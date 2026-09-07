@@ -42,6 +42,7 @@ const productSchema = mongoose.Schema({
   numReviews: { type: Number, required: true, default: 0 },
 }, {
   timestamps: true,
+  suppressReservedKeysWarning: true,
 });
 
 const Product = mongoose.model('Product', productSchema);

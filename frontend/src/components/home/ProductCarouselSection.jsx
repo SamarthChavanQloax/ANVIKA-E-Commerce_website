@@ -14,13 +14,14 @@ const mockProducts = [
 const ProductCarouselSection = ({ 
   title = "NEW ARRIVALS", 
   subtitle = "Fresh silhouettes. Timeless details.",
-  viewAllLink = "/shop?filter=new"
+  viewAllLink = "/shop?filter=new",
+  products = mockProducts
 }) => {
   // TODO: Implement Axios fetch logic when MongoDB is running
   // const [products, setProducts] = useState([]);
   // useEffect(() => { axios.get('/api/products?isNew=true').then(res => setProducts(res.data)) }, [])
   
-  const productsToDisplay = mockProducts;
+  const productsToDisplay = products && products.length > 0 ? products : mockProducts;
 
   return (
     <section className="py-24 px-4 sm:px-6 lg:px-12 max-w-[90rem] mx-auto">

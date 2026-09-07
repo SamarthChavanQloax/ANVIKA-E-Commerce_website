@@ -36,11 +36,11 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex">
+    <div className="min-h-[calc(100vh-115px)] flex">
       {/* Left side - Image */}
       <div className="hidden lg:block lg:w-1/2 relative bg-surface">
         <img 
-          src="https://images.unsplash.com/photo-1583391733959-b202242138bc?q=80&w=1200&auto=format&fit=crop" 
+          src="/saree-lavender.png" 
           alt="Login Fashion"
           className="absolute inset-0 h-full w-full object-cover object-top"
         />

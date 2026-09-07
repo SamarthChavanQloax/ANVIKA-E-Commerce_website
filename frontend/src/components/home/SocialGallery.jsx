@@ -1,14 +1,15 @@
 import { RevealOnScroll } from '../animations/RevealOnScroll';
 import { Heart } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { InstagramIcon } from '../common/SocialIcons';
 
 const images = [
-  "/demo-saree.jpg",
-  "/demo-saree.jpg",
-  "/demo-saree.jpg",
-  "/demo-saree.jpg",
-  "/demo-saree.jpg",
-  "/demo-saree.jpg"
+  "/saree-purple.png",
+  "/saree-gold.jpg",
+  "/saree-plum.png",
+  "/saree-blackgold.jpg",
+  "/saree-greenstripe.jpg",
+  "/saree-emerald.png"
 ];
 
 const SocialGallery = () => {
@@ -16,9 +17,19 @@ const SocialGallery = () => {
     <section className="py-24 bg-surface">
       <RevealOnScroll>
         <div className="text-center mb-16 flex flex-col items-center px-4">
-          <span className="text-accent text-[10px] tracking-[0.25em] uppercase mb-4 block font-medium">@ANVIKABOUTIQUE</span>
+          <motion.a
+            href="https://instagram.com/anvikaboutique"
+            target="_blank"
+            rel="noopener noreferrer"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-background border border-border/80 text-accent text-[11px] tracking-[0.25em] uppercase mb-4 font-medium shadow-sm hover:border-accent transition-colors"
+          >
+            <InstagramIcon size={14} />
+            <span>@ANVIKABOUTIQUE</span>
+          </motion.a>
           <h2 className="text-4xl md:text-5xl font-serif text-text font-light tracking-wide mb-4">Follow Our Story</h2>
-          <p className="text-text-muted text-sm font-light">See how our community wears the collection.</p>
+          <p className="text-text-muted text-sm font-light">See how our community wears the collection across the globe.</p>
         </div>
       </RevealOnScroll>
 

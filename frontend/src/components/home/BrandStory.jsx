@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { RevealOnScroll } from '../animations/RevealOnScroll';
 import Button from '../common/Button';
 
@@ -23,16 +24,18 @@ const BrandStory = () => {
                 We collaborate directly with artisans across India to bring you thoughtful silhouettes, selecting only the finest fabrics and ensuring every finish meets our exacting standards.
               </p>
             </div>
-            <Button variant="outline" className="rounded-full tracking-widest text-xs px-10 border-border hover:bg-surface">
-              OUR STORY
-            </Button>
+            <Link to="/about">
+              <Button variant="outline" className="rounded-full tracking-widest text-xs px-10 border-border hover:bg-surface">
+                OUR STORY
+              </Button>
+            </Link>
           </RevealOnScroll>
         </div>
 
         {/* Story Image */}
         <RevealOnScroll direction="left" className="h-[50vh] lg:h-[70vh] rounded-3xl overflow-hidden shadow-sm order-1 lg:order-2">
           <img 
-            src="/demo-saree.jpg" 
+            src="/saree-emerald.png" 
             alt="Craftsmanship and Fabric" 
             className="w-full h-full object-cover"
           />

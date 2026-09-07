@@ -16,9 +16,9 @@ const CollectionGrid = () => {
         
         {/* Large Featured Collection */}
         <RevealOnScroll className="lg:col-span-2 group relative overflow-hidden rounded-2xl bg-surface cursor-pointer">
-          <Link to="/collection/festive-edit" className="block w-full h-full">
+          <Link to="/collections" className="block w-full h-full">
             <motion.img 
-              src="/demo-saree.jpg" 
+              src="/saree-bridal.png" 
               alt="Festive Edit"
               className="w-full h-full object-cover transition-transform duration-1000 ease-[0.25,0.1,0.25,1] group-hover:scale-105"
             />
@@ -32,9 +32,9 @@ const CollectionGrid = () => {
 
         {/* Small Collection 1 */}
         <RevealOnScroll delay={0.2} className="group relative overflow-hidden rounded-2xl bg-surface cursor-pointer">
-          <Link to="/collection/everyday-elegance" className="block w-full h-full">
+          <Link to="/collections" className="block w-full h-full">
             <motion.img 
-              src="/demo-saree.jpg" 
+              src="/saree-lavender.png" 
               alt="Everyday Elegance"
               className="w-full h-full object-cover transition-transform duration-1000 ease-[0.25,0.1,0.25,1] group-hover:scale-105"
             />
@@ -47,9 +47,9 @@ const CollectionGrid = () => {
 
         {/* Small Collection 2 */}
         <RevealOnScroll delay={0.1} className="group relative overflow-hidden rounded-2xl bg-surface cursor-pointer">
-          <Link to="/collection/saree-stories" className="block w-full h-full">
+          <Link to="/collections" className="block w-full h-full">
             <motion.img 
-              src="/demo-saree.jpg" 
+              src="/saree-emerald.png" 
               alt="Saree Stories"
               className="w-full h-full object-cover transition-transform duration-1000 ease-[0.25,0.1,0.25,1] group-hover:scale-105 object-top"
             />
@@ -62,9 +62,9 @@ const CollectionGrid = () => {
 
         {/* Medium Collection 3 */}
         <RevealOnScroll delay={0.2} className="md:col-span-2 lg:col-span-2 group relative overflow-hidden rounded-2xl bg-surface cursor-pointer">
-          <Link to="/collection/new-season" className="block w-full h-full">
+          <Link to="/collections" className="block w-full h-full">
             <motion.img 
-              src="/demo-saree.jpg" 
+              src="/saree-rust.png" 
               alt="New Season"
               className="w-full h-full object-cover transition-transform duration-1000 ease-[0.25,0.1,0.25,1] group-hover:scale-105 object-top"
             />

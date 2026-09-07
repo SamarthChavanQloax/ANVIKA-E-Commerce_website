@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { RevealOnScroll } from '../animations/RevealOnScroll';
 import Button from '../common/Button';
 
@@ -9,7 +10,7 @@ const SareeFeature = () => {
           
           <RevealOnScroll className="absolute inset-0 w-full h-full">
             <img 
-              src="/demo-saree.jpg" 
+              src="/saree-bridal.png" 
               alt="The Saree Edit"
               className="w-full h-full object-cover object-top"
             />
@@ -24,9 +25,11 @@ const SareeFeature = () => {
                 moments worth remembering.
               </h2>
               <div className="w-16 h-[1px] bg-white/70 mb-10" />
-              <Button className="bg-white text-black hover:bg-white/90 px-10">
-                SHOP SAREES
-              </Button>
+              <Link to="/category/sarees">
+                <Button className="bg-white text-black hover:bg-white/90 px-10">
+                  SHOP SAREES
+                </Button>
+              </Link>
             </div>
           </RevealOnScroll>
           

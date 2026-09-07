@@ -24,11 +24,11 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-row-reverse">
+    <div className="min-h-[calc(100vh-115px)] flex flex-row-reverse">
       {/* Right side - Image */}
       <div className="hidden lg:block lg:w-1/2 relative bg-surface">
         <img 
-          src="https://images.unsplash.com/photo-1610030469983-98e550d6193c?q=80&w=1200&auto=format&fit=crop" 
+          src="/saree-rust.png" 
           alt="Register Fashion"
           className="absolute inset-0 h-full w-full object-cover object-center"
         />

@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { RevealOnScroll } from '../animations/RevealOnScroll';
 import Button from '../common/Button';
 
@@ -9,7 +10,7 @@ const EditorialSplit = () => {
         {/* Left: Large Lifestyle Image */}
         <RevealOnScroll direction="right" className="h-[60vh] lg:h-full rounded-2xl overflow-hidden shadow-sm relative group">
           <img 
-            src="/demo-saree.jpg" 
+            src="/saree-designer.png" 
             alt="The Art of Indian Dressing" 
             className="w-full h-full object-cover transition-transform duration-1000 ease-[0.25,0.1,0.25,1] group-hover:scale-105"
           />
@@ -29,9 +30,11 @@ const EditorialSplit = () => {
             <p className="text-text-muted mb-12 leading-relaxed font-light text-lg max-w-lg tracking-wide">
               Our collections celebrate Indian craftsmanship through contemporary silhouettes, thoughtful details, and effortless styling. Designed for the woman who honors her roots while embracing the world.
             </p>
-            <Button variant="outline" className="rounded-full tracking-widest text-xs px-10 border-border hover:bg-surface">
-              DISCOVER THE COLLECTION
-            </Button>
+            <Link to="/shop">
+              <Button variant="outline" className="rounded-full tracking-widest text-xs px-10 border-border hover:bg-surface">
+                DISCOVER THE COLLECTION
+              </Button>
+            </Link>
           </RevealOnScroll>
         </div>
 

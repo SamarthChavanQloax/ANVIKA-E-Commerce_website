@@ -8,20 +8,38 @@ const FeaturedCategories = () => {
     { 
       name: 'SAREES', 
       desc: 'Timeless drapes, reimagined.', 
-      image: '/demo-saree.jpg',
-      slug: 'sarees'
+      image: '/saree-emerald.png',
+      link: '/category/sarees'
     },
     { 
       name: 'WOMEN', 
-      desc: 'Modern silhouettes for every day.', 
-      image: '/demo-saree.jpg',
-      slug: 'women'
+      desc: 'Modern silhouettes for everyday grace.', 
+      image: '/saree-purple.png',
+      link: '/category/women'
+    },
+    { 
+      name: 'DRESSES', 
+      desc: 'Flowing cuts & contemporary elegance.', 
+      image: '/dress-beige-front.jpg',
+      link: '/category/dresses'
+    },
+    { 
+      name: 'ETHNIC WEAR', 
+      desc: 'Artisanal kurtas & festive sets.', 
+      image: '/saree-gold.jpg',
+      link: '/category/ethnic'
     },
     { 
       name: 'BABY & KIDS', 
       desc: 'Little looks, made with love.', 
-      image: '/demo-saree.jpg',
-      slug: 'kids'
+      image: '/baby-1.png',
+      link: '/category/kids'
+    },
+    { 
+      name: 'COLLECTIONS', 
+      desc: 'Curated edits for every celebration.', 
+      image: '/saree-plum.png',
+      link: '/collections'
     },
   ];
 
@@ -30,15 +48,15 @@ const FeaturedCategories = () => {
       <RevealOnScroll>
         <div className="text-center mb-16 flex flex-col items-center">
           <span className="text-text-muted text-[10px] sm:text-xs tracking-[0.2em] uppercase mb-4 block font-medium">From everyday elegance to unforgettable occasions</span>
-          <h2 className="text-4xl md:text-5xl font-serif text-text font-light tracking-wide">Explore The Collection</h2>
+          <h2 className="text-4xl md:text-5xl font-serif text-text font-light tracking-wide">Explore The Categories</h2>
           <div className="w-12 h-[1px] bg-accent mt-8"></div>
         </div>
       </RevealOnScroll>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-10">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-6 lg:gap-8">
         {categories.map((category, idx) => (
-          <RevealOnScroll key={category.name} delay={idx * 0.15}>
-            <Link to={`/category/${category.slug}`} className="group relative aspect-[3/4] overflow-hidden rounded-xl bg-surface flex cursor-pointer block">
+          <RevealOnScroll key={category.name} delay={idx * 0.1}>
+            <Link to={category.link} className="group relative aspect-[3/4] overflow-hidden rounded-2xl bg-surface flex cursor-pointer block">
               <motion.img 
                 src={category.image} 
                 alt={category.name}

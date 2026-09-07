@@ -1,0 +1,40 @@
+services:
+  # Backend Node.js Service
+  - type: web
+    name: anvika-backend
+    env: node
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 5001
+      - key: FRONTEND_URL
+        fromService:
+          type: web
+          name: anvika-26
+          envVar: RENDER_EXTERNAL_URL
+      - key: MONGO_URI
+        sync: false # Set this securely in the Render dashboard
+      - key: JWT_SECRET
+        sync: false # Set this securely in the Render dashboard
+
+  # Frontend React SPA
+  - type: web
+    name: anvika-26
+    env: static
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      - key: VITE_API_URL
+        fromService:
+          type: web
+          name: anvika-backend
+          envVar: RENDER_EXTERNAL_URL

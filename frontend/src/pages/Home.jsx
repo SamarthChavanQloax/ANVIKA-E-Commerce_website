@@ -11,11 +11,11 @@ import Newsletter from '../components/home/Newsletter';
 
 import { products } from '../data/products';
 
-const newArrivals = products.filter(p => p.isNew).slice(0, 4);
-const sareesProducts = products.filter(p => p.category === 'Sarees').slice(0, 4);
-const womenProducts = products.filter(p => p.category === 'Women').slice(0, 4);
-const dressesProducts = products.filter(p => p.category === 'Dresses').slice(0, 4);
-const ethnicProducts = products.filter(p => p.category === 'Ethnic Wear').slice(0, 4);
+const newArrivals = products.filter(p => p.isNew);
+const sareesProducts = products.filter(p => p.category === 'Sarees');
+const womenProducts = products.filter(p => p.category === 'Women' || p.category === 'Dresses');
+const dressesProducts = products.filter(p => p.category === 'Dresses');
+const ethnicProducts = products.filter(p => p.category === 'Ethnic Wear' || p.category === 'Women');
 const kidsProducts = products.filter(p => p.category === 'Baby & Kids');
 
 const Home = () => {

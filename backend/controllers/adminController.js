@@ -244,3 +244,270 @@ export const getAdminCustomers = async (req, res, next) => {
     next(error);
   }
 };
+
+// @desc    Get detailed executive audit & report data for admin (orders, customers, metrics, date-filtered)
+// @route   GET /api/admin/reports
+// @access  Private/Admin
+export const getAdminReportData = async (req, res, next) => {
+  try {
+    const { range = '30days', startDate, endDate, status } = req.query;
+
+    let dateFilter = {};
+    const now = new Date();
+
+    if (range === 'today') {
+      const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      dateFilter = { createdAt: { $gte: startOfDay } };
+    } else if (range === '7days') {
+      const past = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      dateFilter = { createdAt: { $gte: past } };
+    } else if (range === '30days') {
+      const past = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+      dateFilter = { createdAt: { $gte: past } };
+    } else if (range === '3months') {
+      const past = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
+      dateFilter = { createdAt: { $gte: past } };
+    } else if (range === 'thisYear') {
+      const startOfYear = new Date(now.getFullYear(), 0, 1);
+      dateFilter = { createdAt: { $gte: startOfYear } };
+    } else if (range === 'custom' && startDate) {
+      dateFilter = {
+        createdAt: {
+          $gte: new Date(startDate),
+          ...(endDate ? { $lte: new Date(new Date(endDate).setHours(23, 59, 59, 999)) } : {}),
+        },
+      };
+    }
+
+    const orderQuery = { ...dateFilter };
+    if (status && status !== 'all') {
+      orderQuery.orderStatus = status;
+    }
+
+    // 1. Fetch filtered orders with populated user
+    const orders = await Order.find(orderQuery)
+      .populate('user', 'name email phone addresses')
+      .sort({ createdAt: -1 });
+
+    // 2. Fetch all customers (excluding admins)
+    const allCustomers = await User.find({ role: { $ne: 'admin' } })
+      .select('-password')
+      .sort({ createdAt: -1 });
+
+    // New customers in period based on user creation date
+    let newCustomersInPeriod = 0;
+    if (dateFilter.createdAt) {
+      newCustomersInPeriod = allCustomers.filter((c) => {
+        const d = new Date(c.createdAt);
+        if (dateFilter.createdAt.$gte && d < dateFilter.createdAt.$gte) return false;
+        if (dateFilter.createdAt.$lte && d > dateFilter.createdAt.$lte) return false;
+        return true;
+      }).length;
+    } else {
+      newCustomersInPeriod = allCustomers.length;
+    }
+
+    // 3. Customer order stats & lifetime values
+    const allOrdersInDb = await Order.find({});
+    const ordersByUserId = {};
+    allOrdersInDb.forEach((o) => {
+      if (o.user) {
+        const uid = o.user.toString();
+        if (!ordersByUserId[uid]) ordersByUserId[uid] = [];
+        ordersByUserId[uid].push(o);
+      }
+    });
+
+    let returningCustomersCount = 0;
+    const customerReports = allCustomers.map((c) => {
+      const userAllOrders = ordersByUserId[c._id.toString()] || [];
+      if (userAllOrders.length > 1) {
+        returningCustomersCount++;
+      }
+
+      const periodOrders = orders.filter((o) => o.user && o.user._id.toString() === c._id.toString());
+      const periodSpent = periodOrders.reduce((sum, o) => (o.orderStatus !== 'Cancelled' ? sum + (o.total || 0) : sum), 0);
+      const allTimeSpent = userAllOrders.reduce((sum, o) => (o.orderStatus !== 'Cancelled' ? sum + (o.total || 0) : sum), 0);
+      const lastOrder = userAllOrders.length > 0
+        ? [...userAllOrders].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))[0]
+        : null;
+
+      return {
+        _id: c._id,
+        name: c.name,
+        email: c.email,
+        phone: c.phone || lastOrder?.shippingAddress?.phone || 'N/A',
+        joinedDate: c.createdAt,
+        totalOrders: userAllOrders.length,
+        periodOrdersCount: periodOrders.length,
+        totalSpent: allTimeSpent,
+        periodSpent,
+        lastOrderDate: lastOrder ? lastOrder.createdAt : null,
+        lastOrderStatus: lastOrder ? lastOrder.orderStatus : null,
+        primaryAddress: lastOrder?.shippingAddress
+          ? `${lastOrder.shippingAddress.street || ''}, ${lastOrder.shippingAddress.city || ''}, ${lastOrder.shippingAddress.state || ''} ${lastOrder.shippingAddress.postalCode || ''}`.trim()
+          : (c.addresses?.[0] ? `${c.addresses[0].street || ''}, ${c.addresses[0].city || ''}` : 'Not provided'),
+      };
+    });
+
+    // 4. Financial & Order Metrics (Consistent Logic: AOV = Net Revenue / Revenue Orders)
+    const totalOrders = orders.length;
+    const cancelledOrders = orders.filter((o) => o.orderStatus === 'Cancelled');
+    const cancelledOrdersCount = cancelledOrders.length;
+    const cancelledRevenue = cancelledOrders.reduce((sum, o) => sum + (o.total || 0), 0);
+
+    const revenueOrders = orders.filter((o) => o.orderStatus !== 'Cancelled');
+    const revenueOrdersCount = revenueOrders.length;
+
+    const grossSubtotalRevenue = revenueOrders.reduce((sum, o) => sum + (o.subtotal || o.total || 0), 0);
+    const totalDiscountAmount = revenueOrders.reduce((sum, o) => sum + (o.discount || 0), 0);
+    const totalShippingAmount = revenueOrders.reduce((sum, o) => sum + (o.shipping || 0), 0);
+    const netRevenue = revenueOrders.reduce((sum, o) => sum + (o.total || 0), 0);
+
+    // AOV = netRevenue / revenueOrdersCount
+    const avgOrderValue = revenueOrdersCount > 0 ? Math.round(netRevenue / revenueOrdersCount) : 0;
+
+    // Items sold & Top Selling Products
+    let totalItemsSold = 0;
+    const productSalesMap = {};
+
+    revenueOrders.forEach((o) => {
+      (o.items || []).forEach((item) => {
+        const qty = item.qty || 1;
+        const price = item.price || 0;
+        totalItemsSold += qty;
+
+        const pName = item.name || 'Handcrafted Couture Piece';
+        if (!productSalesMap[pName]) {
+          productSalesMap[pName] = {
+            name: pName,
+            image: item.image,
+            unitsSold: 0,
+            revenue: 0,
+          };
+        }
+        productSalesMap[pName].unitsSold += qty;
+        productSalesMap[pName].revenue += price * qty;
+      });
+    });
+
+    const topSellingProducts = Object.values(productSalesMap)
+      .sort((a, b) => b.unitsSold - a.unitsSold || b.revenue - a.revenue)
+      .slice(0, 10);
+
+    // 5. Order Status Summary
+    const statusCounts = {
+      Pending: 0,
+      Placed: 0,
+      Confirmed: 0,
+      Processing: 0,
+      Shipped: 0,
+      Delivered: 0,
+      Cancelled: 0,
+      Returned: 0,
+    };
+    orders.forEach((o) => {
+      const st = o.orderStatus || 'Placed';
+      statusCounts[st] = (statusCounts[st] || 0) + 1;
+    });
+
+    // 6. Payment Summary
+    const paymentStatusCounts = {
+      Paid: 0,
+      Pending: 0,
+      Failed: 0,
+      Refunded: 0,
+    };
+    const paymentMethodCounts = {};
+
+    orders.forEach((o) => {
+      if (o.orderStatus === 'Cancelled') {
+        paymentStatusCounts['Refunded'] = (paymentStatusCounts['Refunded'] || 0) + 1;
+      } else if (o.isPaid || o.paymentStatus === 'Completed') {
+        paymentStatusCounts['Paid'] = (paymentStatusCounts['Paid'] || 0) + 1;
+      } else if (o.paymentStatus === 'Failed') {
+        paymentStatusCounts['Failed'] = (paymentStatusCounts['Failed'] || 0) + 1;
+      } else {
+        paymentStatusCounts['Pending'] = (paymentStatusCounts['Pending'] || 0) + 1;
+      }
+
+      const pm = o.paymentMethod || 'Other';
+      paymentMethodCounts[pm] = (paymentMethodCounts[pm] || 0) + 1;
+    });
+
+    // Active ordering customers in period
+    const activeOrderingCustomers = new Set(
+      orders.map((o) => o.user?._id?.toString()).filter(Boolean)
+    ).size;
+
+    // Generated By Admin info from request
+    const adminUser = req.user ? { name: req.user.name, email: req.user.email } : { name: 'Anvika Admin' };
+
+    res.json({
+      metadata: {
+        title: 'Executive Audit & Customer Ledger Report',
+        brand: 'ANVIKA BOUTIQUE',
+        generatedBy: adminUser.name,
+        generatedAt: new Date().toISOString(),
+        range,
+        startDate: startDate || null,
+        endDate: endDate || null,
+        statusFilter: status || 'all',
+      },
+      summary: {
+        totalOrders,
+        revenueOrdersCount,
+        cancelledOrdersCount,
+        cancelledRevenue,
+        totalItemsSold,
+        grossRevenue: netRevenue,
+        avgOrderValue,
+      },
+      financialSummary: {
+        grossSubtotal: grossSubtotalRevenue,
+        discounts: totalDiscountAmount,
+        shipping: totalShippingAmount,
+        netRevenue: netRevenue,
+        refundsOrCancelled: cancelledRevenue,
+      },
+      customerSummary: {
+        totalCustomers: allCustomers.length,
+        newCustomers: newCustomersInPeriod,
+        returningCustomers: returningCustomersCount,
+        orderingCustomers: activeOrderingCustomers,
+      },
+      statusSummary: statusCounts,
+      paymentSummary: {
+        statuses: paymentStatusCounts,
+        methods: paymentMethodCounts,
+      },
+      topSellingProducts,
+      orders: orders.map((o) => ({
+        _id: o._id,
+        orderNumber: o._id.toString().slice(-8).toUpperCase(),
+        createdAt: o.createdAt,
+        customerName: o.user?.name || 'Guest / Unassigned',
+        customerEmail: o.user?.email || 'N/A',
+        customerPhone: o.user?.phone || o.shippingAddress?.phone || 'N/A',
+        orderStatus: o.orderStatus,
+        paymentStatus: o.orderStatus === 'Cancelled' ? 'Refunded' : o.isPaid || o.paymentStatus === 'Completed' ? 'Paid' : (o.paymentStatus || 'Pending'),
+        paymentMethod: o.paymentMethod || 'Standard',
+        subtotal: o.subtotal || 0,
+        shipping: o.shipping || 0,
+        discount: o.discount || 0,
+        total: o.total || 0,
+        itemsCount: (o.items || []).reduce((sum, it) => sum + (it.qty || 1), 0),
+        items: (o.items || []).map((it) => ({
+          name: it.name,
+          qty: it.qty,
+          price: it.price,
+        })),
+        shippingAddress: o.shippingAddress,
+      })),
+      customers: customerReports,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+

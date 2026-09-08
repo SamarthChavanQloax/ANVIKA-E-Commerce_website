@@ -44,6 +44,7 @@ import Inventory from './pages/Admin/Inventory';
 import OrderList from './pages/Admin/OrderList';
 import CustomerList from './pages/Admin/CustomerList';
 import Analytics from './pages/Admin/Analytics';
+import Reports from './pages/Admin/Reports';
 
 function AppLayout() {
   const location = useLocation();
@@ -65,6 +66,7 @@ function AppLayout() {
             <Route path="inventory" element={<Inventory />} />
             <Route path="orders" element={<OrderList />} />
             <Route path="customers" element={<CustomerList />} />
+            <Route path="reports" element={<Reports />} />
             <Route path="analytics" element={<Analytics />} />
           </Route>
         </Route>

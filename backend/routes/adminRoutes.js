@@ -3,6 +3,7 @@ import {
   getAdminDashboard,
   getAdminAnalytics,
   getAdminCustomers,
+  getAdminReportData,
 } from '../controllers/adminController.js';
 import {
   getOrders,
@@ -23,6 +24,9 @@ router.get('/analytics', getAdminAnalytics);
 
 // Customers list
 router.get('/customers', getAdminCustomers);
+
+// Reports generation & export data
+router.get('/reports', getAdminReportData);
 
 // Orders management aliases
 router.route('/orders')

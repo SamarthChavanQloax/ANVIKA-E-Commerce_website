@@ -17,6 +17,7 @@ import {
   Sparkles,
   ShieldCheck,
   ChevronRight,
+  FileText,
 } from 'lucide-react';
 
 const NAV_ITEMS = [
@@ -26,6 +27,7 @@ const NAV_ITEMS = [
   { name: 'Inventory', path: '/admin/inventory', icon: Boxes },
   { name: 'Orders', path: '/admin/orders', icon: ShoppingBag },
   { name: 'Customers', path: '/admin/customers', icon: Users },
+  { name: 'Reports', path: '/admin/reports', icon: FileText },
   { name: 'Analytics', path: '/admin/analytics', icon: BarChart3 },
 ];
 

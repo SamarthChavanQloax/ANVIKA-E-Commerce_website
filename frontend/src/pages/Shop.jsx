@@ -221,15 +221,15 @@ const Shop = () => {
         {/* Product Grid Area */}
         <div className="flex-grow">
           {/* Controls Bar: Mobile Filter Toggle & Sort */}
-          <div className="flex items-center justify-between mb-8 pb-4 border-b border-border relative">
+          <div className="flex flex-wrap items-center justify-between gap-3 mb-6 sm:mb-8 pb-4 border-b border-border relative">
             <button 
-              className="lg:hidden flex items-center gap-2 text-text text-sm font-medium border border-border px-4 py-2 rounded-xl"
+              className="lg:hidden flex items-center gap-2 text-text text-xs sm:text-sm font-medium border border-border px-3.5 py-2 rounded-xl bg-surface/50 hover:bg-surface transition-colors"
               onClick={() => setIsFilterOpen(true)}
             >
-              <SlidersHorizontal size={16} /> Filters {hasActiveFilters && '(Active)'}
+              <SlidersHorizontal size={15} /> <span>Filters {hasActiveFilters && '(Active)'}</span>
             </button>
 
-            <div className="text-text-muted text-xs">
+            <div className="text-text-muted text-[11px] sm:text-xs">
               Showing <span className="font-semibold text-text">{filteredProducts.length}</span> piece{filteredProducts.length !== 1 ? 's' : ''}
             </div>
             
@@ -237,9 +237,9 @@ const Shop = () => {
             <div className="relative">
               <button
                 onClick={() => setIsSortDropdownOpen(!isSortDropdownOpen)}
-                className="flex items-center gap-2 text-xs font-medium text-text bg-surface px-4 py-2 rounded-xl border border-border hover:border-accent/50 transition-colors"
+                className="flex items-center gap-2 text-[11px] sm:text-xs font-medium text-text bg-surface px-3 sm:px-4 py-2 rounded-xl border border-border hover:border-accent/50 transition-colors"
               >
-                <span>Sort by: <strong>{activeSortLabel}</strong></span>
+                <span>Sort: <strong>{activeSortLabel}</strong></span>
                 <ChevronDown size={14} className={`text-text-muted transition-transform ${isSortDropdownOpen ? 'rotate-180' : ''}`} />
               </button>
 
@@ -315,7 +315,7 @@ const Shop = () => {
               </Button>
             </div>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 lg:gap-8">
+            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-6 lg:gap-8">
               {filteredProducts.map((product, idx) => (
                 <RevealOnScroll key={product._id} delay={(idx % 4) * 0.08}>
                   <ProductCard product={product} />

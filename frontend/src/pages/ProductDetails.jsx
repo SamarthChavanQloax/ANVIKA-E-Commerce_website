@@ -177,14 +177,14 @@ const ProductDetails = () => {
                 <>
                   <button
                     onClick={() => setSelectedImageIdx(prev => (prev === 0 ? images.length - 1 : prev - 1))}
-                    className="absolute left-3 top-1/2 -translate-y-1/2 p-2 rounded-full bg-background/80 hover:bg-background text-text border border-border/80 shadow-md backdrop-blur-md opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="absolute left-3 top-1/2 -translate-y-1/2 p-2.5 sm:p-2 rounded-full bg-background/80 hover:bg-background text-text border border-border/80 shadow-md backdrop-blur-md opacity-90 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
                     aria-label="Previous image"
                   >
                     <ChevronLeft size={18} />
                   </button>
                   <button
                     onClick={() => setSelectedImageIdx(prev => (prev === images.length - 1 ? 0 : prev + 1))}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-full bg-background/80 hover:bg-background text-text border border-border/80 shadow-md backdrop-blur-md opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 p-2.5 sm:p-2 rounded-full bg-background/80 hover:bg-background text-text border border-border/80 shadow-md backdrop-blur-md opacity-90 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
                     aria-label="Next image"
                   >
                     <ChevronRight size={18} />
@@ -317,78 +317,80 @@ const ProductDetails = () => {
               )}
 
               {/* Add to Cart Actions */}
-              <div className="flex flex-col sm:flex-row items-stretch gap-3 mb-8">
-                {/* Quantity Stepper */}
-                <div className="flex items-center justify-between border border-border rounded-xl bg-surface px-2 h-14 sm:w-36 flex-shrink-0">
-                  <button 
-                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="w-10 h-full flex items-center justify-center text-text hover:text-accent transition-colors text-lg"
-                    aria-label="Decrease quantity"
+              <div className="flex flex-col gap-3 mb-8">
+                {/* Row 1: Quantity Stepper & Add to Bag */}
+                <div className="flex items-center gap-2.5 sm:gap-3">
+                  {/* Quantity Stepper */}
+                  <div className="flex items-center justify-between border border-border rounded-xl bg-surface px-2 h-13 sm:h-14 w-28 sm:w-36 flex-shrink-0">
+                    <button 
+                      onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                      className="w-8 sm:w-10 h-full flex items-center justify-center text-text hover:text-accent transition-colors text-lg"
+                      aria-label="Decrease quantity"
+                    >
+                      -
+                    </button>
+                    <span className="w-8 sm:w-10 text-center text-sm font-semibold text-text">{quantity}</span>
+                    <button 
+                      onClick={() => setQuantity(quantity + 1)}
+                      className="w-8 sm:w-10 h-full flex items-center justify-center text-text hover:text-accent transition-colors text-lg"
+                      aria-label="Increase quantity"
+                    >
+                      +
+                    </button>
+                  </div>
+
+                  {/* Add to Bag CTA */}
+                  <Button 
+                    onClick={handleAddToCart}
+                    disabled={displayStock === 0}
+                    className={`flex-1 h-13 sm:h-14 uppercase tracking-wider sm:tracking-widest text-xs font-semibold flex items-center justify-center gap-2 transition-all ${
+                      isAdded ? 'bg-emerald-600 text-white' : displayStock === 0 ? 'bg-gray-400 text-gray-700 cursor-not-allowed' : 'bg-primary text-background hover:opacity-95'
+                    }`}
                   >
-                    -
-                  </button>
-                  <span className="w-10 text-center text-sm font-semibold text-text">{quantity}</span>
-                  <button 
-                    onClick={() => setQuantity(quantity + 1)}
-                    className="w-10 h-full flex items-center justify-center text-text hover:text-accent transition-colors text-lg"
-                    aria-label="Increase quantity"
-                  >
-                    +
-                  </button>
+                    {isAdded ? (
+                      <>
+                        <Check size={18} /> ADDED TO BAG
+                      </>
+                    ) : displayStock === 0 ? (
+                      <>
+                         OUT OF STOCK
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles size={16} /> ADD TO SHOPPING BAG
+                      </>
+                    )}
+                  </Button>
                 </div>
 
-                {/* Add to Bag CTA */}
-                <Button 
-                  onClick={handleAddToCart}
-                  disabled={displayStock === 0}
-                  className={`flex-1 h-14 uppercase tracking-widest text-xs font-semibold flex items-center justify-center gap-2 transition-all ${
-                    isAdded ? 'bg-emerald-600 text-white' : displayStock === 0 ? 'bg-gray-400 text-gray-700 cursor-not-allowed' : 'bg-primary text-background hover:opacity-95'
-                  }`}
-                >
-                  {isAdded ? (
-                    <>
-                      <Check size={18} /> ADDED TO BAG
-                    </>
-                  ) : displayStock === 0 ? (
-                    <>
-                       OUT OF STOCK
-                    </>
-                  ) : (
-                    <>
-                      <Sparkles size={16} /> ADD TO SHOPPING BAG
-                    </>
-                  )}
-                </Button>
+                {/* Row 2: Secondary Quick Actions (Compare & Wishlist) side-by-side on all screens */}
+                <div className="grid grid-cols-2 gap-2.5 sm:gap-3">
+                  <button
+                    onClick={() => toggleCompare(product)}
+                    className={`h-11 sm:h-12 flex items-center justify-center gap-2 rounded-xl border text-xs tracking-wider uppercase font-medium transition-all ${
+                      isCompared
+                        ? 'border-primary bg-primary/10 text-primary'
+                        : 'border-border bg-surface hover:bg-surface/80 text-text'
+                    }`}
+                    aria-label="Add to compare"
+                  >
+                    <ArrowRightLeft size={16} />
+                    <span className="truncate">{isCompared ? 'In Compare' : 'Compare'}</span>
+                  </button>
 
-                {/* Compare Button */}
-                <button
-                  onClick={() => toggleCompare(product)}
-                  className={`w-14 h-14 flex-shrink-0 flex items-center justify-center rounded-xl border transition-all ${
-                    isCompared
-                      ? 'border-primary bg-primary/10 text-primary'
-                      : 'border-border bg-surface hover:bg-surface/80 text-text'
-                  }`}
-                  aria-label="Add to compare"
-                >
-                  <motion.div whileTap={{ scale: 0.8 }}>
-                    <ArrowRightLeft size={22} />
-                  </motion.div>
-                </button>
-
-                {/* Like / Wishlist Button */}
-                <button
-                  onClick={() => toggleWishlist(product)}
-                  className={`w-14 h-14 flex-shrink-0 flex items-center justify-center rounded-xl border transition-all ${
-                    isFavorited
-                      ? 'border-red-500 bg-red-50 text-red-500 dark:bg-red-950/50 shadow-sm'
-                      : 'border-border bg-surface hover:bg-surface/80 text-text'
-                  }`}
-                  aria-label="Add to wishlist"
-                >
-                  <motion.div whileTap={{ scale: 0.8 }}>
-                    <Heart size={22} className={isFavorited ? 'fill-red-500 stroke-red-500' : ''} />
-                  </motion.div>
-                </button>
+                  <button
+                    onClick={() => toggleWishlist(product)}
+                    className={`h-11 sm:h-12 flex items-center justify-center gap-2 rounded-xl border text-xs tracking-wider uppercase font-medium transition-all ${
+                      isFavorited
+                        ? 'border-red-500 bg-red-50 text-red-500 dark:bg-red-950/50 shadow-sm'
+                        : 'border-border bg-surface hover:bg-surface/80 text-text'
+                    }`}
+                    aria-label="Add to wishlist"
+                  >
+                    <Heart size={16} className={isFavorited ? 'fill-red-500 stroke-red-500' : ''} />
+                    <span className="truncate">{isFavorited ? 'Wishlisted' : 'Add to Wishlist'}</span>
+                  </button>
+                </div>
               </div>
 
               {/* Instant Buy Now Button */}

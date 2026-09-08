@@ -31,7 +31,7 @@ const Login = () => {
   };
 
   return (
-    <div className="relative min-h-[calc(100vh-115px)] flex items-center justify-center overflow-hidden py-12 px-4 sm:px-6 lg:px-12 bg-stone-950">
+    <div className="relative min-h-[calc(100vh-115px)] flex items-center justify-center overflow-y-auto py-8 sm:py-12 px-4 sm:px-6 lg:px-12 bg-stone-950">
       {/* Background Video Looping Continuously */}
       <video
         autoPlay
@@ -46,7 +46,7 @@ const Login = () => {
       <div className="absolute inset-0 bg-gradient-to-r from-black/45 via-black/25 to-black/40 backdrop-blur-[1px]" />
 
       {/* Main Content Layout */}
-      <div className="relative z-10 w-full max-w-6xl mx-auto flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-16">
+      <div className="relative z-10 w-full max-w-6xl mx-auto flex flex-col lg:flex-row items-center justify-between gap-8 lg:gap-16">
         
         {/* Left Side: Brand Narrative */}
         <div className="hidden lg:flex flex-col max-w-xl text-white space-y-6">
@@ -78,7 +78,7 @@ const Login = () => {
         {/* Right Side: Transparent Blurry Glass Login Card */}
         <div className="w-full max-w-md">
           <FadeIn>
-            <div className="relative overflow-hidden backdrop-blur-2xl bg-white/[0.08] hover:bg-white/[0.11] border border-white/25 rounded-3xl p-8 sm:p-10 shadow-[0_16px_50px_rgba(0,0,0,0.4)] text-white transition-all duration-300 ring-1 ring-white/20">
+            <div className="relative overflow-hidden backdrop-blur-2xl bg-white/[0.08] hover:bg-white/[0.11] border border-white/25 rounded-2xl sm:rounded-3xl p-6 sm:p-8 md:p-10 shadow-[0_16px_50px_rgba(0,0,0,0.4)] text-white transition-all duration-300 ring-1 ring-white/20">
               
               {/* Subtle top light sheen for glass effect */}
               <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/40 to-transparent pointer-events-none" />

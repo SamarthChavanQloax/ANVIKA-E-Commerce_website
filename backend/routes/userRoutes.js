@@ -5,7 +5,12 @@ import {
   logoutUser,
   getUserProfile,
   updateUserProfile,
+  getWishlist,
+  addToWishlist,
+  removeFromWishlist,
   getUsers,
+  getUserById,
+  updateUser,
   deleteUser,
 } from '../controllers/userController.js';
 import { protect, admin } from '../middleware/authMiddleware.js';
@@ -23,7 +28,16 @@ router.route('/profile')
   .get(protect, getUserProfile)
   .put(protect, updateUserProfile);
 
+router.route('/wishlist')
+  .get(protect, getWishlist);
+
+router.route('/wishlist/:productId')
+  .post(protect, addToWishlist)
+  .delete(protect, removeFromWishlist);
+
 router.route('/:id')
+  .get(protect, admin, getUserById)
+  .put(protect, admin, updateUser)
   .delete(protect, admin, deleteUser);
 
 export default router;

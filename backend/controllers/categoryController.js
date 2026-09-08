@@ -35,21 +35,58 @@ const getCategoryBySlug = async (req, res, next) => {
 const createCategory = async (req, res, next) => {
   try {
     const { name, slug, description, image } = req.body;
-    const categoryExists = await Category.findOne({ slug });
+    if (!name) {
+      res.status(400);
+      throw new Error('Category name is required');
+    }
+
+    const finalSlug = slug || name.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-');
+    const categoryExists = await Category.findOne({
+      $or: [
+        { slug: finalSlug },
+        { name: { $regex: new RegExp(`^${name.trim()}$`, 'i') } }
+      ]
+    });
 
     if (categoryExists) {
       res.status(400);
-      throw new Error('Category already exists');
+      throw new Error('Category already exists with this name or slug');
     }
 
     const category = await Category.create({
-      name,
-      slug: slug || name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
-      description,
-      image,
+      name: name.trim(),
+      slug: finalSlug,
+      description: description || '',
+      image: image || '',
     });
 
     res.status(201).json(category);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Update a category
+// @route   PUT /api/categories/:id
+// @access  Private/Admin
+const updateCategory = async (req, res, next) => {
+  try {
+    const category = await Category.findById(req.params.id);
+
+    if (category) {
+      category.name = req.body.name || category.name;
+      if (req.body.slug) {
+        category.slug = req.body.slug;
+      }
+      category.description = req.body.description !== undefined ? req.body.description : category.description;
+      category.image = req.body.image !== undefined ? req.body.image : category.image;
+
+      const updatedCategory = await category.save();
+      res.json(updatedCategory);
+    } else {
+      res.status(404);
+      throw new Error('Category not found');
+    }
   } catch (error) {
     next(error);
   }
@@ -78,5 +115,6 @@ export {
   getCategories,
   getCategoryBySlug,
   createCategory,
+  updateCategory,
   deleteCategory,
 };

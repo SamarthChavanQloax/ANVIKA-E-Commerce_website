@@ -3,6 +3,9 @@ import {
   getProducts,
   getProductById,
   getProductBySlug,
+  getTopProducts,
+  getFeaturedProducts,
+  getRelatedProducts,
   createProductReview,
   createProduct,
   updateProduct,
@@ -16,6 +19,12 @@ router.route('/')
   .get(getProducts)
   .post(protect, admin, createProduct);
 
+router.route('/top')
+  .get(getTopProducts);
+
+router.route('/featured')
+  .get(getFeaturedProducts);
+
 router.route('/slug/:slug')
   .get(getProductBySlug);
 
@@ -23,6 +32,9 @@ router.route('/:id')
   .get(getProductById)
   .put(protect, admin, updateProduct)
   .delete(protect, admin, deleteProduct);
+
+router.route('/:id/related')
+  .get(getRelatedProducts);
 
 router.route('/:id/reviews')
   .post(protect, createProductReview);

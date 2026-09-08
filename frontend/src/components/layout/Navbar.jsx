@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { ShoppingBag, Search, User, Menu, X, Heart, ArrowRight } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
 import { useWishlist } from '../../context/WishlistContext';
+import { useAuth } from '../../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import SearchModal from '../search/SearchModal';
 import AnnouncementBar from '../home/AnnouncementBar';
@@ -14,6 +15,7 @@ const Navbar = () => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const { cartItems, openCart } = useCart();
   const { wishlistItems, openWishlist } = useWishlist();
+  const { userInfo } = useAuth();
   const location = useLocation();
 
   const isHome = location.pathname === '/';
@@ -117,8 +119,16 @@ const Navbar = () => {
                 transition={{ type: "spring", stiffness: 400, damping: 18 }}
                 className="hidden sm:block"
               >
-                <Link to="/login" className="p-1 hover:text-accent transition-colors block" aria-label="Account">
+                <Link 
+                  to={userInfo ? "/profile" : "/login"} 
+                  className="p-1 hover:text-accent transition-colors block relative" 
+                  aria-label="Account"
+                  title={userInfo ? `Logged in as ${userInfo.name}` : "Sign In"}
+                >
                   <User size={20} strokeWidth={1.5} />
+                  {userInfo && (
+                    <span className="absolute 0 top-0.5 right-0.5 w-2 h-2 rounded-full bg-emerald-500 ring-2 ring-background" />
+                  )}
                 </Link>
               </motion.div>
 
@@ -247,11 +257,11 @@ const Navbar = () => {
                     Account & Preferences
                   </span>
                   <Link 
-                    to="/login" 
+                    to={userInfo ? "/profile" : "/login"} 
                     onClick={() => setIsMenuOpen(false)} 
                     className="flex items-center gap-3 py-1.5 text-sm tracking-widest uppercase hover:text-accent transition-colors"
                   >
-                    <User size={16} strokeWidth={1.5} /> My Account
+                    <User size={16} strokeWidth={1.5} /> {userInfo ? `My Profile (${userInfo.name.split(' ')[0]})` : 'My Account'}
                   </Link>
                   <button 
                     onClick={() => {

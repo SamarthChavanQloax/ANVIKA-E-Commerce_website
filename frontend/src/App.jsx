@@ -20,6 +20,7 @@ import ProductDetails from './pages/ProductDetails';
 import Compare from './pages/Compare';
 import Login from './pages/Auth/Login';
 import Register from './pages/Auth/Register';
+import Profile from './pages/Auth/Profile';
 
 import Contact from './pages/Info/Contact';
 import Shipping from './pages/Info/Shipping';
@@ -54,6 +55,7 @@ function AppLayout() {
           <Route path="/compare" element={<Compare />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/profile" element={<Profile />} />
 
           {/* Help Pages */}
           <Route path="/contact" element={<Contact />} />

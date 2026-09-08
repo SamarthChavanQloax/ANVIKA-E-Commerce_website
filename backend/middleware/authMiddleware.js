@@ -5,13 +5,25 @@ import User from '../models/User.js';
 const protect = async (req, res, next) => {
   let token;
 
-  token = req.cookies.jwt;
+  // 1. Check cookies for token
+  if (req.cookies && req.cookies.jwt) {
+    token = req.cookies.jwt;
+  }
+  // 2. Check Authorization header for Bearer token
+  else if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+    token = req.headers.authorization.split(' ')[1];
+  }
 
   if (token) {
     try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback_secret_for_dev');
 
       req.user = await User.findById(decoded.userId).select('-password');
+
+      if (!req.user) {
+        res.status(401);
+        return next(new Error('Not authorized, user not found'));
+      }
 
       next();
     } catch (error) {

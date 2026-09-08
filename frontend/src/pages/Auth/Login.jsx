@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { FadeIn } from '../../components/animations/RevealOnScroll';
 import Button from '../../components/common/Button';
-import axios from 'axios';
+import api from '../../api';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -19,16 +19,8 @@ const Login = () => {
     setError('');
     
     try {
-      // In a real app with backend running, this would be:
-      // const { data } = await axios.post('/api/users/login', { email, password });
-      // login(data);
-      
-      // Simulating login for frontend demo
-      setTimeout(() => {
-        login({ _id: '1', name: 'Jane Customer', email, role: 'customer' });
-        setIsLoading(false);
-      }, 1000);
-      
+      const { data } = await api.post('/users/login', { email, password });
+      login(data);
     } catch (err) {
       setError(err.response?.data?.message || err.message);
       setIsLoading(false);
@@ -48,7 +40,7 @@ const Login = () => {
       </div>
 
       {/* Right side - Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 sm:p-12 lg:p-24 bg-background">
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 sm:p-10 lg:p-16 bg-background">
         <FadeIn className="w-full max-w-md">
           <div className="text-center mb-10">
             <h1 className="text-3xl font-serif text-text mb-2">Welcome Back</h1>

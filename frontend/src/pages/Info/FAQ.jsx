@@ -87,7 +87,7 @@ const FAQ = () => {
     : FAQ_DATA.filter(f => f.category === activeTab);
 
   return (
-    <div className="w-full pt-8 pb-24 bg-background">
+    <div className="w-full py-8 md:py-12 bg-background">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Header */}
@@ -106,7 +106,7 @@ const FAQ = () => {
         </FadeIn>
 
         {/* Category Filter Pills */}
-        <div className="flex items-center justify-center gap-2 overflow-x-auto pb-6 mb-12 hide-scrollbar">
+        <div className="flex items-center justify-center gap-2 overflow-x-auto pb-4 mb-8 hide-scrollbar">
           {categories.map((cat) => (
             <button
               key={cat}
@@ -123,7 +123,7 @@ const FAQ = () => {
         </div>
 
         {/* FAQ Accordions */}
-        <div className="space-y-12">
+        <div className="space-y-8">
           {displayedSections.map((section, catIdx) => (
             <div key={section.category} className="space-y-4">
               <h2 className="text-xl font-serif text-text font-medium pb-2 border-b border-border">

@@ -32,7 +32,7 @@ const Home = () => {
         Below the hero video, transition into the 
         bright, premium Indian fashion e-commerce showcase.
       */}
-      <div id="featured-content" className="bg-background pt-20 rounded-t-[40px] -mt-[30px] relative z-30 shadow-[0_-20px_50px_rgba(0,0,0,0.5)]">
+      <div id="featured-content" className="bg-background pt-12 md:pt-16 rounded-t-[40px] -mt-[30px] relative z-30 shadow-[0_-20px_50px_rgba(0,0,0,0.5)]">
         
         {/* 1. Explore Categories Grid */}
         <FeaturedCategories />

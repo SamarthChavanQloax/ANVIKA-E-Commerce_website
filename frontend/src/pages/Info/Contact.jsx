@@ -21,7 +21,7 @@ const Contact = () => {
   };
 
   return (
-    <div className="w-full pt-8 pb-24 bg-background">
+    <div className="w-full py-8 md:py-12 bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Header */}
@@ -39,7 +39,7 @@ const Contact = () => {
           </div>
         </FadeIn>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-start">
           
           {/* Contact Details & Flagship Ateliers */}
           <div className="lg:col-span-5 space-y-8">

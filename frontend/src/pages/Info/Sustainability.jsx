@@ -5,7 +5,7 @@ import Button from '../../components/common/Button';
 
 const Sustainability = () => {
   return (
-    <div className="w-full pt-8 pb-24 bg-background">
+    <div className="w-full py-8 md:py-12 bg-background">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Header */}
@@ -24,7 +24,7 @@ const Sustainability = () => {
         </FadeIn>
 
         {/* 4 Pillars */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
           <RevealOnScroll>
             <div className="p-8 bg-surface/40 rounded-3xl border border-border/80 h-full">
               <div className="w-12 h-12 rounded-full bg-emerald-500/10 text-emerald-600 flex items-center justify-center mb-6">

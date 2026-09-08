@@ -23,14 +23,14 @@ const projects = [
 
 const Projects = () => {
   return (
-    <section className="py-32 px-4 sm:px-8 md:px-16 bg-[#121212] min-h-screen relative z-20">
+    <section className="section-space px-4 sm:px-8 md:px-16 bg-[#121212] min-h-screen relative z-20">
       <div className="max-w-[90rem] mx-auto">
         <motion.div 
           initial={{ opacity: 0, y: 50 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-100px" }}
           transition={{ duration: 0.8, ease: "easeOut" }}
-          className="mb-20"
+          className="mb-12"
         >
           <h2 className="text-4xl md:text-6xl font-light text-white tracking-tight">Featured Work</h2>
           <div className="w-16 h-[1px] bg-white/30 mt-6"></div>
@@ -53,7 +53,7 @@ const Projects = () => {
                   className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
                 />
               </div>
-              <div className="p-8">
+              <div className="p-6">
                 <span className="text-white/50 text-[10px] tracking-[0.2em] uppercase font-medium mb-3 block">
                   {project.category}
                 </span>

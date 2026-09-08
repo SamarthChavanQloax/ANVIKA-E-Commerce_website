@@ -179,7 +179,7 @@ const HeroVideo = () => {
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.35, duration: 0.6 }}
-                className="mt-8 flex flex-wrap items-center justify-center gap-4"
+                className="mt-6 flex flex-wrap items-center justify-center gap-4"
               >
                 <Link
                   to="/shop"

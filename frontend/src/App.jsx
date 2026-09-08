@@ -20,6 +20,9 @@ import ProductDetails from './pages/ProductDetails';
 import Compare from './pages/Compare';
 import Login from './pages/Auth/Login';
 import Register from './pages/Auth/Register';
+import Checkout from './pages/Checkout';
+import Orders from './pages/Orders';
+import AdminDashboard from './pages/AdminDashboard';
 
 import Contact from './pages/Info/Contact';
 import Shipping from './pages/Info/Shipping';
@@ -54,6 +57,10 @@ function AppLayout() {
           <Route path="/compare" element={<Compare />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/checkout" element={<Checkout />} />
+          <Route path="/orders" element={<Orders />} />
+          <Route path="/orders/:id" element={<Orders />} />
+          <Route path="/admin" element={<AdminDashboard />} />
 
           {/* Help Pages */}
           <Route path="/contact" element={<Contact />} />

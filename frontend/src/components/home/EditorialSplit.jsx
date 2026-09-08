@@ -4,8 +4,8 @@ import Button from '../common/Button';
 
 const EditorialSplit = () => {
   return (
-    <section className="py-24 px-4 sm:px-6 lg:px-12 max-w-[90rem] mx-auto overflow-hidden bg-background">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24 items-center h-auto lg:h-[80vh]">
+    <section className="section-space px-4 sm:px-6 lg:px-12 max-w-[90rem] mx-auto overflow-hidden bg-background">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center h-auto lg:h-[70vh]">
         
         {/* Left: Large Lifestyle Image */}
         <RevealOnScroll direction="right" className="h-[60vh] lg:h-full rounded-2xl overflow-hidden shadow-sm relative group">

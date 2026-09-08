@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Heart, Star, Check, Truck, ShieldCheck, Sparkles, ChevronLeft, ChevronRight, ArrowRightLeft } from 'lucide-react';
 import { useQuickView } from '../../context/QuickViewContext';
+import { getProductBadges } from '../../utils/productBadges';
 import { useCart } from '../../context/CartContext';
 import { useWishlist } from '../../context/WishlistContext';
 import { useCompare } from '../../context/CompareContext';
@@ -32,6 +33,7 @@ const QuickViewModal = () => {
   const images = selectedProduct.images?.length > 0 
     ? selectedProduct.images 
     : [selectedProduct.image || '/demo-saree.jpg'];
+  const { isNew, hasDiscount, discountPercentage } = getProductBadges(selectedProduct);
 
   const isFavorited = isInWishlist(selectedProduct._id);
   const isCompared = isInCompare(selectedProduct._id);
@@ -116,10 +118,19 @@ const QuickViewModal = () => {
                   </div>
                 )}
 
-                {selectedProduct.discount > 0 && (
-                  <span className="absolute top-4 left-4 bg-accent text-white text-[10px] font-semibold tracking-widest uppercase px-3 py-1 rounded-full shadow-sm">
-                    {selectedProduct.discount}% OFF
-                  </span>
+                {(isNew || hasDiscount) && (
+                  <div className="absolute top-4 left-4 flex flex-col gap-2">
+                    {isNew && (
+                      <span className="bg-background/90 text-text text-[10px] font-semibold tracking-widest uppercase px-3 py-1 rounded-full shadow-sm">
+                        New
+                      </span>
+                    )}
+                    {hasDiscount && (
+                      <span className="bg-accent text-white text-[10px] font-semibold tracking-widest uppercase px-3 py-1 rounded-full shadow-sm">
+                        -{discountPercentage}%
+                      </span>
+                    )}
+                  </div>
                 )}
               </div>
 

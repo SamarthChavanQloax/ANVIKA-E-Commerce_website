@@ -4,6 +4,7 @@ import { Search, X, ArrowRight, Star } from 'lucide-react';
 import { products } from '../../data/products';
 import { useQuickView } from '../../context/QuickViewContext';
 import { useNavigate } from 'react-router-dom';
+import { getProductBadges } from '../../utils/productBadges';
 
 const POPULAR_SEARCHES = ['Banarasi Silk', 'Anarkali Set', 'Chanderi', 'Bridal Lehenga', 'Mulmul Dress', 'Kids Kurta'];
 
@@ -140,16 +141,36 @@ const SearchModal = ({ isOpen, onClose }) => {
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {filteredProducts.map((product) => (
-                      <div
-                        key={product._id}
-                        onClick={() => handleSelectProduct(product)}
-                        className="flex gap-4 p-3 rounded-2xl bg-surface/40 hover:bg-surface border border-border/60 hover:border-accent/40 cursor-pointer transition-all group"
-                      >
-                        <img
-                          src={product.image || '/demo-saree.jpg'}
-                          alt={product.name}
-                          className="w-16 h-20 object-cover rounded-xl bg-surface flex-shrink-0"
-                        />
+                      (() => {
+                        const { isNew, hasDiscount, discountPercentage } = getProductBadges(product);
+
+                        return (
+                          <div
+                            key={product._id}
+                            onClick={() => handleSelectProduct(product)}
+                            className="flex gap-4 p-3 rounded-2xl bg-surface/40 hover:bg-surface border border-border/60 hover:border-accent/40 cursor-pointer transition-all group"
+                          >
+                            <div className="relative w-16 h-20 shrink-0">
+                              <img
+                                src={product.image || '/demo-saree.jpg'}
+                                alt={product.name}
+                                className="w-full h-full object-cover rounded-xl bg-surface"
+                              />
+                              {(isNew || hasDiscount) && (
+                                <div className="absolute top-1 left-1 flex flex-col gap-1">
+                                  {isNew && (
+                                    <span className="bg-background/90 text-text text-[8px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded-full">
+                                      New
+                                    </span>
+                                  )}
+                                  {hasDiscount && (
+                                    <span className="bg-accent text-white text-[8px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded-full">
+                                      -{discountPercentage}%
+                                    </span>
+                                  )}
+                                </div>
+                              )}
+                            </div>
                         <div className="flex-1 min-w-0 flex flex-col justify-center">
                           <span className="text-[10px] text-accent font-medium uppercase tracking-wider block mb-0.5">
                             {product.category}
@@ -172,7 +193,9 @@ const SearchModal = ({ isOpen, onClose }) => {
                             <span>{product.rating || '4.9'}</span>
                           </div>
                         </div>
-                      </div>
+                          </div>
+                        );
+                      })()
                     ))}
                   </div>
                 </div>

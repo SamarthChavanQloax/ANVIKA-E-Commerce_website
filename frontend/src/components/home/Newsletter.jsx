@@ -3,15 +3,15 @@ import Button from '../common/Button';
 
 const Newsletter = () => {
   return (
-    <section className="py-32 px-4 sm:px-6 bg-primary text-background flex justify-center text-center">
+    <section className="section-space px-4 sm:px-6 bg-primary text-background flex justify-center text-center">
       <RevealOnScroll className="max-w-2xl w-full">
-        <span className="text-accent text-[10px] sm:text-xs tracking-[0.3em] uppercase mb-6 block font-medium">
+        <span className="text-accent text-[10px] sm:text-xs tracking-[0.3em] uppercase mb-4 block font-medium">
           BE THE FIRST TO KNOW
         </span>
-        <h2 className="text-4xl md:text-5xl font-serif font-light tracking-wide mb-6">
+        <h2 className="text-4xl md:text-5xl font-serif font-light tracking-wide mb-4">
           Join the Anvika Society
         </h2>
-        <p className="text-background/80 font-light text-base tracking-wide mb-12 max-w-lg mx-auto">
+        <p className="text-background/80 font-light text-base tracking-wide mb-8 max-w-lg mx-auto">
           New collections, exclusive edits, and stories from our world, delivered straight to your inbox.
         </p>
         

@@ -6,7 +6,7 @@ import Button from '../../components/common/Button';
 
 const About = () => {
   return (
-    <div className="w-full pt-8 pb-24 bg-background">
+    <div className="w-full py-8 md:py-12 bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Editorial Hero */}
@@ -43,7 +43,7 @@ const About = () => {
         </div>
 
         {/* Narrative Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center mb-24">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-12 items-center mb-16">
           <RevealOnScroll>
             <div className="space-y-6 text-sm sm:text-base text-text-muted font-light leading-relaxed">
               <span className="text-xs uppercase tracking-[0.25em] text-accent font-semibold block">Our Origins</span>
@@ -80,7 +80,7 @@ const About = () => {
         </div>
 
         {/* Core Pillars */}
-        <div className="border-t border-border pt-20 mb-24">
+        <div className="border-t border-border pt-12 md:pt-16 mb-16">
           <div className="text-center mb-16">
             <span className="text-xs uppercase tracking-[0.25em] text-accent font-medium block mb-2">Our Guiding Values</span>
             <h2 className="text-3xl md:text-4xl font-serif text-text font-light tracking-wide">The Anvika Standard</h2>

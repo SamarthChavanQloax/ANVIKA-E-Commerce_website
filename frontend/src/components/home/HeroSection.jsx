@@ -26,12 +26,12 @@ const HeroSection = () => {
       <div className="relative h-full flex flex-col justify-center max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Staggered Content Container */}
-        <div className="max-w-xl text-left mt-20">
+        <div className="max-w-xl text-left mt-12">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.1, ease: [0.25, 0.1, 0.25, 1] }}
-            className="mb-6"
+            className="mb-4"
           >
             <span className="text-white text-[10px] sm:text-xs tracking-[0.3em] uppercase block font-medium">
               THE NEW EDIT
@@ -53,7 +53,7 @@ const HeroSection = () => {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
-            className="text-white/90 mt-8 text-base md:text-lg max-w-sm font-light leading-relaxed tracking-wide"
+            className="text-white/90 mt-6 text-base md:text-lg max-w-sm font-light leading-relaxed tracking-wide"
           >
             Discover timeless Indian silhouettes designed for the woman of today.
           </motion.p>
@@ -62,7 +62,7 @@ const HeroSection = () => {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.55, ease: [0.25, 0.1, 0.25, 1] }}
-            className="flex flex-col sm:flex-row gap-4 mt-12"
+            className="flex flex-col sm:flex-row gap-4 mt-8"
           >
             <Button className="bg-white text-black hover:bg-white/90">
               SHOP THE COLLECTION

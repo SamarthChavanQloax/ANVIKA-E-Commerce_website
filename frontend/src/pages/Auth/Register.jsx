@@ -3,24 +3,31 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { FadeIn } from '../../components/animations/RevealOnScroll';
 import Button from '../../components/common/Button';
+import api from '../../api';
 
 const Register = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
   
   const { login } = useAuth();
 
   const submitHandler = async (e) => {
     e.preventDefault();
     setIsLoading(true);
+    setError('');
     
-    // Simulating registration for frontend demo
-    setTimeout(() => {
-      login({ _id: '2', name, email, role: 'customer' });
+    try {
+      const { data } = await api.post('/users', { name, email, password });
+      login(data);
+    } catch (error) {
+      setError(error.response?.data?.message || 'Registration failed.');
       setIsLoading(false);
-    }, 1000);
+      return;
+    }
+    setIsLoading(false);
   };
 
   return (
@@ -36,12 +43,14 @@ const Register = () => {
       </div>
 
       {/* Left side - Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 sm:p-12 lg:p-24 bg-background">
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 sm:p-10 lg:p-16 bg-background">
         <FadeIn className="w-full max-w-md">
           <div className="text-center mb-10">
             <h1 className="text-3xl font-serif text-text mb-2">Create Account</h1>
             <p className="text-text-muted">Join us to experience modern Indian luxury.</p>
           </div>
+
+          {error && <div className="bg-red-100 text-red-700 p-3 mb-6 rounded-sm text-sm">{error}</div>}
 
           <form onSubmit={submitHandler} className="flex flex-col gap-6">
             <div>

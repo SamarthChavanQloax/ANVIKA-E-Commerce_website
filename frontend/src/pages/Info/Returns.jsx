@@ -5,7 +5,7 @@ import Button from '../../components/common/Button';
 
 const Returns = () => {
   return (
-    <div className="w-full pt-8 pb-24 bg-background">
+    <div className="w-full py-8 md:py-12 bg-background">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Header */}
@@ -24,7 +24,7 @@ const Returns = () => {
         </FadeIn>
 
         {/* 3 Steps Process */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
           <RevealOnScroll>
             <div className="p-8 bg-surface/50 border border-border/80 rounded-3xl h-full flex flex-col justify-between">
               <div>

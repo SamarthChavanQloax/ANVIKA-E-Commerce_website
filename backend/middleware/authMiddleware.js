@@ -12,6 +12,10 @@ const protect = async (req, res, next) => {
       const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback_secret_for_dev');
 
       req.user = await User.findById(decoded.userId).select('-password');
+      if (!req.user) {
+        res.status(401);
+        return next(new Error('Not authorized, user not found'));
+      }
 
       next();
     } catch (error) {

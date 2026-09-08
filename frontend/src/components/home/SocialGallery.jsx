@@ -14,7 +14,7 @@ const images = [
 
 const SocialGallery = () => {
   return (
-    <section className="py-24 bg-surface">
+    <section className="section-space bg-surface">
       <RevealOnScroll>
         <div className="text-center mb-16 flex flex-col items-center px-4">
           <motion.a

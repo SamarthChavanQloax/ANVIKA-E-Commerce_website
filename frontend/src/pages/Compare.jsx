@@ -15,7 +15,7 @@ const Compare = () => {
 
   if (compareItems.length === 0) {
     return (
-      <div className="w-full pt-16 pb-24 bg-background min-h-[60vh] flex flex-col items-center justify-center">
+      <div className="w-full py-12 md:py-16 bg-background min-h-[60vh] flex flex-col items-center justify-center">
         <h1 className="text-3xl font-serif text-text font-light mb-4">Compare Products</h1>
         <p className="text-text-muted mb-8 text-center max-w-md">
           Your comparison list is empty. Add up to 4 products to see them side-by-side.
@@ -28,7 +28,7 @@ const Compare = () => {
   }
 
   return (
-    <div className="w-full pt-12 pb-24 bg-background min-h-screen">
+    <div className="w-full py-10 md:py-12 bg-background min-h-screen">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">

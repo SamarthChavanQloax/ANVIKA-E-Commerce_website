@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react';
+import api from '../api';
 
 const CartContext = createContext();
 
@@ -67,17 +68,14 @@ export const CartProvider = ({ children }) => {
     setAppliedCoupon(null);
   };
 
-  const applyCoupon = (code) => {
-    const upper = code.trim().toUpperCase();
-    if (upper === 'ANVIKA10' || upper === 'FESTIVE10') {
-      setAppliedCoupon({ code: upper, discountPercent: 10 });
-      return { success: true, message: '10% discount applied successfully!' };
+  const applyCoupon = async (code) => {
+    try {
+      const { data } = await api.post('/coupons/validate', { code, subtotal });
+      setAppliedCoupon({ ...data, discountAmount: data.discount });
+      return { success: true, message: `${data.code} applied successfully.` };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message || 'Invalid coupon code.' };
     }
-    if (upper === 'ROYAL15') {
-      setAppliedCoupon({ code: upper, discountPercent: 15 });
-      return { success: true, message: '15% Royal discount applied!' };
-    }
-    return { success: false, message: 'Invalid coupon code. Try ANVIKA10' };
   };
 
   const removeCoupon = () => {
@@ -86,8 +84,8 @@ export const CartProvider = ({ children }) => {
 
   const subtotal = cartItems.reduce((acc, item) => acc + (item.price * item.qty), 0);
   const totalItems = cartItems.reduce((acc, item) => acc + item.qty, 0);
-  const discountAmount = appliedCoupon ? Math.round((subtotal * appliedCoupon.discountPercent) / 100) : 0;
-  const shippingFee = subtotal >= 10000 || subtotal === 0 ? 0 : 450;
+  const discountAmount = appliedCoupon?.discountAmount || 0;
+  const shippingFee = subtotal - discountAmount >= 10000 || subtotal === 0 ? 0 : 450;
   const orderTotal = Math.max(0, subtotal - discountAmount + shippingFee);
 
   return (

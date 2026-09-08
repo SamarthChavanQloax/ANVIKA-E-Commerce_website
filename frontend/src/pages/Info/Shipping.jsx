@@ -5,7 +5,7 @@ import Button from '../../components/common/Button';
 
 const Shipping = () => {
   return (
-    <div className="w-full pt-8 pb-24 bg-background">
+    <div className="w-full py-8 md:py-12 bg-background">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Header */}
@@ -24,7 +24,7 @@ const Shipping = () => {
         </FadeIn>
 
         {/* Highlights */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
           <RevealOnScroll>
             <div className="p-6 bg-surface/50 border border-border/80 rounded-2xl text-center flex flex-col items-center">
               <div className="w-12 h-12 rounded-full bg-accent/10 text-accent flex items-center justify-center mb-4">
@@ -63,7 +63,7 @@ const Shipping = () => {
         </div>
 
         {/* Policy Details */}
-        <div className="space-y-12 text-sm text-text-muted font-light leading-relaxed">
+        <div className="space-y-8 text-sm text-text-muted font-light leading-relaxed">
           <RevealOnScroll>
             <section className="bg-surface/30 p-8 sm:p-10 rounded-3xl border border-border/80 space-y-4">
               <h2 className="text-2xl font-serif text-text font-medium">1. Domestic Transit (India)</h2>

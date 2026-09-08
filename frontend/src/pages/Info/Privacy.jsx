@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 
 const Privacy = () => {
   return (
-    <div className="w-full pt-8 pb-24 bg-background">
+    <div className="w-full py-8 md:py-12 bg-background">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Header */}
@@ -64,7 +64,7 @@ const Privacy = () => {
         </FadeIn>
 
         {/* Content */}
-        <div className="space-y-10 text-sm text-text-muted font-light leading-relaxed">
+        <div className="space-y-8 text-sm text-text-muted font-light leading-relaxed">
           <section className="space-y-3">
             <h2 className="text-xl font-serif text-text font-medium">1. Introduction & Overview</h2>
             <p>

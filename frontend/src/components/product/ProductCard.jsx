@@ -6,6 +6,7 @@ import Button from '../common/Button';
 import { useWishlist } from '../../context/WishlistContext';
 import { useQuickView } from '../../context/QuickViewContext';
 import { useCompare } from '../../context/CompareContext';
+import { getProductBadges } from '../../utils/productBadges';
 
 const ProductCard = ({ product }) => {
   const [isHovered, setIsHovered] = useState(false);
@@ -15,6 +16,7 @@ const ProductCard = ({ product }) => {
 
   const isFavorited = isInWishlist(product._id || product.id);
   const isCompared = isInCompare(product._id || product.id);
+  const { isNew, hasDiscount, discountPercentage } = getProductBadges(product);
 
   const primaryImage = product.images?.[0] || product.image;
   const secondaryImage = product.images?.[1] || primaryImage;
@@ -53,14 +55,14 @@ const ProductCard = ({ product }) => {
 
         {/* Badges */}
         <div className="absolute top-4 left-4 flex flex-col gap-2">
-          {product.isNew && (
+          {isNew && (
             <span className="bg-background/90 backdrop-blur-sm text-text text-[10px] tracking-widest px-3 py-1 rounded-full shadow-sm uppercase font-medium">
               New
             </span>
           )}
-          {product.discount > 0 && (
+          {hasDiscount && (
             <span className="bg-accent/90 backdrop-blur-sm text-white text-[10px] tracking-widest px-3 py-1 rounded-full shadow-sm uppercase font-medium">
-              -{product.discount}%
+              -{discountPercentage}%
             </span>
           )}
         </div>

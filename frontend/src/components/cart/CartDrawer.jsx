@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Trash2, Plus, Minus, ShoppingBag, ArrowRight, Tag, CheckCircle2, ShieldCheck } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Button from '../common/Button';
 
 const FREE_SHIPPING_THRESHOLD = 10000;
@@ -23,34 +23,24 @@ const CartDrawer = () => {
     applyCoupon,
     removeCoupon 
   } = useCart();
+  const navigate = useNavigate();
 
   const [couponInput, setCouponInput] = useState('');
   const [couponFeedback, setCouponFeedback] = useState(null);
-  const [isCheckingOut, setIsCheckingOut] = useState(false);
-  const [checkoutComplete, setCheckoutComplete] = useState(false);
 
   const freeShippingProgress = Math.min(100, Math.round((subtotal / FREE_SHIPPING_THRESHOLD) * 100));
   const amountNeededForFreeShipping = Math.max(0, FREE_SHIPPING_THRESHOLD - subtotal);
 
-  const handleApplyCoupon = (e) => {
+  const handleApplyCoupon = async (e) => {
     e.preventDefault();
     if (!couponInput) return;
-    const result = applyCoupon(couponInput);
+    const result = await applyCoupon(couponInput);
     setCouponFeedback(result);
   };
 
-  const handleCheckoutSimulation = () => {
-    setIsCheckingOut(true);
-    setTimeout(() => {
-      setIsCheckingOut(false);
-      setCheckoutComplete(true);
-      clearCart();
-    }, 1800);
-  };
-
-  const handleResetCheckout = () => {
-    setCheckoutComplete(false);
+  const handleCheckout = () => {
     closeCart();
+    navigate('/checkout');
   };
 
   return (
@@ -117,24 +107,7 @@ const CartDrawer = () => {
             </div>
 
             {/* Content Area */}
-            {checkoutComplete ? (
-              <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
-                <motion.div
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  className="w-16 h-16 rounded-full bg-emerald-100 dark:bg-emerald-950 flex items-center justify-center text-emerald-600 mb-6"
-                >
-                  <CheckCircle2 size={36} />
-                </motion.div>
-                <h4 className="font-serif text-2xl text-text font-light mb-2">Order Confirmed!</h4>
-                <p className="text-text-muted text-sm max-w-xs mb-6 leading-relaxed">
-                  Thank you for shopping with Anvika. Your bespoke handloom order is being prepared with utmost care.
-                </p>
-                <Button onClick={handleResetCheckout} className="bg-primary text-background">
-                  Continue Exploring
-                </Button>
-              </div>
-            ) : cartItems.length === 0 ? (
+            {cartItems.length === 0 ? (
               <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
                 <div className="w-16 h-16 rounded-full bg-surface flex items-center justify-center text-text-muted mb-4">
                   <ShoppingBag size={30} strokeWidth={1.2} />
@@ -238,7 +211,7 @@ const CartDrawer = () => {
                     <div className="flex items-center justify-between bg-emerald-500/10 border border-emerald-500/20 px-3 py-2 rounded-xl text-xs">
                       <div className="flex items-center gap-2 text-emerald-600 font-medium">
                         <CheckCircle2 size={14} />
-                        <span>Code <strong>{appliedCoupon.code}</strong> applied ({appliedCoupon.discountPercent}% OFF)</span>
+                        <span>Code <strong>{appliedCoupon.code}</strong> applied</span>
                       </div>
                       <button 
                         onClick={removeCoupon} 
@@ -264,7 +237,7 @@ const CartDrawer = () => {
 
                     {appliedCoupon && (
                       <div className="flex justify-between text-emerald-600">
-                        <span>Discount ({appliedCoupon.discountPercent}%)</span>
+                        <span>Discount</span>
                         <span>-₹{discountAmount.toLocaleString('en-IN')}</span>
                       </div>
                     )}
@@ -288,18 +261,11 @@ const CartDrawer = () => {
 
                   {/* Checkout CTA */}
                   <Button 
-                    onClick={handleCheckoutSimulation} 
-                    disabled={isCheckingOut}
+                    onClick={handleCheckout}
                     className="w-full py-3.5 bg-primary text-background font-medium tracking-widest text-xs uppercase flex items-center justify-center gap-2 group hover:opacity-90 transition-opacity"
                   >
-                    {isCheckingOut ? (
-                      <span className="animate-pulse">Processing Order...</span>
-                    ) : (
-                      <>
-                        PROCEED TO CHECKOUT
-                        <ArrowRight size={14} className="transform group-hover:translate-x-1 transition-transform" />
-                      </>
-                    )}
+                    PROCEED TO CHECKOUT
+                    <ArrowRight size={14} className="transform group-hover:translate-x-1 transition-transform" />
                   </Button>
 
                   <div className="flex items-center justify-center gap-2 text-[10px] text-text-muted">

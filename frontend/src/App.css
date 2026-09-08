@@ -40,7 +40,7 @@
 
   .framework {
     z-index: 1;
-    top: 34px;
+    top: 32px;
     height: 28px;
     transform: perspective(2000px) rotateZ(300deg) rotateX(44deg) rotateY(39deg)
       scale(1.4);
@@ -48,7 +48,7 @@
 
   .vite {
     z-index: 0;
-    top: 107px;
+    top: 104px;
     height: 26px;
     width: auto;
     transform: perspective(2000px) rotateZ(300deg) rotateX(40deg) rotateY(39deg)
@@ -59,14 +59,14 @@
 #center {
   display: flex;
   flex-direction: column;
-  gap: 25px;
+  gap: 24px;
   place-content: center;
   place-items: center;
   flex-grow: 1;
 
   @media (max-width: 1024px) {
     padding: 32px 20px 24px;
-    gap: 18px;
+    gap: 16px;
   }
 }
 
@@ -109,7 +109,7 @@
   padding: 0;
   display: flex;
   gap: 8px;
-  margin: 32px 0 0;
+  margin: 24px 0 0;
 
   .logo {
     height: 18px;
@@ -137,7 +137,7 @@
   }
 
   @media (max-width: 1024px) {
-    margin-top: 20px;
+    margin-top: 16px;
     flex-wrap: wrap;
     justify-content: center;
 
@@ -154,10 +154,10 @@
 }
 
 #spacer {
-  height: 88px;
+  height: 64px;
   border-top: 1px solid var(--border);
   @media (max-width: 1024px) {
-    height: 48px;
+    height: 32px;
   }
 }
 

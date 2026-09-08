@@ -13,7 +13,6 @@ export const products = [
     sizes: ['Free Size (6.3m with blouse)'],
     colors: ['Rosewood Red', 'Wine Crimson'],
     isNew: true,
-    discount: 16,
     rating: 4.9,
     reviewsCount: 28,
     inStock: true
@@ -32,7 +31,6 @@ export const products = [
     sizes: ['Free Size (6.3m with blouse)'],
     colors: ['Lilac Rose', 'Silver Frost'],
     isNew: true,
-    discount: 15,
     rating: 4.9,
     reviewsCount: 31,
     inStock: true
@@ -51,7 +49,6 @@ export const products = [
     sizes: ['Free Size (6.3m with blouse)'],
     colors: ['Midnight Peacock', 'Antique Gold'],
     isBestseller: true,
-    discount: 12,
     rating: 5.0,
     reviewsCount: 47,
     inStock: true
@@ -70,7 +67,6 @@ export const products = [
     sizes: ['Free Size (6.3m with blouse)'],
     colors: ['Emerald Forest', 'Gold Zari'],
     isBestseller: true,
-    discount: 13,
     rating: 5.0,
     reviewsCount: 54,
     inStock: true
@@ -96,7 +92,6 @@ export const products = [
     colors: ['Sand Beige', 'Warm Camel'],
     isNew: true,
     isBestseller: true,
-    discount: 19,
     rating: 5.0,
     reviewsCount: 48,
     inStock: true
@@ -115,7 +110,6 @@ export const products = [
     sizes: ['Free Size (6.3m with blouse)'],
     colors: ['Terracotta Rust', 'Forest Indigo'],
     isNew: true,
-    discount: 17,
     rating: 4.9,
     reviewsCount: 39,
     inStock: true
@@ -134,7 +128,6 @@ export const products = [
     sizes: ['Free Size (6.3m with blouse)'],
     colors: ['Royal Violet', 'Amethyst Purple'],
     isNew: true,
-    discount: 14,
     rating: 4.9,
     reviewsCount: 27,
     inStock: true
@@ -153,7 +146,6 @@ export const products = [
     sizes: ['Free Size (6.3m with blouse)'],
     colors: ['Midnight Plum', 'Blackcurrant Wine'],
     isBestseller: true,
-    discount: 14,
     rating: 5.0,
     reviewsCount: 36,
     inStock: true
@@ -172,7 +164,6 @@ export const products = [
     sizes: ['Free Size (6.3m with blouse)'],
     colors: ['Sunlit Gold', 'Champagne Zari'],
     isNew: true,
-    discount: 13,
     rating: 4.9,
     reviewsCount: 41,
     inStock: true
@@ -191,7 +182,6 @@ export const products = [
     sizes: ['Free Size (6.3m with blouse)'],
     colors: ['Obsidian Black', 'Burnished Gold'],
     isBestseller: true,
-    discount: 13,
     rating: 4.8,
     reviewsCount: 34,
     inStock: true
@@ -210,7 +200,6 @@ export const products = [
     sizes: ['Free Size (6.3m with blouse)'],
     colors: ['Pine Forest', 'Silver Foil'],
     isNew: true,
-    discount: 14,
     rating: 4.8,
     reviewsCount: 23,
     inStock: true
@@ -229,7 +218,6 @@ export const products = [
     sizes: ['6-12M', '1-2Y', '2-3Y', '3-4Y', '4-5Y'],
     colors: ['Vintage Ecru', 'Blush Floral'],
     isNew: true,
-    discount: 17,
     rating: 4.9,
     reviewsCount: 38,
     inStock: true
@@ -248,7 +236,6 @@ export const products = [
     sizes: ['3-6M', '6-12M', '1-2Y', '2-3Y'],
     colors: ['Garden Ivory', 'Rosebud Pink'],
     isBestseller: true,
-    discount: 15,
     rating: 5.0,
     reviewsCount: 45,
     inStock: true
@@ -267,7 +254,6 @@ export const products = [
     sizes: ['6-12M', '1-2Y', '2-3Y', '3-4Y'],
     colors: ['Midnight Chambray', 'Pastel Blossom'],
     isNew: true,
-    discount: 17,
     rating: 4.8,
     reviewsCount: 29,
     inStock: true
@@ -286,7 +272,6 @@ export const products = [
     sizes: ['1-2Y', '2-3Y', '3-4Y', '4-5Y', '5-6Y'],
     colors: ['Sage Meadow', 'Olive Floral'],
     isNew: true,
-    discount: 17,
     rating: 4.9,
     reviewsCount: 32,
     inStock: true
@@ -305,7 +290,6 @@ export const products = [
     sizes: ['0-6M', '6-12M', '1-2Y', '2-3Y'],
     colors: ['Blush Rose', 'Candy Pink'],
     isBestseller: true,
-    discount: 14,
     rating: 5.0,
     reviewsCount: 56,
     inStock: true

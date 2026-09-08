@@ -9,12 +9,16 @@ import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
 import { useCompare } from '../context/CompareContext';
 import ProductCard from '../components/product/ProductCard';
+import { getProductBadges } from '../utils/productBadges';
+import { useAuth } from '../context/AuthContext';
+import api from '../api';
 
 const ProductDetails = () => {
   const { id } = useParams();
   const { addToCart, openCart } = useCart();
   const { isInWishlist, toggleWishlist } = useWishlist();
   const { isInCompare, toggleCompare } = useCompare();
+  const { userInfo } = useAuth();
 
   // Look up product from central catalog, fallback gracefully
   const product = products.find(p => p._id === id || p.slug === id) || products[0];
@@ -24,16 +28,22 @@ const ProductDetails = () => {
   const [quantity, setQuantity] = useState(1);
   const [isAdded, setIsAdded] = useState(false);
   const [activeAccordion, setActiveAccordion] = useState('description');
+  const [reviews, setReviews] = useState([]);
+  const [reviewRating, setReviewRating] = useState(5);
+  const [reviewText, setReviewText] = useState('');
+  const [reviewMessage, setReviewMessage] = useState('');
 
   useEffect(() => {
     setSelectedSize(product.sizes?.[0] || 'Free Size');
     setSelectedImageIdx(0);
     setQuantity(1);
     setIsAdded(false);
+    api.get(`/products/${product._id}/reviews`).then(({ data }) => setReviews(data)).catch(() => setReviews([]));
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [id, product]);
 
   const images = product.images?.length > 0 ? product.images : [product.image || '/demo-saree.jpg'];
+  const { isNew, hasDiscount, discountPercentage } = getProductBadges(product);
   const isFavorited = isInWishlist(product._id);
   const isCompared = isInCompare(product._id);
 
@@ -53,8 +63,18 @@ const ProductDetails = () => {
     openCart();
   };
 
+  const submitReview = async (event) => {
+    event.preventDefault();
+    try {
+      const { data } = await api.post(`/products/${product._id}/reviews`, { rating: reviewRating, text: reviewText });
+      setReviews((current) => [data, ...current]);
+      setReviewText('');
+      setReviewMessage('Review submitted.');
+    } catch (error) { setReviewMessage(error.response?.data?.message || 'Unable to submit review.'); }
+  };
+
   return (
-    <div className="w-full pt-8 pb-24 bg-background">
+    <div className="w-full py-8 md:py-12 bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Breadcrumbs */}
@@ -70,7 +90,7 @@ const ProductDetails = () => {
           <span className="text-text font-medium truncate max-w-xs">{product.name}</span>
         </nav>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-12 items-start">
           
           {/* Left Column: Image Gallery */}
           <div className="flex flex-col-reverse md:flex-row gap-4 lg:sticky top-36">
@@ -145,10 +165,19 @@ const ProductDetails = () => {
                 </div>
               )}
 
-              {product.discount > 0 && (
-                <span className="absolute top-4 left-4 bg-accent text-white text-[11px] font-semibold tracking-widest uppercase px-3.5 py-1.5 rounded-full shadow-md">
-                  {product.discount}% OFF
-                </span>
+              {(isNew || hasDiscount) && (
+                <div className="absolute top-4 left-4 flex flex-col gap-2">
+                  {isNew && (
+                    <span className="bg-background/90 text-text text-[11px] font-semibold tracking-widest uppercase px-3.5 py-1.5 rounded-full shadow-md">
+                      New
+                    </span>
+                  )}
+                  {hasDiscount && (
+                    <span className="bg-accent text-white text-[11px] font-semibold tracking-widest uppercase px-3.5 py-1.5 rounded-full shadow-md">
+                      -{discountPercentage}%
+                    </span>
+                  )}
+                </div>
               )}
             </div>
           </div>
@@ -395,8 +424,18 @@ const ProductDetails = () => {
           </div>
         </div>
 
+        <section className="mt-12 border-t border-border pt-10" aria-labelledby="reviews-heading">
+          <div className="flex items-center justify-between gap-4 mb-6">
+            <div><span className="text-xs uppercase tracking-[0.25em] text-accent font-medium">Client Notes</span><h2 id="reviews-heading" className="text-3xl font-serif mt-2">Reviews & Ratings</h2></div>
+            <span className="text-sm text-text-muted">{reviews.length} review{reviews.length === 1 ? '' : 's'}</span>
+          </div>
+          <div className="space-y-4 mb-8">{reviews.map((review) => <article key={review._id} className="border-b border-border pb-4"><div className="flex justify-between text-sm"><strong>{review.user?.name || 'Verified customer'}</strong><span className="text-accent">{'★'.repeat(review.rating)}</span></div><p className="text-sm text-text-muted mt-2">{review.text}</p></article>)}{reviews.length === 0 && <p className="text-sm text-text-muted">No reviews yet.</p>}</div>
+          {userInfo && <form onSubmit={submitReview} className="grid sm:grid-cols-[8rem_1fr_auto] gap-3 items-end"><label className="text-sm">Rating<select value={reviewRating} onChange={(event) => setReviewRating(Number(event.target.value))} className="mt-1 w-full px-3 py-2 bg-surface border border-border rounded-lg">{[5, 4, 3, 2, 1].map((value) => <option key={value} value={value}>{value} / 5</option>)}</select></label><label className="text-sm">Your review<textarea required value={reviewText} onChange={(event) => setReviewText(event.target.value)} className="mt-1 w-full px-3 py-2 bg-surface border border-border rounded-lg" rows="2" /></label><Button type="submit" size="sm">Submit</Button></form>}
+          {reviewMessage && <p className="text-sm text-text-muted mt-3">{reviewMessage}</p>}
+        </section>
+
         {/* You May Also Like Section */}
-        <div className="mt-28 border-t border-border pt-16">
+        <div className="mt-16 md:mt-20 border-t border-border pt-12">
           <RevealOnScroll>
             <div className="text-center mb-12">
               <span className="text-xs uppercase tracking-[0.25em] text-accent font-medium block mb-2">Curated Pairings</span>

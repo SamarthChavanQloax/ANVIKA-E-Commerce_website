@@ -35,7 +35,7 @@ const Testimonials = () => {
   }, []);
 
   return (
-    <section className="py-24 px-4 sm:px-6 lg:px-12 bg-surface">
+    <section className="section-space px-4 sm:px-6 lg:px-12 bg-surface">
       <RevealOnScroll className="max-w-4xl mx-auto text-center">
         <span className="text-accent text-[10px] tracking-[0.25em] uppercase mb-12 block font-medium">
           WHAT OUR CUSTOMERS SAY

@@ -57,7 +57,7 @@ const Footer = () => {
       {/* 1. Trust Pillars / Value Proposition Bar */}
       <div className="border-b border-border/80 bg-background/50">
         <div className="max-w-[95rem] mx-auto px-4 sm:px-6 lg:px-12 py-12">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-10">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
             {trustPillars.map((pillar, idx) => {
               const Icon = pillar.icon;
               return (
@@ -83,7 +83,7 @@ const Footer = () => {
       {/* 2. Atelier Club / Newsletter Signup Strip */}
       <div className="border-b border-border/80 bg-gradient-to-b from-transparent to-background/30">
         <div className="max-w-[95rem] mx-auto px-4 sm:px-6 lg:px-12 py-14">
-          <div className="flex flex-col lg:flex-row items-center justify-between gap-8 bg-surface p-8 sm:p-10 rounded-3xl border border-border shadow-sm">
+          <div className="flex flex-col lg:flex-row items-center justify-between gap-6 bg-surface p-6 sm:p-8 rounded-3xl border border-border shadow-sm">
             <div className="max-w-xl text-center lg:text-left">
               <div className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.25em] text-accent font-semibold mb-2">
                 <Sparkles size={14} /> The ANVIKA Privilege
@@ -130,8 +130,8 @@ const Footer = () => {
       </div>
 
       {/* 3. Main Footer Links & Information Grid */}
-      <div className="max-w-[95rem] mx-auto px-4 sm:px-6 lg:px-12 pt-16 pb-14">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10 lg:gap-8 mb-16">
+      <div className="max-w-[95rem] mx-auto px-4 sm:px-6 lg:px-12 pt-12 pb-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-8 lg:gap-6 mb-12">
           
           {/* Col 1: Brand & Heritage (4 cols) */}
           <div className="lg:col-span-4 pr-0 lg:pr-8">

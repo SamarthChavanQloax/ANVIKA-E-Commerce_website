@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import bcrypt from 'bcrypt';
 import dotenv from 'dotenv';
 import User from './models/User.js';
 import Product from './models/Product.js';
@@ -95,7 +96,11 @@ const importData = async () => {
     await User.deleteMany();
     await Category.deleteMany();
 
-    const createdUsers = await User.insertMany(users);
+    const seededUsers = await Promise.all(users.map(async (user) => ({
+      ...user,
+      password: await bcrypt.hash(user.password, 10),
+    })));
+    const createdUsers = await User.insertMany(seededUsers);
     const adminUser = createdUsers[0]._id;
 
     await Category.insertMany(categories);

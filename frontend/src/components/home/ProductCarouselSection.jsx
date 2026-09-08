@@ -5,7 +5,7 @@ import { ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const mockProducts = [
-  { _id: '1', name: 'Rosewood Banarasi Silk Saree', price: 12500, originalPrice: 15000, category: 'Sarees', image: '/demo-saree.jpg', isNew: true, discount: 16 },
+  { _id: '1', name: 'Rosewood Banarasi Silk Saree', price: 12500, originalPrice: 15000, category: 'Sarees', image: '/demo-saree.jpg', isNew: true },
   { _id: '2', name: 'Moonlight Chanderi Saree', price: 8900, category: 'Sarees', image: '/demo-saree.jpg' },
   { _id: '3', name: 'Mehfil Embroidered Anarkali', price: 15000, category: 'Women\'s Wear', image: '/demo-saree.jpg', isBestseller: true },
   { _id: '4', name: 'Little Bloom Cotton Dress', price: 2500, category: 'Baby & Kids', image: '/demo-saree.jpg' },
@@ -24,7 +24,7 @@ const ProductCarouselSection = ({
   const productsToDisplay = products && products.length > 0 ? products : mockProducts;
 
   return (
-    <section className="py-24 px-4 sm:px-6 lg:px-12 max-w-[90rem] mx-auto">
+    <section className="section-space px-4 sm:px-6 lg:px-12 max-w-[90rem] mx-auto">
       <RevealOnScroll>
         <div className="flex flex-col md:flex-row justify-between items-end mb-12">
           <div>

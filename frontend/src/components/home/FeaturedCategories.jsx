@@ -44,7 +44,7 @@ const FeaturedCategories = () => {
   ];
 
   return (
-    <section className="py-24 px-4 sm:px-6 lg:px-12 max-w-[90rem] mx-auto bg-background">
+    <section className="section-space px-4 sm:px-6 lg:px-12 max-w-[90rem] mx-auto bg-background">
       <RevealOnScroll>
         <div className="text-center mb-16 flex flex-col items-center">
           <span className="text-text-muted text-[10px] sm:text-xs tracking-[0.2em] uppercase mb-4 block font-medium">From everyday elegance to unforgettable occasions</span>

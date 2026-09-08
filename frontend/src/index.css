@@ -11,6 +11,11 @@
   
   --font-serif: "Cormorant Garamond", serif;
   --font-sans: "Inter", sans-serif;
+
+  --spacing-section-mobile: 4rem;
+  --spacing-section-desktop: 5rem;
+  --spacing-content: 1.5rem;
+  --spacing-content-lg: 2rem;
 }
 
 @layer base {
@@ -74,6 +79,26 @@ body {
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+@layer components {
+  .section-space {
+    padding-block: var(--spacing-section-mobile);
+  }
+
+  .content-space {
+    gap: var(--spacing-content);
+  }
+
+  @media (min-width: 768px) {
+    .section-space {
+      padding-block: var(--spacing-section-desktop);
+    }
+
+    .content-space {
+      gap: var(--spacing-content-lg);
+    }
+  }
 }
 
 h1, h2, h3, h4, h5, h6 {

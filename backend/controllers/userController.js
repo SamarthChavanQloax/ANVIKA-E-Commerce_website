@@ -11,13 +11,14 @@ const authUser = async (req, res, next) => {
     const user = await User.findOne({ email });
 
     if (user && (await user.matchPassword(password))) {
-      generateToken(res, user._id);
+      const token = generateToken(res, user._id);
 
       res.json({
         _id: user._id,
         name: user.name,
         email: user.email,
         role: user.role,
+        token,
       });
     } else {
       res.status(401);
@@ -49,13 +50,14 @@ const registerUser = async (req, res, next) => {
     });
 
     if (user) {
-      generateToken(res, user._id);
+      const token = generateToken(res, user._id);
 
       res.status(201).json({
         _id: user._id,
         name: user.name,
         email: user.email,
         role: user.role,
+        token,
       });
     } else {
       res.status(400);
@@ -82,7 +84,7 @@ const logoutUser = (req, res) => {
 // @access  Private
 const getUserProfile = async (req, res, next) => {
   try {
-    const user = await User.findById(req.user._id);
+    const user = await User.findById(req.user._id).populate('wishlist');
 
     if (user) {
       res.json({
@@ -140,6 +142,77 @@ const updateUserProfile = async (req, res, next) => {
   }
 };
 
+// @desc    Get user wishlist
+// @route   GET /api/users/wishlist
+// @access  Private
+const getWishlist = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user._id).populate('wishlist');
+    if (user) {
+      res.json(user.wishlist || []);
+    } else {
+      res.status(404);
+      throw new Error('User not found');
+    }
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Add product to wishlist
+// @route   POST /api/users/wishlist/:productId
+// @access  Private
+const addToWishlist = async (req, res, next) => {
+  try {
+    const { productId } = req.params;
+    const user = await User.findById(req.user._id);
+
+    if (user) {
+      const alreadyInWishlist = user.wishlist.some(
+        (id) => id.toString() === productId.toString()
+      );
+
+      if (!alreadyInWishlist) {
+        user.wishlist.push(productId);
+        await user.save();
+      }
+
+      const populatedUser = await User.findById(req.user._id).populate('wishlist');
+      res.status(200).json(populatedUser.wishlist);
+    } else {
+      res.status(404);
+      throw new Error('User not found');
+    }
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Remove product from wishlist
+// @route   DELETE /api/users/wishlist/:productId
+// @access  Private
+const removeFromWishlist = async (req, res, next) => {
+  try {
+    const { productId } = req.params;
+    const user = await User.findById(req.user._id);
+
+    if (user) {
+      user.wishlist = user.wishlist.filter(
+        (id) => id.toString() !== productId.toString()
+      );
+      await user.save();
+
+      const populatedUser = await User.findById(req.user._id).populate('wishlist');
+      res.status(200).json(populatedUser.wishlist);
+    } else {
+      res.status(404);
+      throw new Error('User not found');
+    }
+  } catch (error) {
+    next(error);
+  }
+};
+
 // @desc    Get all users
 // @route   GET /api/users
 // @access  Private/Admin
@@ -147,6 +220,54 @@ const getUsers = async (req, res, next) => {
   try {
     const users = await User.find({}).select('-password');
     res.json(users);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Get user by ID
+// @route   GET /api/users/:id
+// @access  Private/Admin
+const getUserById = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.params.id).select('-password');
+    if (user) {
+      res.json(user);
+    } else {
+      res.status(404);
+      throw new Error('User not found');
+    }
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Update user by ID
+// @route   PUT /api/users/:id
+// @access  Private/Admin
+const updateUser = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.params.id);
+
+    if (user) {
+      user.name = req.body.name || user.name;
+      user.email = req.body.email || user.email;
+      user.role = req.body.role || user.role;
+      user.phone = req.body.phone || user.phone;
+
+      const updatedUser = await user.save();
+
+      res.json({
+        _id: updatedUser._id,
+        name: updatedUser.name,
+        email: updatedUser.email,
+        role: updatedUser.role,
+        phone: updatedUser.phone,
+      });
+    } else {
+      res.status(404);
+      throw new Error('User not found');
+    }
   } catch (error) {
     next(error);
   }
@@ -181,6 +302,11 @@ export {
   logoutUser,
   getUserProfile,
   updateUserProfile,
+  getWishlist,
+  addToWishlist,
+  removeFromWishlist,
   getUsers,
+  getUserById,
+  updateUser,
   deleteUser,
 };

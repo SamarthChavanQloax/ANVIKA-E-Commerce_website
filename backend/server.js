@@ -24,16 +24,33 @@ const app = express();
 // Allowed origins for CORS (local frontend dev server & configured environment url)
 const allowedOrigins = [
   'http://localhost:5173',
+  'http://localhost:3000',
   'http://127.0.0.1:5173',
+  'http://127.0.0.1:3000',
   process.env.FRONTEND_URL,
 ].filter(Boolean);
 
 app.use(cors({
-  origin: 'http://localhost:5173', // Vite default port
-  credentials: true
+  origin: (origin, callback) => {
+    // Allow requests with no origin (e.g. mobile apps, curl, Postman)
+    if (!origin) return callback(null, true);
+    if (
+      allowedOrigins.includes(origin) ||
+      origin.startsWith('http://localhost:') ||
+      origin.startsWith('http://127.0.0.1:')
+    ) {
+      return callback(null, true);
+    }
+    // Allow for dev flexibility
+    return callback(null, true);
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
 }));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cookieParser());
 
 // Database connection state
@@ -43,15 +60,23 @@ const connectDB = async () => {
   const mongoUri = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/anvika_boutique';
   try {
     const conn = await mongoose.connect(mongoUri, {
-      serverSelectionTimeoutMS: 4000,
+      serverSelectionTimeoutMS: 5000,
     });
     isDbConnected = true;
     console.log(`✅ MongoDB Connected: ${conn.connection.host}`);
   } catch (error) {
-    isDbConnected = false;
-    console.warn(`⚠️ MongoDB Connection Notice: Could not connect to ${mongoUri}`);
-    console.warn(`   Reason: ${error.message}`);
-    console.warn(`   Tip: To connect to MongoDB, ensure a local MongoDB service is running, or set MONGO_URI in backend/.env to your MongoDB Atlas connection string.`);
+    console.warn(`⚠️ Primary MongoDB connection failed (${error.message}). Trying direct replica set...`);
+    try {
+      const fallbackUri = 'mongodb://anvika_admin:Qloax123@ac-uqatpw3-shard-00-00.6f3gpag.mongodb.net:27017,ac-uqatpw3-shard-00-01.6f3gpag.mongodb.net:27017,ac-uqatpw3-shard-00-02.6f3gpag.mongodb.net:27017/test?ssl=true&replicaSet=atlas-w3rxdd-shard-0&authSource=admin&retryWrites=true&w=majority';
+      const conn = await mongoose.connect(fallbackUri, {
+        serverSelectionTimeoutMS: 8000,
+      });
+      isDbConnected = true;
+      console.log(`✅ MongoDB Connected via Direct Replica Set: ${conn.connection.host}`);
+    } catch (fallbackError) {
+      isDbConnected = false;
+      console.warn(`⚠️ MongoDB Connection Notice: Could not connect to database: ${fallbackError.message}`);
+    }
   }
 };
 
@@ -78,6 +103,11 @@ app.use('/api/products', productRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/categories', categoryRoutes);
+
+// Payment configuration
+app.get('/api/config/paypal', (req, res) => {
+  res.send(process.env.PAYPAL_CLIENT_ID || 'sb');
+});
 
 // 404 handler for undefined routes
 app.use((req, res, next) => {

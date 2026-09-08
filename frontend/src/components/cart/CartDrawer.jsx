@@ -2,8 +2,10 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Trash2, Plus, Minus, ShoppingBag, ArrowRight, Tag, CheckCircle2, ShieldCheck } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
-import { Link } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
+import { Link, useNavigate } from 'react-router-dom';
 import Button from '../common/Button';
+import axios from 'axios';
 
 const FREE_SHIPPING_THRESHOLD = 10000;
 
@@ -24,10 +26,15 @@ const CartDrawer = () => {
     removeCoupon 
   } = useCart();
 
+  const { userInfo } = useAuth();
+  const navigate = useNavigate();
+
   const [couponInput, setCouponInput] = useState('');
   const [couponFeedback, setCouponFeedback] = useState(null);
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [checkoutComplete, setCheckoutComplete] = useState(false);
+  const [createdOrderData, setCreatedOrderData] = useState(null);
+  const [checkoutError, setCheckoutError] = useState('');
 
   const freeShippingProgress = Math.min(100, Math.round((subtotal / FREE_SHIPPING_THRESHOLD) * 100));
   const amountNeededForFreeShipping = Math.max(0, FREE_SHIPPING_THRESHOLD - subtotal);
@@ -39,13 +46,55 @@ const CartDrawer = () => {
     setCouponFeedback(result);
   };
 
-  const handleCheckoutSimulation = () => {
+  const handleCheckout = async () => {
+    if (!userInfo) {
+      closeCart();
+      navigate('/login');
+      return;
+    }
+
     setIsCheckingOut(true);
-    setTimeout(() => {
-      setIsCheckingOut(false);
+    setCheckoutError('');
+
+    try {
+      const orderPayload = {
+        orderItems: cartItems.map((item) => ({
+          _id: item._id,
+          name: item.name,
+          image: item.image,
+          price: item.price,
+          quantity: item.qty,
+        })),
+        shippingAddress: {
+          street: '101 Heritage Boulevard',
+          city: 'Mumbai',
+          state: 'Maharashtra',
+          postalCode: '400001',
+          country: 'India',
+        },
+        paymentMethod: 'UPI',
+        itemsPrice: subtotal,
+        shippingPrice: shippingFee,
+        discountPrice: discountAmount,
+        totalPrice: orderTotal,
+      };
+
+      const config = {
+        headers: {
+          Authorization: `Bearer ${userInfo?.token}`,
+        },
+        withCredentials: true,
+      };
+
+      const { data } = await axios.post('/api/orders', orderPayload, config);
+      setCreatedOrderData(data);
       setCheckoutComplete(true);
       clearCart();
-    }, 1800);
+    } catch (err) {
+      setCheckoutError(err.response?.data?.message || err.message || 'Checkout failed. Please try again.');
+    } finally {
+      setIsCheckingOut(false);
+    }
   };
 
   const handleResetCheckout = () => {
@@ -126,13 +175,25 @@ const CartDrawer = () => {
                 >
                   <CheckCircle2 size={36} />
                 </motion.div>
-                <h4 className="font-serif text-2xl text-text font-light mb-2">Order Confirmed!</h4>
+                <h4 className="font-serif text-2xl text-text font-light mb-1">Order Confirmed!</h4>
+                {createdOrderData?._id && (
+                  <span className="text-[11px] font-mono text-accent font-semibold tracking-wider block mb-2">
+                    ORDER #{createdOrderData._id.slice(-8).toUpperCase()}
+                  </span>
+                )}
                 <p className="text-text-muted text-sm max-w-xs mb-6 leading-relaxed">
-                  Thank you for shopping with Anvika. Your bespoke handloom order is being prepared with utmost care.
+                  Thank you for shopping with Anvika. Your bespoke order has been recorded in your account.
                 </p>
-                <Button onClick={handleResetCheckout} className="bg-primary text-background">
-                  Continue Exploring
-                </Button>
+                <div className="flex flex-col gap-2.5 w-full max-w-xs">
+                  <Link to="/profile" onClick={handleResetCheckout}>
+                    <Button className="w-full bg-primary text-background text-xs uppercase tracking-wider py-3">
+                      View Order in My Profile
+                    </Button>
+                  </Link>
+                  <Button variant="outline" onClick={handleResetCheckout} className="w-full text-xs uppercase tracking-wider py-3">
+                    Continue Exploring
+                  </Button>
+                </div>
               </div>
             ) : cartItems.length === 0 ? (
               <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
@@ -286,17 +347,23 @@ const CartDrawer = () => {
                     </div>
                   </div>
 
+                  {checkoutError && (
+                    <div className="p-3 bg-red-100 dark:bg-red-950/40 border border-red-200 dark:border-red-900 rounded-xl text-red-600 dark:text-red-300 text-xs">
+                      {checkoutError}
+                    </div>
+                  )}
+
                   {/* Checkout CTA */}
                   <Button 
-                    onClick={handleCheckoutSimulation} 
+                    onClick={handleCheckout} 
                     disabled={isCheckingOut}
                     className="w-full py-3.5 bg-primary text-background font-medium tracking-widest text-xs uppercase flex items-center justify-center gap-2 group hover:opacity-90 transition-opacity"
                   >
                     {isCheckingOut ? (
-                      <span className="animate-pulse">Processing Order...</span>
+                      <span className="animate-pulse">Placing Your Order...</span>
                     ) : (
                       <>
-                        PROCEED TO CHECKOUT
+                        {userInfo ? 'PROCEED TO CHECKOUT' : 'SIGN IN TO CHECKOUT'}
                         <ArrowRight size={14} className="transform group-hover:translate-x-1 transition-transform" />
                       </>
                     )}

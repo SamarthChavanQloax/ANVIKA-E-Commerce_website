@@ -182,6 +182,52 @@ const deleteProduct = async (req, res, next) => {
   }
 };
 
+// @desc    Get top rated products
+// @route   GET /api/products/top
+// @access  Public
+const getTopProducts = async (req, res, next) => {
+  try {
+    const products = await Product.find({}).sort({ rating: -1 }).limit(6);
+    res.json(products);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Get featured products
+// @route   GET /api/products/featured
+// @access  Public
+const getFeaturedProducts = async (req, res, next) => {
+  try {
+    const products = await Product.find({ isFeatured: true }).sort({ createdAt: -1 }).limit(8);
+    res.json(products);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Get related products by category
+// @route   GET /api/products/:id/related
+// @access  Public
+const getRelatedProducts = async (req, res, next) => {
+  try {
+    const currentProduct = await Product.findById(req.params.id);
+    if (!currentProduct) {
+      res.status(404);
+      throw new Error('Product not found');
+    }
+
+    const related = await Product.find({
+      category: currentProduct.category,
+      _id: { $ne: currentProduct._id },
+    }).limit(4);
+
+    res.json(related);
+  } catch (error) {
+    next(error);
+  }
+};
+
 // @desc    Create a product
 // @route   POST /api/products
 // @access  Private/Admin
@@ -191,17 +237,23 @@ const createProduct = async (req, res, next) => {
       name: req.body.name || 'Sample Product',
       slug: req.body.slug || `sample-product-${Date.now()}`,
       price: req.body.price || 0,
+      originalPrice: req.body.originalPrice || req.body.price || 0,
+      discount: req.body.discount || 0,
       user: req.user._id,
       image: req.body.image || '/demo-saree.jpg',
-      images: req.body.images || ['/demo-saree.jpg'],
+      images: req.body.images || [req.body.image || '/demo-saree.jpg'],
       category: req.body.category || 'Sarees',
       subcategory: req.body.subcategory || '',
       fabric: req.body.fabric || 'Silk',
+      colors: req.body.colors || [],
+      sizes: req.body.sizes || [],
       stock: req.body.stock || 0,
+      sku: req.body.sku || `ANV-${Date.now().toString().slice(-6)}`,
       numReviews: 0,
+      rating: 0,
       description: req.body.description || 'Sample product description',
       isFeatured: req.body.isFeatured || false,
-      isNew: req.body.isNew || false,
+      isNew: req.body.isNew !== undefined ? req.body.isNew : true,
       isBestseller: req.body.isBestseller || false,
     });
 
@@ -236,6 +288,9 @@ export {
   getProducts,
   getProductById,
   getProductBySlug,
+  getTopProducts,
+  getFeaturedProducts,
+  getRelatedProducts,
   createProductReview,
   deleteProduct,
   createProduct,

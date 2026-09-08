@@ -1,26 +1,34 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { FadeIn } from '../../components/animations/RevealOnScroll';
 import Button from '../../components/common/Button';
+import axios from 'axios';
 
 const Register = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
   
   const { login } = useAuth();
+  const navigate = useNavigate();
 
   const submitHandler = async (e) => {
     e.preventDefault();
     setIsLoading(true);
+    setError('');
     
-    // Simulating registration for frontend demo
-    setTimeout(() => {
-      login({ _id: '2', name, email, role: 'customer' });
+    try {
+      const { data } = await axios.post('/api/users', { name, email, password }, { withCredentials: true });
+      login(data);
       setIsLoading(false);
-    }, 1000);
+      navigate('/profile');
+    } catch (err) {
+      setError(err.response?.data?.message || err.message || 'Registration failed');
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -42,6 +50,8 @@ const Register = () => {
             <h1 className="text-3xl font-serif text-text mb-2">Create Account</h1>
             <p className="text-text-muted">Join us to experience modern Indian luxury.</p>
           </div>
+
+          {error && <div className="bg-red-100 dark:bg-red-950/50 text-red-700 dark:text-red-300 p-3 mb-6 rounded-sm text-sm border border-red-200 dark:border-red-900">{error}</div>}
 
           <form onSubmit={submitHandler} className="flex flex-col gap-6">
             <div>

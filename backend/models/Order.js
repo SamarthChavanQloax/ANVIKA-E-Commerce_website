@@ -30,15 +30,40 @@ const orderSchema = mongoose.Schema({
     type: String,
     required: true,
   },
-  paymentStatus: {
-    type: String,
-    enum: ['Pending', 'Completed', 'Failed'],
-    default: 'Pending'
-  },
   orderStatus: {
     type: String,
     enum: ['Placed', 'Confirmed', 'Packed', 'Shipped', 'Delivered', 'Cancelled'],
-    default: 'Placed'
+    default: 'Placed',
+  },
+  paymentStatus: {
+    type: String,
+    enum: ['Pending', 'Completed', 'Failed'],
+    default: 'Pending',
+  },
+  paymentResult: {
+    id: { type: String },
+    status: { type: String },
+    update_time: { type: String },
+    email_address: { type: String },
+  },
+  isPaid: {
+    type: Boolean,
+    required: true,
+    default: false,
+  },
+  paidAt: {
+    type: Date,
+  },
+  isDelivered: {
+    type: Boolean,
+    required: true,
+    default: false,
+  },
+  deliveredAt: {
+    type: Date,
+  },
+  cancelledAt: {
+    type: Date,
   },
   subtotal: { type: Number, required: true, default: 0.0 },
   shipping: { type: Number, required: true, default: 0.0 },

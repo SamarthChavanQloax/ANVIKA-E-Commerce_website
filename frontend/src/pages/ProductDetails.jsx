@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Heart, Truck, RefreshCw, ChevronDown, Check, Star, ShieldCheck, Sparkles, ArrowRight, ChevronLeft, ChevronRight, ArrowRightLeft } from 'lucide-react';
 import Button from '../components/common/Button';
 import { FadeIn, RevealOnScroll } from '../components/animations/RevealOnScroll';
-import { products } from '../data/products';
+import { useProducts } from '../context/ProductContext';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
 import { useCompare } from '../context/CompareContext';
@@ -12,26 +13,59 @@ import ProductCard from '../components/product/ProductCard';
 
 const ProductDetails = () => {
   const { id } = useParams();
+  const { products, getProductById } = useProducts();
   const { addToCart, openCart } = useCart();
   const { isInWishlist, toggleWishlist } = useWishlist();
   const { isInCompare, toggleCompare } = useCompare();
 
-  // Look up product from central catalog, fallback gracefully
-  const product = products.find(p => p._id === id || p.slug === id) || products[0];
+  const [apiProduct, setApiProduct] = useState(null);
 
+  useEffect(() => {
+    if (id) {
+      const t = Date.now();
+      axios.get(`/api/products/${id}?_t=${t}`)
+        .then((res) => {
+          if (res.data) setApiProduct(res.data);
+        })
+        .catch(() => {
+          axios.get(`/api/products/slug/${id}?_t=${t}`)
+            .then((res) => {
+              if (res.data) setApiProduct(res.data);
+            })
+            .catch(() => {});
+        });
+    }
+  }, [id, products]);
+
+  // Look up product from central catalog and live API, syncing real-time updates
+  const contextProduct = getProductById(id) || products.find(p => p._id === id || p.slug === id);
+  const product = (contextProduct && apiProduct)
+    ? { ...apiProduct, ...contextProduct }
+    : (apiProduct || contextProduct || products[0]);
+
+  const defaultVariant = product?.variants?.[0];
   const [selectedImageIdx, setSelectedImageIdx] = useState(0);
-  const [selectedSize, setSelectedSize] = useState(product.sizes?.[0] || 'Free Size');
+  const [selectedSize, setSelectedSize] = useState(defaultVariant?.size || '');
+  const [selectedColor, setSelectedColor] = useState(defaultVariant?.color || '');
   const [quantity, setQuantity] = useState(1);
   const [isAdded, setIsAdded] = useState(false);
   const [activeAccordion, setActiveAccordion] = useState('description');
 
   useEffect(() => {
-    setSelectedSize(product.sizes?.[0] || 'Free Size');
-    setSelectedImageIdx(0);
-    setQuantity(1);
-    setIsAdded(false);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, [id, product]);
+    if (product) {
+      const firstVariant = product.variants?.[0];
+      setSelectedSize(firstVariant?.size || '');
+      setSelectedColor(firstVariant?.color || '');
+      setSelectedImageIdx(0);
+      setQuantity(1);
+      setIsAdded(false);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [id, product?._id]);
+
+  if (!product) {
+    return null;
+  }
 
   const images = product.images?.length > 0 ? product.images : [product.image || '/demo-saree.jpg'];
   const isFavorited = isInWishlist(product._id);
@@ -42,14 +76,39 @@ const ProductDetails = () => {
     .filter(p => p._id !== product._id)
     .slice(0, 4);
 
+  // Get unique colors and sizes
+  const availableColors = [...new Set(product.variants?.map(v => v.color).filter(Boolean) || [])];
+  const availableSizes = [...new Set(product.variants?.map(v => v.size).filter(Boolean) || [])];
+
+  const activeVariant = product.variants?.find(v => v.size === selectedSize && v.color === selectedColor) || product.variants?.[0];
+
+  // If variants have distinct differentiated pricing (e.g. S is ₹15,000, L is ₹15,500), use activeVariant price;
+  // Otherwise, always prioritize product.price so admin edits (e.g. 4999 -> 3999) reflect instantly.
+  const hasDifferentiatedVariantPrices = product.variants?.length > 1 &&
+    new Set(product.variants.map(v => Number(v.price))).size > 1;
+
+  const displayPrice = hasDifferentiatedVariantPrices
+    ? (Number(activeVariant?.price) || Number(product.price) || 0)
+    : (Number(product.price) || Number(activeVariant?.price) || 0);
+
+  const displayStock = activeVariant && activeVariant.stock !== undefined ? activeVariant.stock : (product.stock || 0);
+
   const handleAddToCart = () => {
-    addToCart(product, quantity, selectedSize);
+    if (displayStock < quantity) {
+      alert('Not enough stock!');
+      return;
+    }
+    addToCart({ ...product, price: displayPrice }, quantity, selectedSize, selectedColor, activeVariant?._id);
     setIsAdded(true);
     setTimeout(() => setIsAdded(false), 2000);
   };
 
   const handleBuyNow = () => {
-    addToCart(product, quantity, selectedSize);
+    if (displayStock < quantity) {
+      alert('Not enough stock!');
+      return;
+    }
+    addToCart({ ...product, price: displayPrice }, quantity, selectedSize, selectedColor, activeVariant?._id);
     openCart();
   };
 
@@ -176,9 +235,9 @@ const ProductDetails = () => {
               {/* Price Row */}
               <div className="flex items-baseline gap-4 mb-6">
                 <span className="text-3xl font-semibold text-text">
-                  ₹{product.price.toLocaleString('en-IN')}
+                  ₹{displayPrice.toLocaleString('en-IN')}
                 </span>
-                {product.originalPrice > product.price && (
+                {product.originalPrice > displayPrice && (
                   <span className="text-lg text-text-muted line-through">
                     ₹{product.originalPrice.toLocaleString('en-IN')}
                   </span>
@@ -193,27 +252,66 @@ const ProductDetails = () => {
                 {product.description}
               </p>
 
+              {/* Stock Info */}
+              <div className="mb-4 text-sm font-medium">
+                {displayStock > 0 ? (
+                  <span className="text-emerald-600">In Stock: {displayStock}</span>
+                ) : (
+                  <span className="text-red-600">Out of Stock</span>
+                )}
+              </div>
+
+              {/* Color Selector */}
+              {availableColors.length > 0 && (
+                <div className="mb-6">
+                  <div className="flex justify-between items-center text-xs mb-3">
+                    <span className="font-semibold text-text uppercase tracking-wider">Select Color</span>
+                  </div>
+                  <div className="flex flex-wrap gap-2.5">
+                    {availableColors.map((color) => (
+                      <button
+                        key={color}
+                        onClick={() => setSelectedColor(color)}
+                        className={`px-5 py-2.5 rounded-xl text-xs font-medium transition-all ${
+                          selectedColor === color
+                            ? 'bg-primary text-background shadow-md ring-2 ring-primary/20'
+                            : 'bg-surface hover:bg-surface/80 text-text border border-border'
+                        }`}
+                      >
+                        {color}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* Size Selector */}
-              {product.sizes?.length > 0 && (
+              {availableSizes.length > 0 && (
                 <div className="mb-8">
                   <div className="flex justify-between items-center text-xs mb-3">
                     <span className="font-semibold text-text uppercase tracking-wider">Select Size</span>
                     <span className="text-accent cursor-pointer hover:underline text-[11px]">Size & Fit Guide</span>
                   </div>
                   <div className="flex flex-wrap gap-2.5">
-                    {product.sizes.map((size) => (
-                      <button
-                        key={size}
-                        onClick={() => setSelectedSize(size)}
-                        className={`px-5 py-2.5 rounded-xl text-xs font-medium transition-all ${
-                          selectedSize === size
-                            ? 'bg-primary text-background shadow-md ring-2 ring-primary/20'
-                            : 'bg-surface hover:bg-surface/80 text-text border border-border'
-                        }`}
-                      >
-                        {size}
-                      </button>
-                    ))}
+                    {availableSizes.map((size) => {
+                      const variantExists = product.variants.some(v => v.size === size && v.color === selectedColor && v.stock > 0);
+                      return (
+                        <button
+                          key={size}
+                          onClick={() => setSelectedSize(size)}
+                          disabled={!variantExists}
+                          className={`px-5 py-2.5 rounded-xl text-xs font-medium transition-all ${
+                            selectedSize === size
+                              ? 'bg-primary text-background shadow-md ring-2 ring-primary/20'
+                              : !variantExists
+                              ? 'bg-surface opacity-50 cursor-not-allowed text-text-muted border border-border/50'
+                              : 'bg-surface hover:bg-surface/80 text-text border border-border'
+                          }`}
+                        >
+                          {size}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
               )}
@@ -242,13 +340,18 @@ const ProductDetails = () => {
                 {/* Add to Bag CTA */}
                 <Button 
                   onClick={handleAddToCart}
+                  disabled={displayStock === 0}
                   className={`flex-1 h-14 uppercase tracking-widest text-xs font-semibold flex items-center justify-center gap-2 transition-all ${
-                    isAdded ? 'bg-emerald-600 text-white' : 'bg-primary text-background hover:opacity-95'
+                    isAdded ? 'bg-emerald-600 text-white' : displayStock === 0 ? 'bg-gray-400 text-gray-700 cursor-not-allowed' : 'bg-primary text-background hover:opacity-95'
                   }`}
                 >
                   {isAdded ? (
                     <>
                       <Check size={18} /> ADDED TO BAG
+                    </>
+                  ) : displayStock === 0 ? (
+                    <>
+                       OUT OF STOCK
                     </>
                   ) : (
                     <>
@@ -291,7 +394,10 @@ const ProductDetails = () => {
               {/* Instant Buy Now Button */}
               <button
                 onClick={handleBuyNow}
-                className="w-full py-3.5 mb-8 rounded-xl border border-primary text-primary font-medium tracking-widest text-xs uppercase hover:bg-primary hover:text-background transition-all flex items-center justify-center gap-2"
+                disabled={displayStock === 0}
+                className={`w-full py-3.5 mb-8 rounded-xl border font-medium tracking-widest text-xs uppercase transition-all flex items-center justify-center gap-2 ${
+                  displayStock === 0 ? 'border-gray-300 text-gray-400 cursor-not-allowed' : 'border-primary text-primary hover:bg-primary hover:text-background'
+                }`}
               >
                 BUY NOW WITH 1-CLICK CHECKOUT <ArrowRight size={14} />
               </button>

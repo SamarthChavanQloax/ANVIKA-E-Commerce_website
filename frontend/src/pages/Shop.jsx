@@ -5,7 +5,7 @@ import { useParams, useSearchParams, Link } from 'react-router-dom';
 import ProductCard from '../components/product/ProductCard';
 import Button from '../components/common/Button';
 import { FadeIn, RevealOnScroll } from '../components/animations/RevealOnScroll';
-import { products as allProducts } from '../data/products';
+import { useProducts } from '../context/ProductContext';
 
 const CATEGORIES = [
   { id: 'all', label: 'All Pieces' },
@@ -25,6 +25,7 @@ const SORT_OPTIONS = [
 ];
 
 const Shop = () => {
+  const { products: allProducts } = useProducts();
   const { categoryName } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
   const filterParam = searchParams.get('filter');
@@ -111,11 +112,12 @@ const Shop = () => {
     }).sort((a, b) => {
       if (sortBy === 'price-low') return a.price - b.price;
       if (sortBy === 'price-high') return b.price - a.price;
-      if (sortBy === 'newest') return (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0);
+      if (sortBy === 'newest') return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
       if (sortBy === 'rating') return (b.rating || 0) - (a.rating || 0);
-      return 0; // featured default
+      // Default: show newest arrivals from MongoDB first!
+      return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
     });
-  }, [selectedCategories, minPrice, maxPrice, sortBy, searchParam, filterParam]);
+  }, [allProducts, selectedCategories, minPrice, maxPrice, sortBy, searchParam, filterParam]);
 
   const activeSortLabel = SORT_OPTIONS.find(s => s.id === sortBy)?.label || 'Featured';
   const hasActiveFilters = selectedCategories.length > 0 || minPrice !== '' || maxPrice !== '' || !!searchParam;

@@ -16,6 +16,7 @@ import productRoutes from './routes/productRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import orderRoutes from './routes/orderRoutes.js';
 import categoryRoutes from './routes/categoryRoutes.js';
+import adminRoutes from './routes/adminRoutes.js';
 
 dotenv.config();
 
@@ -67,7 +68,7 @@ const connectDB = async () => {
   } catch (error) {
     console.warn(`⚠️ Primary MongoDB connection failed (${error.message}). Trying direct replica set...`);
     try {
-      const fallbackUri = 'mongodb://anvika_admin:Qloax123@ac-uqatpw3-shard-00-00.6f3gpag.mongodb.net:27017,ac-uqatpw3-shard-00-01.6f3gpag.mongodb.net:27017,ac-uqatpw3-shard-00-02.6f3gpag.mongodb.net:27017/test?ssl=true&replicaSet=atlas-w3rxdd-shard-0&authSource=admin&retryWrites=true&w=majority';
+      const fallbackUri = 'mongodb://anvika_admin:Qloax123@ac-uqatpw3-shard-00-00.6f3gpag.mongodb.net:27017,ac-uqatpw3-shard-00-01.6f3gpag.mongodb.net:27017,ac-uqatpw3-shard-00-02.6f3gpag.mongodb.net:27017/anvika_boutique?ssl=true&replicaSet=atlas-w3rxdd-shard-0&authSource=admin&retryWrites=true&w=majority';
       const conn = await mongoose.connect(fallbackUri, {
         serverSelectionTimeoutMS: 8000,
       });
@@ -103,6 +104,7 @@ app.use('/api/products', productRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/categories', categoryRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Payment configuration
 app.get('/api/config/paypal', (req, res) => {

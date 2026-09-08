@@ -22,9 +22,10 @@ export const CartProvider = ({ children }) => {
   const openCart = () => setIsCartOpen(true);
   const closeCart = () => setIsCartOpen(false);
 
-  const addToCart = (product, qty = 1, selectedSize = null) => {
-    const sizeToUse = selectedSize || product.sizes?.[0] || 'Standard';
-    const itemKey = `${product._id}_${sizeToUse}`;
+  const addToCart = (product, qty = 1, selectedSize = '', selectedColor = '', variantId = null) => {
+    const sizeToUse = selectedSize || product.variants?.[0]?.size || 'Standard';
+    const colorToUse = selectedColor || product.variants?.[0]?.color || '';
+    const itemKey = `${product._id}_${sizeToUse}_${colorToUse}`;
 
     setCartItems(prev => {
       const existIndex = prev.findIndex(item => item.cartKey === itemKey);
@@ -39,6 +40,7 @@ export const CartProvider = ({ children }) => {
           ...product, 
           cartKey: itemKey, 
           selectedSize: sizeToUse, 
+          selectedColor: colorToUse,
           qty 
         }
       ];

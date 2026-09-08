@@ -51,6 +51,17 @@ function syncPhotosPlugin() {
         fs.copyFileSync(src, destPath)
       }
     }
+
+    // Sync login video
+    const rootLoginVideo = path.resolve(__dirname, '../login_video.mp4')
+    if (fs.existsSync(rootLoginVideo)) {
+      const publicVideosDir = path.resolve(__dirname, 'public/videos')
+      if (!fs.existsSync(publicVideosDir)) {
+        fs.mkdirSync(publicVideosDir, { recursive: true })
+      }
+      fs.copyFileSync(rootLoginVideo, path.join(publicVideosDir, 'login_video.mp4'))
+      fs.copyFileSync(rootLoginVideo, path.resolve(__dirname, 'public/login_video.mp4'))
+    }
   }
 
   // Execute sync immediately on config evaluation

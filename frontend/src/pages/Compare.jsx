@@ -9,7 +9,7 @@ const Compare = () => {
   const { addToCart, openCart } = useCart();
 
   const handleAddToCart = (product) => {
-    addToCart(product, 1, product.sizes?.[0] || 'Free Size');
+    addToCart(product, 1, product.variants?.[0]?.size || 'Free Size', product.variants?.[0]?.color || '');
     openCart();
   };
 

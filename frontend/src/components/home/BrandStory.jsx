@@ -35,9 +35,9 @@ const BrandStory = () => {
         {/* Story Image */}
         <RevealOnScroll direction="left" className="h-[50vh] lg:h-[70vh] rounded-3xl overflow-hidden shadow-sm order-1 lg:order-2">
           <img 
-            src="/saree-emerald.png" 
+            src="/products/saree-pink-gold.jpg" 
             alt="Craftsmanship and Fabric" 
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover object-center"
           />
         </RevealOnScroll>
 

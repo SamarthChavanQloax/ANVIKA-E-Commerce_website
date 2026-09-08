@@ -33,7 +33,7 @@ const QuickViewModal = () => {
     ? selectedProduct.images 
     : [selectedProduct.image || '/demo-saree.jpg'];
 
-  const isFavorited = isInWishlist(selectedProduct._id);
+  const isFavorited = isInWishlist(selectedProduct);
   const isCompared = isInCompare(selectedProduct._id);
 
   const handleAddToCart = () => {

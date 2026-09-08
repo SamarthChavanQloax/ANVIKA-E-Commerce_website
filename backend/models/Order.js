@@ -29,6 +29,7 @@ const orderSchema = mongoose.Schema({
     postalCode: { type: String, required: true },
     country: { type: String, required: true },
   },
+<<<<<<< HEAD
   paymentMethod: { type: String, default: 'cod' },
   paymentStatus: {
     type: String,
@@ -39,6 +40,46 @@ const orderSchema = mongoose.Schema({
     type: String,
     enum: ['Pending', 'Confirmed', 'Processing', 'Shipped', 'Out for Delivery', 'Delivered', 'Cancelled', 'Returned', 'Refunded'],
     default: 'Pending'
+=======
+  paymentMethod: {
+    type: String,
+    required: true,
+  },
+  orderStatus: {
+    type: String,
+    enum: ['Placed', 'Confirmed', 'Packed', 'Shipped', 'Delivered', 'Cancelled'],
+    default: 'Placed',
+  },
+  paymentStatus: {
+    type: String,
+    enum: ['Pending', 'Completed', 'Failed'],
+    default: 'Pending',
+  },
+  paymentResult: {
+    id: { type: String },
+    status: { type: String },
+    update_time: { type: String },
+    email_address: { type: String },
+  },
+  isPaid: {
+    type: Boolean,
+    required: true,
+    default: false,
+  },
+  paidAt: {
+    type: Date,
+  },
+  isDelivered: {
+    type: Boolean,
+    required: true,
+    default: false,
+  },
+  deliveredAt: {
+    type: Date,
+  },
+  cancelledAt: {
+    type: Date,
+>>>>>>> origin/main
   },
   subtotal: { type: Number, required: true, default: 0.0 },
   shippingFee: { type: Number, required: true, default: 0.0 },

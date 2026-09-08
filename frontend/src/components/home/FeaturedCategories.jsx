@@ -8,37 +8,37 @@ const FeaturedCategories = () => {
     { 
       name: 'SAREES', 
       desc: 'Timeless drapes, reimagined.', 
-      image: '/saree-emerald.png',
+      image: '/products/saree-pink-gold.jpg',
       link: '/category/sarees'
     },
     { 
       name: 'WOMEN', 
       desc: 'Modern silhouettes for everyday grace.', 
-      image: '/saree-purple.png',
+      image: '/products/dress-plum-dhoti-set.jpg',
       link: '/category/women'
     },
     { 
       name: 'DRESSES', 
       desc: 'Flowing cuts & contemporary elegance.', 
-      image: '/dress-beige-front.jpg',
+      image: '/products/dress-cream-mustard-suit.jpg',
       link: '/category/dresses'
     },
     { 
       name: 'ETHNIC WEAR', 
       desc: 'Artisanal kurtas & festive sets.', 
-      image: '/saree-gold.jpg',
+      image: '/products/dress-magenta-designer-suit.jpg',
       link: '/category/ethnic'
     },
     { 
       name: 'BABY & KIDS', 
       desc: 'Little looks, made with love.', 
-      image: '/baby-1.png',
+      image: '/products/baby-cherry-yellow.jpg',
       link: '/category/kids'
     },
     { 
       name: 'COLLECTIONS', 
       desc: 'Curated edits for every celebration.', 
-      image: '/saree-plum.png',
+      image: '/products/saree-silver-silk.jpg',
       link: '/collections'
     },
   ];

@@ -18,7 +18,7 @@ const CollectionGrid = () => {
         <RevealOnScroll className="lg:col-span-2 group relative overflow-hidden rounded-2xl bg-surface cursor-pointer">
           <Link to="/collections" className="block w-full h-full">
             <motion.img 
-              src="/saree-bridal.png" 
+              src="/products/saree-champagne-bridal.jpg" 
               alt="Festive Edit"
               className="w-full h-full object-cover transition-transform duration-1000 ease-[0.25,0.1,0.25,1] group-hover:scale-105"
             />
@@ -34,9 +34,9 @@ const CollectionGrid = () => {
         <RevealOnScroll delay={0.2} className="group relative overflow-hidden rounded-2xl bg-surface cursor-pointer">
           <Link to="/collections" className="block w-full h-full">
             <motion.img 
-              src="/saree-lavender.png" 
+              src="/products/dress-magenta-designer-suit.jpg" 
               alt="Everyday Elegance"
-              className="w-full h-full object-cover transition-transform duration-1000 ease-[0.25,0.1,0.25,1] group-hover:scale-105"
+              className="w-full h-full object-cover transition-transform duration-1000 ease-[0.25,0.1,0.25,1] group-hover:scale-105 object-top"
             />
             <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-colors duration-700" />
             <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-8">
@@ -49,7 +49,7 @@ const CollectionGrid = () => {
         <RevealOnScroll delay={0.1} className="group relative overflow-hidden rounded-2xl bg-surface cursor-pointer">
           <Link to="/collections" className="block w-full h-full">
             <motion.img 
-              src="/saree-emerald.png" 
+              src="/products/saree-royal-yellow.jpg" 
               alt="Saree Stories"
               className="w-full h-full object-cover transition-transform duration-1000 ease-[0.25,0.1,0.25,1] group-hover:scale-105 object-top"
             />
@@ -64,7 +64,7 @@ const CollectionGrid = () => {
         <RevealOnScroll delay={0.2} className="md:col-span-2 lg:col-span-2 group relative overflow-hidden rounded-2xl bg-surface cursor-pointer">
           <Link to="/collections" className="block w-full h-full">
             <motion.img 
-              src="/saree-rust.png" 
+              src="/products/dress-cream-mustard-suit.jpg" 
               alt="New Season"
               className="w-full h-full object-cover transition-transform duration-1000 ease-[0.25,0.1,0.25,1] group-hover:scale-105 object-top"
             />

@@ -4,12 +4,12 @@ import { motion } from 'framer-motion';
 import { InstagramIcon } from '../common/SocialIcons';
 
 const images = [
-  "/saree-purple.png",
-  "/saree-gold.jpg",
-  "/saree-plum.png",
-  "/saree-blackgold.jpg",
-  "/saree-greenstripe.jpg",
-  "/saree-emerald.png"
+  "/products/saree-pink-gold.jpg",
+  "/products/baby-cherry-yellow.jpg",
+  "/products/dress-cream-mustard-suit.jpg",
+  "/products/saree-silver-silk.jpg",
+  "/products/dress-magenta-designer-suit.jpg",
+  "/products/baby-little-bloom.jpg"
 ];
 
 const SocialGallery = () => {

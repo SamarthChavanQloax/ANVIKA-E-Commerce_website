@@ -33,22 +33,22 @@ const BabyFeature = () => {
           <div className="lg:col-span-7 grid grid-cols-12 gap-4 h-full items-center">
             <RevealOnScroll className="col-span-7 aspect-[3/4] rounded-2xl overflow-hidden shadow-md group">
               <img 
-                src="/baby-1.png" 
+                src="/products/baby-cherry-yellow.jpg" 
                 alt="Baby & Kids Fashion" 
-                className="w-full h-full object-cover object-top transition-transform duration-700 group-hover:scale-105"
+                className="w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105"
               />
             </RevealOnScroll>
             <div className="col-span-5 flex flex-col gap-4">
               <RevealOnScroll delay={0.1} className="aspect-square rounded-2xl overflow-hidden shadow-sm group">
                 <img 
-                  src="/baby-3.png" 
+                  src="/products/baby-little-bloom.jpg" 
                   alt="Baby Embroidered Dress" 
-                  className="w-full h-full object-cover object-top transition-transform duration-700 group-hover:scale-105"
+                  className="w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105"
                 />
               </RevealOnScroll>
               <RevealOnScroll delay={0.2} className="aspect-square rounded-2xl overflow-hidden shadow-sm group">
                 <img 
-                  src="/baby-5.png" 
+                  src="/products/baby-blue-stripe.jpg" 
                   alt="Celebration Baby Dress" 
                   className="w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105"
                 />

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { FadeIn } from '../../components/animations/RevealOnScroll';
 import Button from '../../components/common/Button';
@@ -12,6 +12,7 @@ const Login = () => {
   const [error, setError] = useState('');
   
   const { login } = useAuth();
+  const navigate = useNavigate();
 
   const submitHandler = async (e) => {
     e.preventDefault();
@@ -19,12 +20,30 @@ const Login = () => {
     setError('');
     
     try {
+<<<<<<< HEAD
       const { data } = await api.post('/users/login', { email, password });
       login(data);
+=======
+      let res;
+      try {
+        res = await axios.post('/api/auth/login', { email, password }, { withCredentials: true });
+      } catch (authErr) {
+        // Fallback to legacy route if needed
+        res = await axios.post('/api/users/login', { email, password }, { withCredentials: true });
+      }
+      login(res.data);
+      setIsLoading(false);
+      navigate('/profile');
+>>>>>>> origin/main
     } catch (err) {
-      setError(err.response?.data?.message || err.message);
+      setError(err.response?.data?.message || err.message || 'Login failed');
       setIsLoading(false);
     }
+  };
+
+  const fillQuickCredentials = (demoEmail, demoPassword) => {
+    setEmail(demoEmail);
+    setPassword(demoPassword);
   };
 
   return (
@@ -82,7 +101,28 @@ const Login = () => {
             </Button>
           </form>
 
-          <div className="mt-8 text-center text-sm text-text-muted">
+          {/* Quick Demo Credentials */}
+          <div className="mt-6 pt-4 border-t border-border">
+            <p className="text-[11px] text-text-muted uppercase tracking-wider mb-2.5 text-center font-medium">Quick One-Click Test Accounts</p>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => fillQuickCredentials('admin@anvika.com', 'password123')}
+                className="py-2 px-3 text-xs bg-surface hover:bg-border/60 border border-border rounded-lg text-text transition-colors"
+              >
+                Demo Admin
+              </button>
+              <button
+                type="button"
+                onClick={() => fillQuickCredentials('jane@example.com', 'password123')}
+                className="py-2 px-3 text-xs bg-surface hover:bg-border/60 border border-border rounded-lg text-text transition-colors"
+              >
+                Demo Customer
+              </button>
+            </div>
+          </div>
+
+          <div className="mt-6 text-center text-sm text-text-muted">
             Don't have an account?{' '}
             <Link to="/register" className="text-text font-medium hover:text-accent transition-colors border-b border-transparent hover:border-accent">
               Create one

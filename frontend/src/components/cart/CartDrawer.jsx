@@ -2,8 +2,13 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Trash2, Plus, Minus, ShoppingBag, ArrowRight, Tag, CheckCircle2, ShieldCheck } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
+<<<<<<< HEAD
+=======
+import { useAuth } from '../../context/AuthContext';
+>>>>>>> origin/main
 import { Link, useNavigate } from 'react-router-dom';
 import Button from '../common/Button';
+import axios from 'axios';
 
 const FREE_SHIPPING_THRESHOLD = 10000;
 
@@ -25,8 +30,18 @@ const CartDrawer = () => {
   } = useCart();
   const navigate = useNavigate();
 
+  const { userInfo } = useAuth();
+  const navigate = useNavigate();
+
   const [couponInput, setCouponInput] = useState('');
   const [couponFeedback, setCouponFeedback] = useState(null);
+<<<<<<< HEAD
+=======
+  const [isCheckingOut, setIsCheckingOut] = useState(false);
+  const [checkoutComplete, setCheckoutComplete] = useState(false);
+  const [createdOrderData, setCreatedOrderData] = useState(null);
+  const [checkoutError, setCheckoutError] = useState('');
+>>>>>>> origin/main
 
   const freeShippingProgress = Math.min(100, Math.round((subtotal / FREE_SHIPPING_THRESHOLD) * 100));
   const amountNeededForFreeShipping = Math.max(0, FREE_SHIPPING_THRESHOLD - subtotal);
@@ -38,7 +53,81 @@ const CartDrawer = () => {
     setCouponFeedback(result);
   };
 
+<<<<<<< HEAD
   const handleCheckout = () => {
+=======
+  const handleCheckout = async () => {
+    if (!userInfo) {
+      closeCart();
+      navigate('/login');
+      return;
+    }
+
+    setIsCheckingOut(true);
+    setCheckoutError('');
+
+    try {
+      const config = {
+        headers: {
+          Authorization: `Bearer ${userInfo?.token}`,
+        },
+        withCredentials: true,
+      };
+
+      let shippingAddress = {
+        street: '101 Heritage Boulevard',
+        city: 'Mumbai',
+        state: 'Maharashtra',
+        postalCode: '400001',
+        country: 'India',
+      };
+
+      try {
+        const { data: userAddresses } = await axios.get('/api/users/addresses', config);
+        if (Array.isArray(userAddresses) && userAddresses.length > 0) {
+          const defaultAddr = userAddresses.find((a) => a.isDefault) || userAddresses[0];
+          shippingAddress = {
+            street: defaultAddr.addressLine,
+            city: defaultAddr.city,
+            state: defaultAddr.state,
+            postalCode: defaultAddr.postalCode,
+            country: defaultAddr.country || 'India',
+          };
+        }
+      } catch (e) {
+        // Fallback to default shipping address
+      }
+
+      const orderPayload = {
+        orderItems: cartItems.map((item) => ({
+          _id: item._id,
+          name: item.name,
+          image: item.image,
+          price: item.price,
+          quantity: item.qty,
+        })),
+        shippingAddress,
+        paymentMethod: 'UPI',
+        itemsPrice: subtotal,
+        shippingPrice: shippingFee,
+        discountPrice: discountAmount,
+        totalPrice: orderTotal,
+      };
+
+      const { data } = await axios.post('/api/orders', orderPayload, config);
+      setCreatedOrderData(data);
+      setCheckoutComplete(true);
+      clearCart();
+    } catch (err) {
+      setCheckoutError(err.response?.data?.message || err.message || 'Checkout failed. Please try again.');
+    } finally {
+      setIsCheckingOut(false);
+    }
+  };
+
+  const handleResetCheckout = () => {
+    setCheckoutComplete(false);
+>>>>>>> origin/main
     closeCart();
     navigate('/checkout');
   };
@@ -107,7 +196,40 @@ const CartDrawer = () => {
             </div>
 
             {/* Content Area */}
+<<<<<<< HEAD
             {cartItems.length === 0 ? (
+=======
+            {checkoutComplete ? (
+              <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  className="w-16 h-16 rounded-full bg-emerald-100 dark:bg-emerald-950 flex items-center justify-center text-emerald-600 mb-6"
+                >
+                  <CheckCircle2 size={36} />
+                </motion.div>
+                <h4 className="font-serif text-2xl text-text font-light mb-1">Order Confirmed!</h4>
+                {createdOrderData?._id && (
+                  <span className="text-[11px] font-mono text-accent font-semibold tracking-wider block mb-2">
+                    ORDER #{createdOrderData._id.slice(-8).toUpperCase()}
+                  </span>
+                )}
+                <p className="text-text-muted text-sm max-w-xs mb-6 leading-relaxed">
+                  Thank you for shopping with Anvika. Your bespoke order has been recorded in your account.
+                </p>
+                <div className="flex flex-col gap-2.5 w-full max-w-xs">
+                  <Link to="/profile" onClick={handleResetCheckout}>
+                    <Button className="w-full bg-primary text-background text-xs uppercase tracking-wider py-3">
+                      View Order in My Profile
+                    </Button>
+                  </Link>
+                  <Button variant="outline" onClick={handleResetCheckout} className="w-full text-xs uppercase tracking-wider py-3">
+                    Continue Exploring
+                  </Button>
+                </div>
+              </div>
+            ) : cartItems.length === 0 ? (
+>>>>>>> origin/main
               <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
                 <div className="w-16 h-16 rounded-full bg-surface flex items-center justify-center text-text-muted mb-4">
                   <ShoppingBag size={30} strokeWidth={1.2} />
@@ -259,13 +381,34 @@ const CartDrawer = () => {
                     </div>
                   </div>
 
+                  {checkoutError && (
+                    <div className="p-3 bg-red-100 dark:bg-red-950/40 border border-red-200 dark:border-red-900 rounded-xl text-red-600 dark:text-red-300 text-xs">
+                      {checkoutError}
+                    </div>
+                  )}
+
                   {/* Checkout CTA */}
                   <Button 
+<<<<<<< HEAD
                     onClick={handleCheckout}
                     className="w-full py-3.5 bg-primary text-background font-medium tracking-widest text-xs uppercase flex items-center justify-center gap-2 group hover:opacity-90 transition-opacity"
                   >
                     PROCEED TO CHECKOUT
                     <ArrowRight size={14} className="transform group-hover:translate-x-1 transition-transform" />
+=======
+                    onClick={handleCheckout} 
+                    disabled={isCheckingOut}
+                    className="w-full py-3.5 bg-primary text-background font-medium tracking-widest text-xs uppercase flex items-center justify-center gap-2 group hover:opacity-90 transition-opacity"
+                  >
+                    {isCheckingOut ? (
+                      <span className="animate-pulse">Placing Your Order...</span>
+                    ) : (
+                      <>
+                        {userInfo ? 'PROCEED TO CHECKOUT' : 'SIGN IN TO CHECKOUT'}
+                        <ArrowRight size={14} className="transform group-hover:translate-x-1 transition-transform" />
+                      </>
+                    )}
+>>>>>>> origin/main
                   </Button>
 
                   <div className="flex items-center justify-center gap-2 text-[10px] text-text-muted">

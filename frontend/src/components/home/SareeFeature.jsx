@@ -10,9 +10,9 @@ const SareeFeature = () => {
           
           <RevealOnScroll className="absolute inset-0 w-full h-full">
             <img 
-              src="/saree-bridal.png" 
+              src="/products/saree-pink-gold.jpg" 
               alt="The Saree Edit"
-              className="w-full h-full object-cover object-top"
+              className="w-full h-full object-cover object-center"
             />
             <div className="absolute inset-0 bg-black/30" />
             

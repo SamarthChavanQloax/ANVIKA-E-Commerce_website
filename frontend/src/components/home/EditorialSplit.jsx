@@ -10,9 +10,9 @@ const EditorialSplit = () => {
         {/* Left: Large Lifestyle Image */}
         <RevealOnScroll direction="right" className="h-[60vh] lg:h-full rounded-2xl overflow-hidden shadow-sm relative group">
           <img 
-            src="/saree-designer.png" 
+            src="/products/saree-silver-silk.jpg" 
             alt="The Art of Indian Dressing" 
-            className="w-full h-full object-cover transition-transform duration-1000 ease-[0.25,0.1,0.25,1] group-hover:scale-105"
+            className="w-full h-full object-cover object-top transition-transform duration-1000 ease-[0.25,0.1,0.25,1] group-hover:scale-105"
           />
         </RevealOnScroll>
 

@@ -35,7 +35,7 @@ const QuickViewModal = () => {
     : [selectedProduct.image || '/demo-saree.jpg'];
   const { isNew, hasDiscount, discountPercentage } = getProductBadges(selectedProduct);
 
-  const isFavorited = isInWishlist(selectedProduct._id);
+  const isFavorited = isInWishlist(selectedProduct);
   const isCompared = isInCompare(selectedProduct._id);
 
   const handleAddToCart = () => {

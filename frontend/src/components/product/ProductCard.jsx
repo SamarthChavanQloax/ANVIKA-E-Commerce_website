@@ -14,7 +14,7 @@ const ProductCard = ({ product }) => {
   const { openQuickView } = useQuickView();
   const { isInCompare, toggleCompare } = useCompare();
 
-  const isFavorited = isInWishlist(product._id || product.id);
+  const isFavorited = isInWishlist(product);
   const isCompared = isInCompare(product._id || product.id);
   const { isNew, hasDiscount, discountPercentage } = getProductBadges(product);
 

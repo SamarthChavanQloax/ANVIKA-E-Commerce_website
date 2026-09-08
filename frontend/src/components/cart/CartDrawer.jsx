@@ -57,6 +57,37 @@ const CartDrawer = () => {
     setCheckoutError('');
 
     try {
+      const config = {
+        headers: {
+          Authorization: `Bearer ${userInfo?.token}`,
+        },
+        withCredentials: true,
+      };
+
+      let shippingAddress = {
+        street: '101 Heritage Boulevard',
+        city: 'Mumbai',
+        state: 'Maharashtra',
+        postalCode: '400001',
+        country: 'India',
+      };
+
+      try {
+        const { data: userAddresses } = await axios.get('/api/users/addresses', config);
+        if (Array.isArray(userAddresses) && userAddresses.length > 0) {
+          const defaultAddr = userAddresses.find((a) => a.isDefault) || userAddresses[0];
+          shippingAddress = {
+            street: defaultAddr.addressLine,
+            city: defaultAddr.city,
+            state: defaultAddr.state,
+            postalCode: defaultAddr.postalCode,
+            country: defaultAddr.country || 'India',
+          };
+        }
+      } catch (e) {
+        // Fallback to default shipping address
+      }
+
       const orderPayload = {
         orderItems: cartItems.map((item) => ({
           _id: item._id,
@@ -65,25 +96,12 @@ const CartDrawer = () => {
           price: item.price,
           quantity: item.qty,
         })),
-        shippingAddress: {
-          street: '101 Heritage Boulevard',
-          city: 'Mumbai',
-          state: 'Maharashtra',
-          postalCode: '400001',
-          country: 'India',
-        },
+        shippingAddress,
         paymentMethod: 'UPI',
         itemsPrice: subtotal,
         shippingPrice: shippingFee,
         discountPrice: discountAmount,
         totalPrice: orderTotal,
-      };
-
-      const config = {
-        headers: {
-          Authorization: `Bearer ${userInfo?.token}`,
-        },
-        withCredentials: true,
       };
 
       const { data } = await axios.post('/api/orders', orderPayload, config);

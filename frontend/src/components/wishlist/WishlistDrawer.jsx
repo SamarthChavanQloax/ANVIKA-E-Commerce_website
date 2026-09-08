@@ -11,7 +11,7 @@ const WishlistDrawer = () => {
 
   const handleMoveToCart = (product) => {
     addToCart(product, 1);
-    removeFromWishlist(product._id);
+    removeFromWishlist(product._id || product.id || product.productId);
     closeWishlist();
     openCart();
   };
@@ -74,55 +74,58 @@ const WishlistDrawer = () => {
             ) : (
               <>
                 <div className="flex-1 overflow-y-auto px-6 py-4 divide-y divide-border/60">
-                  {wishlistItems.map((item) => (
-                    <motion.div
-                      key={item._id}
-                      layout
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, x: 20 }}
-                      className="py-4 flex gap-4 items-center"
-                    >
-                      <img
-                        src={item.image || '/demo-saree.jpg'}
-                        alt={item.name}
-                        className="w-20 h-24 object-cover rounded-xl bg-surface border border-border flex-shrink-0"
-                      />
-                      <div className="flex-1 min-w-0">
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <span className="text-[10px] text-accent font-medium uppercase tracking-wider block mb-1">
-                              {item.category}
-                            </span>
-                            <h4 className="font-serif text-sm text-text font-medium line-clamp-1">
-                              {item.name}
-                            </h4>
+                  {wishlistItems.map((item, idx) => {
+                    const itemId = item._id || item.id || item.productId || `wishlist_${idx}`;
+                    return (
+                      <motion.div
+                        key={itemId}
+                        layout
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, x: 20 }}
+                        className="py-4 flex gap-4 items-center"
+                      >
+                        <img
+                          src={item.image || '/demo-saree.jpg'}
+                          alt={item.name || 'Product'}
+                          className="w-20 h-24 object-cover rounded-xl bg-surface border border-border flex-shrink-0"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <span className="text-[10px] text-accent font-medium uppercase tracking-wider block mb-1">
+                                {item.category || 'Luxury Ensemble'}
+                              </span>
+                              <h4 className="font-serif text-sm text-text font-medium line-clamp-1">
+                                {item.name || 'Royal Ensemble'}
+                              </h4>
+                            </div>
+                            <button
+                              onClick={() => removeFromWishlist(itemId)}
+                              className="text-text-muted hover:text-red-500 transition-colors p-1"
+                              aria-label="Remove item"
+                            >
+                              <Trash2 size={16} />
+                            </button>
                           </div>
-                          <button
-                            onClick={() => removeFromWishlist(item._id)}
-                            className="text-text-muted hover:text-red-500 transition-colors p-1"
-                            aria-label="Remove item"
-                          >
-                            <Trash2 size={16} />
-                          </button>
-                        </div>
 
-                        <div className="flex items-center justify-between mt-3">
-                          <span className="text-sm font-semibold text-text">
-                            ₹{item.price.toLocaleString('en-IN')}
-                          </span>
+                          <div className="flex items-center justify-between mt-3">
+                            <span className="text-sm font-semibold text-text">
+                              ₹{Number(item.price || 0).toLocaleString('en-IN')}
+                            </span>
 
-                          <button
-                            onClick={() => handleMoveToCart(item)}
-                            className="flex items-center gap-1.5 text-xs bg-primary text-background font-medium px-3 py-1.5 rounded-lg hover:opacity-90 transition-opacity"
-                          >
-                            <ShoppingBag size={13} />
-                            <span>Move to Bag</span>
-                          </button>
+                            <button
+                              onClick={() => handleMoveToCart(item)}
+                              className="flex items-center gap-1.5 text-xs bg-primary text-background font-medium px-3 py-1.5 rounded-lg hover:opacity-90 transition-opacity"
+                            >
+                              <ShoppingBag size={13} />
+                              <span>Move to Bag</span>
+                            </button>
+                          </div>
                         </div>
-                      </div>
-                    </motion.div>
-                  ))}
+                      </motion.div>
+                    );
+                  })}
                 </div>
 
                 <div className="p-6 border-t border-border bg-surface/30">

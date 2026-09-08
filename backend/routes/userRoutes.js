@@ -5,6 +5,10 @@ import {
   logoutUser,
   getUserProfile,
   updateUserProfile,
+  getUserAddresses,
+  addAddress,
+  updateAddress,
+  deleteAddress,
   getWishlist,
   addToWishlist,
   removeFromWishlist,
@@ -27,6 +31,14 @@ router.post('/logout', logoutUser);
 router.route('/profile')
   .get(protect, getUserProfile)
   .put(protect, updateUserProfile);
+
+router.route('/addresses')
+  .get(protect, getUserAddresses)
+  .post(protect, addAddress);
+
+router.route('/addresses/:id')
+  .put(protect, updateAddress)
+  .delete(protect, deleteAddress);
 
 router.route('/wishlist')
   .get(protect, getWishlist);

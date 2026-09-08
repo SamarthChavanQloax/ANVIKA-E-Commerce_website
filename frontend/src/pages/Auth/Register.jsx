@@ -44,7 +44,7 @@ const Register = () => {
       </div>
 
       {/* Left side - Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 sm:p-12 lg:p-24 bg-background">
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 sm:p-12 lg:p-16 bg-background">
         <FadeIn className="w-full max-w-md">
           <div className="text-center mb-10">
             <h1 className="text-3xl font-serif text-text mb-2">Create Account</h1>

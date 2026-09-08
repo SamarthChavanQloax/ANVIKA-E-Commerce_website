@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Manrope:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 
 @theme {
@@ -9,8 +10,8 @@
   --color-text-muted: var(--color-text-muted);
   --color-border: var(--color-border);
   
-  --font-serif: "Cormorant Garamond", serif;
-  --font-sans: "Inter", sans-serif;
+  --font-serif: "Cormorant Garamond", Georgia, serif;
+  --font-sans: "Manrope", "Segoe UI", sans-serif;
 }
 
 @layer base {
@@ -74,11 +75,82 @@ body {
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+button,
+a,
+summary,
+[role="button"],
+label,
+input[type="checkbox"],
+input[type="radio"],
+select {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button:focus-visible,
+a:focus-visible,
+summary:focus-visible,
+[role="button"]:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+}
+
+@layer components {
+  .page-shell {
+    padding-block: 2rem 4rem;
+  }
+
+  .page-heading {
+    margin-bottom: 2rem;
+  }
+
+  .section-heading {
+    margin-bottom: 1.5rem;
+  }
+
+  @media (min-width: 768px) {
+    .page-shell {
+      padding-block: 3rem 5rem;
+    }
+
+    .page-heading {
+      margin-bottom: 2.5rem;
+    }
+  }
 }
 
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-serif);
   font-weight: 400; /* More elegant, thinner serif */
+  line-height: 1.15;
 }
 
 /* Custom Scrollbar */

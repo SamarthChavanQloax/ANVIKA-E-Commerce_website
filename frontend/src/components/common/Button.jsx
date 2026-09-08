@@ -18,7 +18,7 @@ const Button = forwardRef(({
 }, ref) => {
   // Softer rounded corners (rounded-full for a more elegant, feminine look)
   // Thinner font weight (font-normal or just tracking-wide)
-  const baseStyles = "inline-flex items-center justify-center font-sans tracking-wide transition-colors focus:outline-none focus:ring-1 focus:ring-accent focus:ring-offset-1 disabled:opacity-50 disabled:pointer-events-none rounded-full";
+  const baseStyles = "inline-flex items-center justify-center cursor-pointer font-sans text-sm tracking-wide transition-colors focus:outline-none focus:ring-1 focus:ring-accent focus:ring-offset-1 disabled:opacity-50 disabled:pointer-events-none disabled:cursor-not-allowed rounded-full";
   
   const variants = {
     primary: "bg-primary text-background hover:bg-opacity-90 shadow-sm",

@@ -54,7 +54,7 @@ const ProductDetails = () => {
   };
 
   return (
-    <div className="w-full pt-8 pb-24 bg-background">
+    <div className="w-full page-shell bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Breadcrumbs */}
@@ -70,7 +70,7 @@ const ProductDetails = () => {
           <span className="text-text font-medium truncate max-w-xs">{product.name}</span>
         </nav>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-12 items-start">
           
           {/* Left Column: Image Gallery */}
           <div className="flex flex-col-reverse md:flex-row gap-4 lg:sticky top-36">

@@ -87,12 +87,12 @@ const FAQ = () => {
     : FAQ_DATA.filter(f => f.category === activeTab);
 
   return (
-    <div className="w-full pt-8 pb-24 bg-background">
+    <div className="w-full page-shell bg-background">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Header */}
         <FadeIn>
-          <div className="text-center max-w-3xl mx-auto mb-14">
+          <div className="text-center max-w-3xl mx-auto page-heading">
             <span className="text-xs uppercase tracking-[0.3em] text-accent font-medium block mb-3">
               Help Center & Advice
             </span>

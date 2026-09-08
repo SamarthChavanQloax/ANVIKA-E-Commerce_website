@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 
 const Terms = () => {
   return (
-    <div className="w-full pt-8 pb-24 bg-background">
+    <div className="w-full page-shell bg-background">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Header */}

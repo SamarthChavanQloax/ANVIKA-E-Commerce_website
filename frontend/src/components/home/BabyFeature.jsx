@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 
 const BabyFeature = () => {
   return (
-    <section className="py-20 w-full bg-surface/50">
+    <section className="py-16 md:py-20 w-full bg-surface/50">
       <div className="max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center bg-surface border border-border rounded-3xl p-6 sm:p-10 lg:p-12 shadow-sm overflow-hidden">
           

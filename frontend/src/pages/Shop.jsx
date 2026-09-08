@@ -121,7 +121,7 @@ const Shop = () => {
   const hasActiveFilters = selectedCategories.length > 0 || minPrice !== '' || maxPrice !== '' || !!searchParam;
 
   return (
-    <div className="w-full pt-8 pb-24 bg-background">
+    <div className="w-full page-shell bg-background">
       {/* Header */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12">
         <FadeIn>
@@ -303,7 +303,7 @@ const Shop = () => {
 
           {/* Product Grid */}
           {filteredProducts.length === 0 ? (
-            <div className="py-24 text-center">
+            <div className="py-16 text-center">
               <h3 className="font-serif text-3xl text-text font-light mb-3">No matching pieces</h3>
               <p className="text-text-muted text-sm max-w-sm mx-auto mb-6">
                 We couldn&apos;t find any items matching your selected criteria. Try adjusting your filters.

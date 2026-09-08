@@ -24,7 +24,7 @@ const ProductCarouselSection = ({
   const productsToDisplay = products && products.length > 0 ? products : mockProducts;
 
   return (
-    <section className="py-24 px-4 sm:px-6 lg:px-12 max-w-[90rem] mx-auto">
+    <section className="py-16 md:py-20 px-4 sm:px-6 lg:px-12 max-w-[90rem] mx-auto">
       <RevealOnScroll>
         <div className="flex flex-col md:flex-row justify-between items-end mb-12">
           <div>

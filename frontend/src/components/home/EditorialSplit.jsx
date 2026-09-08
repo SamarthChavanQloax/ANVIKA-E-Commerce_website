@@ -4,7 +4,7 @@ import Button from '../common/Button';
 
 const EditorialSplit = () => {
   return (
-    <section className="py-24 px-4 sm:px-6 lg:px-12 max-w-[90rem] mx-auto overflow-hidden bg-background">
+    <section className="py-16 md:py-20 px-4 sm:px-6 lg:px-12 max-w-[90rem] mx-auto overflow-hidden bg-background">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24 items-center h-auto lg:h-[80vh]">
         
         {/* Left: Large Lifestyle Image */}

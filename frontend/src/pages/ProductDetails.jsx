@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Heart, Truck, RefreshCw, ChevronDown, Check, Star, ShieldCheck, Sparkles, ArrowRight, ChevronLeft, ChevronRight, ArrowRightLeft } from 'lucide-react';
 import Button from '../components/common/Button';
 import { FadeIn, RevealOnScroll } from '../components/animations/RevealOnScroll';
-import { products } from '../data/products';
+import { useProducts } from '../context/ProductContext';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
 import { useCompare } from '../context/CompareContext';
@@ -12,26 +13,59 @@ import ProductCard from '../components/product/ProductCard';
 
 const ProductDetails = () => {
   const { id } = useParams();
+  const { products, getProductById } = useProducts();
   const { addToCart, openCart } = useCart();
   const { isInWishlist, toggleWishlist } = useWishlist();
   const { isInCompare, toggleCompare } = useCompare();
 
-  // Look up product from central catalog, fallback gracefully
-  const product = products.find(p => p._id === id || p.slug === id) || products[0];
+  const [apiProduct, setApiProduct] = useState(null);
 
+  useEffect(() => {
+    if (id) {
+      const t = Date.now();
+      axios.get(`/api/products/${id}?_t=${t}`)
+        .then((res) => {
+          if (res.data) setApiProduct(res.data);
+        })
+        .catch(() => {
+          axios.get(`/api/products/slug/${id}?_t=${t}`)
+            .then((res) => {
+              if (res.data) setApiProduct(res.data);
+            })
+            .catch(() => {});
+        });
+    }
+  }, [id, products]);
+
+  // Look up product from central catalog and live API, syncing real-time updates
+  const contextProduct = getProductById(id) || products.find(p => p._id === id || p.slug === id);
+  const product = (contextProduct && apiProduct)
+    ? { ...apiProduct, ...contextProduct }
+    : (apiProduct || contextProduct || products[0]);
+
+  const defaultVariant = product?.variants?.[0];
   const [selectedImageIdx, setSelectedImageIdx] = useState(0);
-  const [selectedSize, setSelectedSize] = useState(product.sizes?.[0] || 'Free Size');
+  const [selectedSize, setSelectedSize] = useState(defaultVariant?.size || '');
+  const [selectedColor, setSelectedColor] = useState(defaultVariant?.color || '');
   const [quantity, setQuantity] = useState(1);
   const [isAdded, setIsAdded] = useState(false);
   const [activeAccordion, setActiveAccordion] = useState('description');
 
   useEffect(() => {
-    setSelectedSize(product.sizes?.[0] || 'Free Size');
-    setSelectedImageIdx(0);
-    setQuantity(1);
-    setIsAdded(false);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, [id, product]);
+    if (product) {
+      const firstVariant = product.variants?.[0];
+      setSelectedSize(firstVariant?.size || '');
+      setSelectedColor(firstVariant?.color || '');
+      setSelectedImageIdx(0);
+      setQuantity(1);
+      setIsAdded(false);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [id, product?._id]);
+
+  if (!product) {
+    return null;
+  }
 
   const images = product.images?.length > 0 ? product.images : [product.image || '/demo-saree.jpg'];
   const isFavorited = isInWishlist(product);
@@ -42,14 +76,39 @@ const ProductDetails = () => {
     .filter(p => p._id !== product._id)
     .slice(0, 4);
 
+  // Get unique colors and sizes
+  const availableColors = [...new Set(product.variants?.map(v => v.color).filter(Boolean) || [])];
+  const availableSizes = [...new Set(product.variants?.map(v => v.size).filter(Boolean) || [])];
+
+  const activeVariant = product.variants?.find(v => v.size === selectedSize && v.color === selectedColor) || product.variants?.[0];
+
+  // If variants have distinct differentiated pricing (e.g. S is ₹15,000, L is ₹15,500), use activeVariant price;
+  // Otherwise, always prioritize product.price so admin edits (e.g. 4999 -> 3999) reflect instantly.
+  const hasDifferentiatedVariantPrices = product.variants?.length > 1 &&
+    new Set(product.variants.map(v => Number(v.price))).size > 1;
+
+  const displayPrice = hasDifferentiatedVariantPrices
+    ? (Number(activeVariant?.price) || Number(product.price) || 0)
+    : (Number(product.price) || Number(activeVariant?.price) || 0);
+
+  const displayStock = activeVariant && activeVariant.stock !== undefined ? activeVariant.stock : (product.stock || 0);
+
   const handleAddToCart = () => {
-    addToCart(product, quantity, selectedSize);
+    if (displayStock < quantity) {
+      alert('Not enough stock!');
+      return;
+    }
+    addToCart({ ...product, price: displayPrice }, quantity, selectedSize, selectedColor, activeVariant?._id);
     setIsAdded(true);
     setTimeout(() => setIsAdded(false), 2000);
   };
 
   const handleBuyNow = () => {
-    addToCart(product, quantity, selectedSize);
+    if (displayStock < quantity) {
+      alert('Not enough stock!');
+      return;
+    }
+    addToCart({ ...product, price: displayPrice }, quantity, selectedSize, selectedColor, activeVariant?._id);
     openCart();
   };
 
@@ -118,14 +177,14 @@ const ProductDetails = () => {
                 <>
                   <button
                     onClick={() => setSelectedImageIdx(prev => (prev === 0 ? images.length - 1 : prev - 1))}
-                    className="absolute left-3 top-1/2 -translate-y-1/2 p-2 rounded-full bg-background/80 hover:bg-background text-text border border-border/80 shadow-md backdrop-blur-md opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="absolute left-3 top-1/2 -translate-y-1/2 p-2.5 sm:p-2 rounded-full bg-background/80 hover:bg-background text-text border border-border/80 shadow-md backdrop-blur-md opacity-90 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
                     aria-label="Previous image"
                   >
                     <ChevronLeft size={18} />
                   </button>
                   <button
                     onClick={() => setSelectedImageIdx(prev => (prev === images.length - 1 ? 0 : prev + 1))}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-full bg-background/80 hover:bg-background text-text border border-border/80 shadow-md backdrop-blur-md opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 p-2.5 sm:p-2 rounded-full bg-background/80 hover:bg-background text-text border border-border/80 shadow-md backdrop-blur-md opacity-90 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
                     aria-label="Next image"
                   >
                     <ChevronRight size={18} />
@@ -176,9 +235,9 @@ const ProductDetails = () => {
               {/* Price Row */}
               <div className="flex items-baseline gap-4 mb-6">
                 <span className="text-3xl font-semibold text-text">
-                  ₹{product.price.toLocaleString('en-IN')}
+                  ₹{displayPrice.toLocaleString('en-IN')}
                 </span>
-                {product.originalPrice > product.price && (
+                {product.originalPrice > displayPrice && (
                   <span className="text-lg text-text-muted line-through">
                     ₹{product.originalPrice.toLocaleString('en-IN')}
                   </span>
@@ -193,105 +252,154 @@ const ProductDetails = () => {
                 {product.description}
               </p>
 
-              {/* Size Selector */}
-              {product.sizes?.length > 0 && (
-                <div className="mb-8">
+              {/* Stock Info */}
+              <div className="mb-4 text-sm font-medium">
+                {displayStock > 0 ? (
+                  <span className="text-emerald-600">In Stock: {displayStock}</span>
+                ) : (
+                  <span className="text-red-600">Out of Stock</span>
+                )}
+              </div>
+
+              {/* Color Selector */}
+              {availableColors.length > 0 && (
+                <div className="mb-6">
                   <div className="flex justify-between items-center text-xs mb-3">
-                    <span className="font-semibold text-text uppercase tracking-wider">Select Size</span>
-                    <span className="text-accent cursor-pointer hover:underline text-[11px]">Size & Fit Guide</span>
+                    <span className="font-semibold text-text uppercase tracking-wider">Select Color</span>
                   </div>
                   <div className="flex flex-wrap gap-2.5">
-                    {product.sizes.map((size) => (
+                    {availableColors.map((color) => (
                       <button
-                        key={size}
-                        onClick={() => setSelectedSize(size)}
+                        key={color}
+                        onClick={() => setSelectedColor(color)}
                         className={`px-5 py-2.5 rounded-xl text-xs font-medium transition-all ${
-                          selectedSize === size
+                          selectedColor === color
                             ? 'bg-primary text-background shadow-md ring-2 ring-primary/20'
                             : 'bg-surface hover:bg-surface/80 text-text border border-border'
                         }`}
                       >
-                        {size}
+                        {color}
                       </button>
                     ))}
                   </div>
                 </div>
               )}
 
+              {/* Size Selector */}
+              {availableSizes.length > 0 && (
+                <div className="mb-8">
+                  <div className="flex justify-between items-center text-xs mb-3">
+                    <span className="font-semibold text-text uppercase tracking-wider">Select Size</span>
+                    <span className="text-accent cursor-pointer hover:underline text-[11px]">Size & Fit Guide</span>
+                  </div>
+                  <div className="flex flex-wrap gap-2.5">
+                    {availableSizes.map((size) => {
+                      const variantExists = product.variants.some(v => v.size === size && v.color === selectedColor && v.stock > 0);
+                      return (
+                        <button
+                          key={size}
+                          onClick={() => setSelectedSize(size)}
+                          disabled={!variantExists}
+                          className={`px-5 py-2.5 rounded-xl text-xs font-medium transition-all ${
+                            selectedSize === size
+                              ? 'bg-primary text-background shadow-md ring-2 ring-primary/20'
+                              : !variantExists
+                              ? 'bg-surface opacity-50 cursor-not-allowed text-text-muted border border-border/50'
+                              : 'bg-surface hover:bg-surface/80 text-text border border-border'
+                          }`}
+                        >
+                          {size}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
               {/* Add to Cart Actions */}
-              <div className="flex flex-col sm:flex-row items-stretch gap-3 mb-8">
-                {/* Quantity Stepper */}
-                <div className="flex items-center justify-between border border-border rounded-xl bg-surface px-2 h-14 sm:w-36 flex-shrink-0">
-                  <button 
-                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="w-10 h-full flex items-center justify-center text-text hover:text-accent transition-colors text-lg"
-                    aria-label="Decrease quantity"
+              <div className="flex flex-col gap-3 mb-8">
+                {/* Row 1: Quantity Stepper & Add to Bag */}
+                <div className="flex items-center gap-2.5 sm:gap-3">
+                  {/* Quantity Stepper */}
+                  <div className="flex items-center justify-between border border-border rounded-xl bg-surface px-2 h-13 sm:h-14 w-28 sm:w-36 flex-shrink-0">
+                    <button 
+                      onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                      className="w-8 sm:w-10 h-full flex items-center justify-center text-text hover:text-accent transition-colors text-lg"
+                      aria-label="Decrease quantity"
+                    >
+                      -
+                    </button>
+                    <span className="w-8 sm:w-10 text-center text-sm font-semibold text-text">{quantity}</span>
+                    <button 
+                      onClick={() => setQuantity(quantity + 1)}
+                      className="w-8 sm:w-10 h-full flex items-center justify-center text-text hover:text-accent transition-colors text-lg"
+                      aria-label="Increase quantity"
+                    >
+                      +
+                    </button>
+                  </div>
+
+                  {/* Add to Bag CTA */}
+                  <Button 
+                    onClick={handleAddToCart}
+                    disabled={displayStock === 0}
+                    className={`flex-1 h-13 sm:h-14 uppercase tracking-wider sm:tracking-widest text-xs font-semibold flex items-center justify-center gap-2 transition-all ${
+                      isAdded ? 'bg-emerald-600 text-white' : displayStock === 0 ? 'bg-gray-400 text-gray-700 cursor-not-allowed' : 'bg-primary text-background hover:opacity-95'
+                    }`}
                   >
-                    -
-                  </button>
-                  <span className="w-10 text-center text-sm font-semibold text-text">{quantity}</span>
-                  <button 
-                    onClick={() => setQuantity(quantity + 1)}
-                    className="w-10 h-full flex items-center justify-center text-text hover:text-accent transition-colors text-lg"
-                    aria-label="Increase quantity"
-                  >
-                    +
-                  </button>
+                    {isAdded ? (
+                      <>
+                        <Check size={18} /> ADDED TO BAG
+                      </>
+                    ) : displayStock === 0 ? (
+                      <>
+                         OUT OF STOCK
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles size={16} /> ADD TO SHOPPING BAG
+                      </>
+                    )}
+                  </Button>
                 </div>
 
-                {/* Add to Bag CTA */}
-                <Button 
-                  onClick={handleAddToCart}
-                  className={`flex-1 h-14 uppercase tracking-widest text-xs font-semibold flex items-center justify-center gap-2 transition-all ${
-                    isAdded ? 'bg-emerald-600 text-white' : 'bg-primary text-background hover:opacity-95'
-                  }`}
-                >
-                  {isAdded ? (
-                    <>
-                      <Check size={18} /> ADDED TO BAG
-                    </>
-                  ) : (
-                    <>
-                      <Sparkles size={16} /> ADD TO SHOPPING BAG
-                    </>
-                  )}
-                </Button>
+                {/* Row 2: Secondary Quick Actions (Compare & Wishlist) side-by-side on all screens */}
+                <div className="grid grid-cols-2 gap-2.5 sm:gap-3">
+                  <button
+                    onClick={() => toggleCompare(product)}
+                    className={`h-11 sm:h-12 flex items-center justify-center gap-2 rounded-xl border text-xs tracking-wider uppercase font-medium transition-all ${
+                      isCompared
+                        ? 'border-primary bg-primary/10 text-primary'
+                        : 'border-border bg-surface hover:bg-surface/80 text-text'
+                    }`}
+                    aria-label="Add to compare"
+                  >
+                    <ArrowRightLeft size={16} />
+                    <span className="truncate">{isCompared ? 'In Compare' : 'Compare'}</span>
+                  </button>
 
-                {/* Compare Button */}
-                <button
-                  onClick={() => toggleCompare(product)}
-                  className={`w-14 h-14 flex-shrink-0 flex items-center justify-center rounded-xl border transition-all ${
-                    isCompared
-                      ? 'border-primary bg-primary/10 text-primary'
-                      : 'border-border bg-surface hover:bg-surface/80 text-text'
-                  }`}
-                  aria-label="Add to compare"
-                >
-                  <motion.div whileTap={{ scale: 0.8 }}>
-                    <ArrowRightLeft size={22} />
-                  </motion.div>
-                </button>
-
-                {/* Like / Wishlist Button */}
-                <button
-                  onClick={() => toggleWishlist(product)}
-                  className={`w-14 h-14 flex-shrink-0 flex items-center justify-center rounded-xl border transition-all ${
-                    isFavorited
-                      ? 'border-red-500 bg-red-50 text-red-500 dark:bg-red-950/50 shadow-sm'
-                      : 'border-border bg-surface hover:bg-surface/80 text-text'
-                  }`}
-                  aria-label="Add to wishlist"
-                >
-                  <motion.div whileTap={{ scale: 0.8 }}>
-                    <Heart size={22} className={isFavorited ? 'fill-red-500 stroke-red-500' : ''} />
-                  </motion.div>
-                </button>
+                  <button
+                    onClick={() => toggleWishlist(product)}
+                    className={`h-11 sm:h-12 flex items-center justify-center gap-2 rounded-xl border text-xs tracking-wider uppercase font-medium transition-all ${
+                      isFavorited
+                        ? 'border-red-500 bg-red-50 text-red-500 dark:bg-red-950/50 shadow-sm'
+                        : 'border-border bg-surface hover:bg-surface/80 text-text'
+                    }`}
+                    aria-label="Add to wishlist"
+                  >
+                    <Heart size={16} className={isFavorited ? 'fill-red-500 stroke-red-500' : ''} />
+                    <span className="truncate">{isFavorited ? 'Wishlisted' : 'Add to Wishlist'}</span>
+                  </button>
+                </div>
               </div>
 
               {/* Instant Buy Now Button */}
               <button
                 onClick={handleBuyNow}
-                className="w-full py-3.5 mb-8 rounded-xl border border-primary text-primary font-medium tracking-widest text-xs uppercase hover:bg-primary hover:text-background transition-all flex items-center justify-center gap-2"
+                disabled={displayStock === 0}
+                className={`w-full py-3.5 mb-8 rounded-xl border font-medium tracking-widest text-xs uppercase transition-all flex items-center justify-center gap-2 ${
+                  displayStock === 0 ? 'border-gray-300 text-gray-400 cursor-not-allowed' : 'border-primary text-primary hover:bg-primary hover:text-background'
+                }`}
               >
                 BUY NOW WITH 1-CLICK CHECKOUT <ArrowRight size={14} />
               </button>

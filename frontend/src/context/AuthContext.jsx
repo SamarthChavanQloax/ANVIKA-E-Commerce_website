@@ -16,13 +16,20 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     if (userInfo) {
       localStorage.setItem('userInfo', JSON.stringify(userInfo));
+      if (userInfo.token) {
+        axios.defaults.headers.common['Authorization'] = `Bearer ${userInfo.token}`;
+      }
     } else {
       localStorage.removeItem('userInfo');
+      delete axios.defaults.headers.common['Authorization'];
     }
   }, [userInfo]);
 
   const login = (data) => {
     setUserInfo(data);
+    if (data.token) {
+      axios.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
+    }
   };
 
   const updateUser = (updatedData) => {
@@ -40,8 +47,10 @@ export const AuthProvider = ({ children }) => {
   const logout = async () => {
     try {
       await axios.post('/api/auth/logout', {}, { withCredentials: true }).catch(() => {});
+      await axios.post('/api/users/logout', {}, { withCredentials: true }).catch(() => {});
     } catch (e) {}
     setUserInfo(null);
+    delete axios.defaults.headers.common['Authorization'];
     localStorage.removeItem('userInfo');
     localStorage.removeItem('anvika_cart');
     localStorage.removeItem('anvika_wishlist');

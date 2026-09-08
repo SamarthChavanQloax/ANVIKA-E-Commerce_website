@@ -21,7 +21,7 @@ const CompareWidget = () => {
           
           <div className="flex items-center gap-4 flex-wrap md:flex-nowrap w-full md:w-auto overflow-x-auto pb-2 md:pb-0 hide-scrollbar">
             {compareItems.map((item) => (
-              <div key={item._id || item.id} className="relative w-16 h-20 md:w-20 md:h-24 rounded-lg overflow-hidden border border-border flex-shrink-0 group">
+              <div key={item._id || item.id} className="relative w-14 h-18 sm:w-16 sm:h-20 md:w-20 md:h-24 rounded-lg overflow-hidden border border-border flex-shrink-0 group">
                 <img 
                   src={(item.images && item.images.length > 0) ? item.images[0] : (item.image || '/demo-saree.jpg')} 
                   alt={item.name} 
@@ -29,7 +29,8 @@ const CompareWidget = () => {
                 />
                 <button
                   onClick={() => removeFromCompare(item._id || item.id)}
-                  className="absolute top-1 right-1 bg-black/50 text-white rounded-full p-0.5 hover:bg-red-500 transition-colors opacity-0 group-hover:opacity-100"
+                  className="absolute top-1 right-1 bg-black/70 text-white rounded-full p-1 sm:p-0.5 hover:bg-red-500 transition-colors opacity-100 md:opacity-0 md:group-hover:opacity-100 shadow-sm"
+                  aria-label="Remove item"
                 >
                   <X size={12} />
                 </button>
@@ -37,8 +38,8 @@ const CompareWidget = () => {
             ))}
             {/* Placeholders for remaining slots */}
             {Array.from({ length: 4 - compareItems.length }).map((_, idx) => (
-              <div key={`empty-${idx}`} className="w-16 h-20 md:w-20 md:h-24 rounded-lg border border-dashed border-border flex items-center justify-center flex-shrink-0 bg-background/50">
-                <span className="text-text-muted text-xs">Add</span>
+              <div key={`empty-${idx}`} className="w-14 h-18 sm:w-16 sm:h-20 md:w-20 md:h-24 rounded-lg border border-dashed border-border flex items-center justify-center flex-shrink-0 bg-background/50">
+                <span className="text-text-muted text-[10px] sm:text-xs">Add</span>
               </div>
             ))}
           </div>

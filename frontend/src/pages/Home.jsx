@@ -7,18 +7,51 @@ import CollectionGrid from '../components/home/CollectionGrid';
 import EditorialSplit from '../components/home/EditorialSplit';
 import BrandStory from '../components/home/BrandStory';
 import SocialGallery from '../components/home/SocialGallery';
+import { useMemo } from 'react';
 import Newsletter from '../components/home/Newsletter';
-
-import { products } from '../data/products';
-
-const newArrivals = products.filter(p => p.isNew);
-const sareesProducts = products.filter(p => p.category === 'Sarees');
-const womenProducts = products.filter(p => p.category === 'Women' || p.category === 'Dresses');
-const dressesProducts = products.filter(p => p.category === 'Dresses');
-const ethnicProducts = products.filter(p => p.category === 'Ethnic Wear' || p.category === 'Women');
-const kidsProducts = products.filter(p => p.category === 'Baby & Kids');
+import { useProducts } from '../context/ProductContext';
 
 const Home = () => {
+  const { products } = useProducts();
+
+  // Helper to place newest pieces from MongoDB at the front of marketing carousels
+  const sortByNewest = (list) => {
+    return [...list].sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+  };
+
+  const newArrivals = useMemo(() => {
+    const list = products.filter(p => p.isNew !== false);
+    return sortByNewest(list.length > 0 ? list : products);
+  }, [products]);
+
+  const sareesProducts = useMemo(() => {
+    return sortByNewest(products.filter(p => (p.category || '').toLowerCase().includes('saree')));
+  }, [products]);
+
+  const womenProducts = useMemo(() => {
+    return sortByNewest(products.filter(p => {
+      const c = (p.category || '').toLowerCase();
+      return c.includes('women') || c.includes('dress');
+    }));
+  }, [products]);
+
+  const dressesProducts = useMemo(() => {
+    return sortByNewest(products.filter(p => (p.category || '').toLowerCase().includes('dress')));
+  }, [products]);
+
+  const ethnicProducts = useMemo(() => {
+    return sortByNewest(products.filter(p => {
+      const c = (p.category || '').toLowerCase();
+      return c.includes('ethnic') || c.includes('women') || c.includes('lehenga');
+    }));
+  }, [products]);
+
+  const kidsProducts = useMemo(() => {
+    return sortByNewest(products.filter(p => {
+      const c = (p.category || '').toLowerCase();
+      return c.includes('kid') || c.includes('baby');
+    }));
+  }, [products]);
   return (
     <div className="w-full font-sans bg-[#121212]">
       {/* 

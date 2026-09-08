@@ -1,13 +1,14 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, X, ArrowRight, Star } from 'lucide-react';
-import { products } from '../../data/products';
+import { useProducts } from '../../context/ProductContext';
 import { useQuickView } from '../../context/QuickViewContext';
 import { useNavigate } from 'react-router-dom';
 
 const POPULAR_SEARCHES = ['Banarasi Silk', 'Anarkali Set', 'Chanderi', 'Bridal Lehenga', 'Mulmul Dress', 'Kids Kurta'];
 
 const SearchModal = ({ isOpen, onClose }) => {
+  const { products } = useProducts();
   const [query, setQuery] = useState('');
   const inputRef = useRef(null);
   const { openQuickView } = useQuickView();

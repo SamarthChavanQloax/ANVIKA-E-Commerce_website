@@ -112,9 +112,10 @@ export const CartProvider = ({ children }) => {
   const openCart = () => setIsCartOpen(true);
   const closeCart = () => setIsCartOpen(false);
 
-  const addToCart = async (product, qty = 1, selectedSize = null) => {
-    const sizeToUse = selectedSize || product.sizes?.[0] || 'Standard';
-    const itemKey = `${product._id}_${sizeToUse}`;
+  const addToCart = async (product, qty = 1, selectedSize = '', selectedColor = '', variantId = null) => {
+    const sizeToUse = selectedSize || product.variants?.[0]?.size || product.sizes?.[0] || 'Standard';
+    const colorToUse = selectedColor || product.variants?.[0]?.color || '';
+    const itemKey = `${product._id}_${sizeToUse}_${colorToUse}`;
 
     // If authenticated, sync with MongoDB backend
     if (userInfo?.token) {
@@ -128,7 +129,7 @@ export const CartProvider = ({ children }) => {
           {
             productId: product._id,
             quantity: qty,
-            variant: { size: sizeToUse },
+            variant: { size: sizeToUse, color: colorToUse },
           },
           config
         );
@@ -155,6 +156,7 @@ export const CartProvider = ({ children }) => {
           ...product,
           cartKey: itemKey,
           selectedSize: sizeToUse,
+          selectedColor: colorToUse,
           qty,
         },
       ];

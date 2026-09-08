@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { FadeIn } from '../../components/animations/RevealOnScroll';
-import Button from '../../components/common/Button';
 import axios from 'axios';
+import { Sparkles, Lock, Mail, User, ArrowRight, ShieldCheck, Crown } from 'lucide-react';
 
 const Register = () => {
   const [name, setName] = useState('');
@@ -38,76 +38,154 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-[calc(100vh-115px)] flex flex-row-reverse">
-      {/* Right side - Image */}
-      <div className="hidden lg:block lg:w-1/2 relative bg-surface">
-        <img 
-          src="/saree-rust.png" 
-          alt="Register Fashion"
-          className="absolute inset-0 h-full w-full object-cover object-center"
-        />
-        <div className="absolute inset-0 bg-black/10" />
-      </div>
+    <div className="relative min-h-[calc(100vh-115px)] flex items-center justify-center overflow-y-auto py-8 sm:py-12 px-4 sm:px-6 lg:px-12 bg-stone-950">
+      {/* Background Video Looping Continuously */}
+      <video
+        autoPlay
+        loop
+        muted
+        playsInline
+        className="absolute inset-0 w-full h-full object-cover filter brightness-[0.88] contrast-[1.02]"
+        src="/videos/login_video.mp4"
+      />
 
-      {/* Left side - Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 sm:p-12 lg:p-24 bg-background">
-        <FadeIn className="w-full max-w-md">
-          <div className="text-center mb-10">
-            <h1 className="text-3xl font-serif text-text mb-2">Create Account</h1>
-            <p className="text-text-muted">Join us to experience modern Indian luxury.</p>
+      {/* Subtle Ambient Video Tint (keeps video visible, avoids black wash) */}
+      <div className="absolute inset-0 bg-gradient-to-r from-black/45 via-black/25 to-black/40 backdrop-blur-[1px]" />
+
+      {/* Main Content Layout */}
+      <div className="relative z-10 w-full max-w-6xl mx-auto flex flex-col lg:flex-row items-center justify-between gap-8 lg:gap-16">
+        
+        {/* Left Side: Brand Narrative */}
+        <div className="hidden lg:flex flex-col max-w-xl text-white space-y-6">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-xl border border-white/25 text-amber-300 text-xs font-medium tracking-widest uppercase w-fit shadow-sm">
+            <Sparkles size={14} className="text-amber-300 animate-pulse" />
+            <span>Join Anvika Heritage</span>
           </div>
 
-          {error && <div className="bg-red-100 dark:bg-red-950/50 text-red-700 dark:text-red-300 p-3 mb-6 rounded-sm text-sm border border-red-200 dark:border-red-900">{error}</div>}
+          <h1 className="text-4xl xl:text-5xl font-serif font-light leading-tight tracking-wide text-white drop-shadow-md">
+            The Art of Indian Luxury, <br />
+            <span className="italic font-serif text-amber-300">Tailored to You.</span>
+          </h1>
 
-          <form onSubmit={submitHandler} className="flex flex-col gap-6">
-            <div>
-              <label className="block text-sm font-medium text-text mb-2">Full Name</label>
-              <input 
-                type="text" 
-                required 
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="w-full px-4 py-3 border border-border bg-surface text-text rounded-sm focus:outline-none focus:ring-1 focus:ring-accent transition-all"
-                placeholder="Jane Doe"
-              />
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-text mb-2">Email Address</label>
-              <input 
-                type="email" 
-                required 
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3 border border-border bg-surface text-text rounded-sm focus:outline-none focus:ring-1 focus:ring-accent transition-all"
-                placeholder="you@example.com"
-              />
-            </div>
+          <p className="text-stone-200 text-sm xl:text-base leading-relaxed font-light max-w-lg drop-shadow">
+            Create an account to unlock bespoke bridal consultations, custom drape sizing, and exclusive early access to handcrafted heirloom weaves.
+          </p>
 
-            <div>
-              <label className="block text-sm font-medium text-text mb-2">Password</label>
-              <input 
-                type="password" 
-                required 
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 border border-border bg-surface text-text rounded-sm focus:outline-none focus:ring-1 focus:ring-accent transition-all"
-                placeholder="••••••••"
-              />
-            </div>
-
-            <Button type="submit" className="w-full h-12 mt-2" isLoading={isLoading}>
-              Register
-            </Button>
-          </form>
-
-          <div className="mt-8 text-center text-sm text-text-muted">
-            Already have an account?{' '}
-            <Link to="/login" className="text-text font-medium hover:text-accent transition-colors border-b border-transparent hover:border-accent">
-              Sign In
-            </Link>
+          {/* Value Badges */}
+          <div className="flex flex-wrap items-center gap-3 pt-2 text-xs text-stone-200 font-light">
+            <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/10 backdrop-blur-xl border border-white/20 shadow-sm">
+              <Crown size={14} className="text-amber-300" /> Private VIP Drops
+            </span>
+            <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/10 backdrop-blur-xl border border-white/20 shadow-sm">
+              <ShieldCheck size={14} className="text-amber-300" /> 100% Certified Handloom
+            </span>
+            <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/10 backdrop-blur-xl border border-white/20 shadow-sm">
+              <Sparkles size={14} className="text-amber-300" /> Complimentary Styling
+            </span>
           </div>
-        </FadeIn>
+        </div>
+
+        {/* Right Side: Transparent Blurry Glass Register Card */}
+        <div className="w-full max-w-md">
+          <FadeIn>
+            <div className="relative overflow-hidden backdrop-blur-2xl bg-white/[0.08] hover:bg-white/[0.11] border border-white/25 rounded-2xl sm:rounded-3xl p-6 sm:p-8 md:p-10 shadow-[0_16px_50px_rgba(0,0,0,0.4)] text-white transition-all duration-300 ring-1 ring-white/20">
+              
+              {/* Subtle top light sheen for glass effect */}
+              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/40 to-transparent pointer-events-none" />
+
+              <div className="text-center mb-8">
+                <span className="lg:hidden inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-amber-300 text-[10px] uppercase tracking-widest mb-3">
+                  <Sparkles size={12} className="text-amber-300" /> Anvika Boutique
+                </span>
+                <h2 className="text-2xl sm:text-3xl font-serif text-white font-light mb-2 drop-shadow-sm">Create Account</h2>
+                <p className="text-xs sm:text-sm text-stone-200 font-light">Join us to experience modern Indian luxury</p>
+              </div>
+
+              {error && (
+                <div className="bg-red-500/25 border border-red-400/40 text-red-100 px-4 py-3 mb-6 rounded-xl text-xs backdrop-blur-md flex items-center gap-2">
+                  <span>{error}</span>
+                </div>
+              )}
+
+              <form onSubmit={submitHandler} className="flex flex-col gap-4">
+                <div>
+                  <label className="block text-xs uppercase tracking-wider text-stone-200 font-medium mb-1.5">
+                    Full Name
+                  </label>
+                  <div className="relative">
+                    <User size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-300" />
+                    <input 
+                      type="text" 
+                      required 
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      className="w-full pl-10 pr-4 py-3 bg-white/10 hover:bg-white/[0.15] focus:bg-white/[0.18] border border-white/20 focus:border-amber-300/80 rounded-xl text-white placeholder-stone-300/60 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-amber-300/30 backdrop-blur-xl transition-all"
+                      placeholder="Jane Doe"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs uppercase tracking-wider text-stone-200 font-medium mb-1.5">
+                    Email Address
+                  </label>
+                  <div className="relative">
+                    <Mail size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-300" />
+                    <input 
+                      type="email" 
+                      required 
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="w-full pl-10 pr-4 py-3 bg-white/10 hover:bg-white/[0.15] focus:bg-white/[0.18] border border-white/20 focus:border-amber-300/80 rounded-xl text-white placeholder-stone-300/60 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-amber-300/30 backdrop-blur-xl transition-all"
+                      placeholder="name@example.com"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs uppercase tracking-wider text-stone-200 font-medium mb-1.5">
+                    Password
+                  </label>
+                  <div className="relative">
+                    <Lock size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-300" />
+                    <input 
+                      type="password" 
+                      required 
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="w-full pl-10 pr-4 py-3 bg-white/10 hover:bg-white/[0.15] focus:bg-white/[0.18] border border-white/20 focus:border-amber-300/80 rounded-xl text-white placeholder-stone-300/60 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-amber-300/30 backdrop-blur-xl transition-all"
+                      placeholder="••••••••"
+                    />
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="w-full py-3.5 mt-2 rounded-xl bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 hover:from-amber-400 hover:to-amber-300 text-stone-950 font-semibold text-xs uppercase tracking-widest shadow-[0_4px_20px_rgba(245,158,11,0.35)] hover:shadow-[0_4px_25px_rgba(245,158,11,0.5)] transition-all duration-300 active:scale-[0.99] disabled:opacity-60 flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  {isLoading ? (
+                    <div className="w-4 h-4 border-2 border-stone-950/30 border-t-stone-950 rounded-full animate-spin" />
+                  ) : (
+                    <>
+                      <span>Create Account</span>
+                      <ArrowRight size={15} />
+                    </>
+                  )}
+                </button>
+              </form>
+
+              <div className="mt-8 pt-6 border-t border-white/15 text-center text-xs text-stone-200 font-light">
+                Already have an account?{' '}
+                <Link to="/login" className="text-amber-300 font-medium hover:text-amber-200 transition-colors underline underline-offset-4 ml-1">
+                  Sign In
+                </Link>
+              </div>
+
+            </div>
+          </FadeIn>
+        </div>
+
       </div>
     </div>
   );

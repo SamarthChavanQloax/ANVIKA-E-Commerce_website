@@ -1,6 +1,7 @@
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider } from './context/AuthContext';
+import { ProductProvider } from './context/ProductContext';
 import { CartProvider } from './context/CartContext';
 import { WishlistProvider } from './context/WishlistContext';
 import { QuickViewProvider } from './context/QuickViewContext';
@@ -31,9 +32,47 @@ import Sustainability from './pages/Info/Sustainability';
 import Terms from './pages/Info/Terms';
 import Privacy from './pages/Info/Privacy';
 
+// Admin Components & Pages
+import AdminRoute from './components/admin/AdminRoute';
+import AdminLayout from './components/admin/AdminLayout';
+import AdminLogin from './pages/Admin/AdminLogin';
+import Dashboard from './pages/Admin/Dashboard';
+import ProductList from './pages/Admin/ProductList';
+import ProductForm from './pages/Admin/ProductForm';
+import CategoryList from './pages/Admin/CategoryList';
+import Inventory from './pages/Admin/Inventory';
+import OrderList from './pages/Admin/OrderList';
+import CustomerList from './pages/Admin/CustomerList';
+import Analytics from './pages/Admin/Analytics';
+import Reports from './pages/Admin/Reports';
+
 function AppLayout() {
   const location = useLocation();
+  const isAdmin = location.pathname.startsWith('/admin');
   const isHome = location.pathname === '/';
+
+  if (isAdmin) {
+    return (
+      <Routes>
+        <Route path="/admin/login" element={<AdminLogin />} />
+        <Route path="/admin" element={<AdminRoute />}>
+          <Route element={<AdminLayout />}>
+            <Route index element={<Navigate to="/admin/dashboard" replace />} />
+            <Route path="dashboard" element={<Dashboard />} />
+            <Route path="products" element={<ProductList />} />
+            <Route path="products/new" element={<ProductForm />} />
+            <Route path="products/:id/edit" element={<ProductForm />} />
+            <Route path="categories" element={<CategoryList />} />
+            <Route path="inventory" element={<Inventory />} />
+            <Route path="orders" element={<OrderList />} />
+            <Route path="customers" element={<CustomerList />} />
+            <Route path="reports" element={<Reports />} />
+            <Route path="analytics" element={<Analytics />} />
+          </Route>
+        </Route>
+      </Routes>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col font-sans text-text bg-background selection:bg-accent selection:text-background transition-colors duration-300">
@@ -87,17 +126,19 @@ function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <CartProvider>
-          <WishlistProvider>
-            <QuickViewProvider>
-              <CompareProvider>
-                <Router>
-                  <AppLayout />
-                </Router>
-              </CompareProvider>
-            </QuickViewProvider>
-          </WishlistProvider>
-        </CartProvider>
+        <ProductProvider>
+          <CartProvider>
+            <WishlistProvider>
+              <QuickViewProvider>
+                <CompareProvider>
+                  <Router>
+                    <AppLayout />
+                  </Router>
+                </CompareProvider>
+              </QuickViewProvider>
+            </WishlistProvider>
+          </CartProvider>
+        </ProductProvider>
       </AuthProvider>
     </ThemeProvider>
   );

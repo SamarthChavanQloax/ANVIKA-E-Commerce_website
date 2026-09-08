@@ -33,12 +33,18 @@ const Checkout = () => {
     setError(''); setIsSubmitting(true);
     try {
       const { data } = await api.post('/orders', {
-        items: cartItems.map((item) => ({ productId: item._id, quantity: item.qty, size: item.selectedSize })),
+        items: cartItems.map((item) => ({
+          productId: item._id,
+          quantity: item.qty,
+          variant: item.variant,
+          size: item.selectedSize || item.variant?.size,
+          color: item.variant?.color,
+        })),
         shippingAddress: form,
         paymentMethod,
         couponCode,
       });
-      if (paymentMethod === 'razorpay') {
+      if (paymentMethod.startsWith('razorpay')) {
         const paymentOrder = (await api.post('/orders/payments/create', { orderId: data._id })).data;
         if (!(await loadRazorpay())) throw new Error('Payment interface could not be loaded.');
         new window.Razorpay({
@@ -48,6 +54,18 @@ const Checkout = () => {
           name: 'ANVIKA',
           description: `Order ${data._id}`,
           order_id: paymentOrder.orderId,
+          config: paymentMethod === 'razorpay_upi' ? {
+            display: {
+              blocks: {
+                upi: {
+                  name: 'UPI',
+                  instruments: [{ method: 'upi' }],
+                },
+              },
+              sequence: ['block.upi'],
+              preferences: { show_default_blocks: true },
+            },
+          } : undefined,
           handler: async (response) => {
             try {
               await api.post('/orders/payments/verify', { orderId: data._id, ...response });
@@ -88,7 +106,7 @@ const Checkout = () => {
             </label>
           ))}
           <label className="block text-sm">Coupon code<input value={couponCode} onChange={(event) => setCouponCode(event.target.value)} className="mt-1 w-full px-3 py-2.5 bg-background border border-border rounded-lg" /></label>
-          <label className="block text-sm">Payment method<select value={paymentMethod} onChange={(event) => setPaymentMethod(event.target.value)} className="mt-1 w-full px-3 py-2.5 bg-background border border-border rounded-lg"><option value="cod">Cash on delivery</option><option value="razorpay">Razorpay</option></select></label>
+          <label className="block text-sm">Payment method<select value={paymentMethod} onChange={(event) => setPaymentMethod(event.target.value)} className="mt-1 w-full px-3 py-2.5 bg-background border border-border rounded-lg"><option value="cod">Cash on delivery</option><option value="razorpay_upi">UPI (Razorpay)</option><option value="razorpay_card">Card (Razorpay)</option><option value="razorpay_netbanking">Netbanking (Razorpay)</option></select></label>
           {error && <p className="text-sm text-red-600">{error}</p>}
           <Button type="submit" isLoading={isSubmitting} className="w-full">Place Order</Button>
         </div>

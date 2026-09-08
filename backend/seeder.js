@@ -159,20 +159,11 @@ const importData = async () => {
     await User.deleteMany();
     await Category.deleteMany();
 
-<<<<<<< HEAD
     const seededUsers = await Promise.all(users.map(async (user) => ({
       ...user,
       password: await bcrypt.hash(user.password, 10),
     })));
     const createdUsers = await User.insertMany(seededUsers);
-=======
-    // Create users individually to run pre-save password hashing hook
-    const createdUsers = [];
-    for (const u of users) {
-      const createdUser = await User.create(u);
-      createdUsers.push(createdUser);
-    }
->>>>>>> origin/main
     const adminUser = createdUsers[0]._id;
 
     await Category.insertMany(categories);

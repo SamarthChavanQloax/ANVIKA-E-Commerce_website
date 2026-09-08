@@ -14,7 +14,6 @@ export const products = [
     sizes: ['Free Size (6.3m with blouse)'],
     colors: ['Rosewood Wine', 'Gold Zari'],
     isNew: true,
-<<<<<<< HEAD
     rating: 4.9,
     reviewsCount: 28,
     inStock: true
@@ -221,11 +220,8 @@ export const products = [
     colors: ['Vintage Ecru', 'Blush Floral'],
     isNew: true,
     rating: 4.9,
-=======
     isBestseller: true,
     discount: 16,
-    rating: 4.9,
->>>>>>> origin/main
     reviewsCount: 38,
     inStock: true
   },
@@ -479,8 +475,6 @@ export const products = [
     sizes: ['6-12M', '1-2Y', '2-3Y', '3-4Y'],
     colors: ['Sky Blue Stripe', 'Pure White'],
     isNew: true,
-<<<<<<< HEAD
-=======
     discount: 18,
     rating: 4.9,
     reviewsCount: 41,
@@ -559,7 +553,6 @@ export const products = [
     colors: ['Cherry Red Gingham', 'Ivory White'],
     isBestseller: true,
     discount: 17,
->>>>>>> origin/main
     rating: 4.8,
     reviewsCount: 29,
     inStock: true
@@ -596,10 +589,7 @@ export const products = [
     sizes: ['0-6M', '6-12M', '1-2Y', '2-3Y'],
     colors: ['Pastel Sky Blue', 'Ivory Blossom'],
     isBestseller: true,
-<<<<<<< HEAD
-=======
     discount: 18,
->>>>>>> origin/main
     rating: 5.0,
     reviewsCount: 58,
     inStock: true

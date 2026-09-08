@@ -43,12 +43,8 @@ const ProductDetails = () => {
   }, [id, product]);
 
   const images = product.images?.length > 0 ? product.images : [product.image || '/demo-saree.jpg'];
-<<<<<<< HEAD
   const { isNew, hasDiscount, discountPercentage } = getProductBadges(product);
   const isFavorited = isInWishlist(product._id);
-=======
-  const isFavorited = isInWishlist(product);
->>>>>>> origin/main
   const isCompared = isInCompare(product._id);
 
   // Related products from same category or others

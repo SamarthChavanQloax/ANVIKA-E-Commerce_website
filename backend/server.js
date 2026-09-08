@@ -15,17 +15,14 @@ try {
 import productRoutes from './routes/productRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import orderRoutes from './routes/orderRoutes.js';
-<<<<<<< HEAD
 import adminRoutes from './routes/adminRoutes.js';
 import reviewRoutes from './routes/reviewRoutes.js';
 import couponRoutes from './routes/couponRoutes.js';
 import paymentRoutes from './routes/paymentRoutes.js';
-=======
 import categoryRoutes from './routes/categoryRoutes.js';
 import authRoutes from './routes/authRoutes.js';
 import cartRoutes from './routes/cartRoutes.js';
 import wishlistRoutes from './routes/wishlistRoutes.js';
->>>>>>> origin/main
 
 dotenv.config();
 
@@ -58,15 +55,9 @@ app.use(cors({
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
 }));
-<<<<<<< HEAD
 app.use('/api/payments/webhook', express.raw({ type: 'application/json' }));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-=======
-
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
->>>>>>> origin/main
 app.use(cookieParser());
 
 // Database connection state
@@ -118,13 +109,11 @@ app.get('/', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/users', userRoutes);
-<<<<<<< HEAD
 app.use('/api/orders', orderRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api', reviewRoutes);
 app.use('/api/coupons', couponRoutes);
 app.use('/api/payments', paymentRoutes);
-=======
 app.use('/api/cart', cartRoutes);
 app.use('/api/wishlist', wishlistRoutes);
 app.use('/api/orders', orderRoutes);
@@ -141,7 +130,6 @@ app.use((req, res, next) => {
   res.status(404);
   next(error);
 });
->>>>>>> origin/main
 
 // Error Handling Middleware
 app.use((err, req, res, next) => {

@@ -51,8 +51,8 @@ export const getCheckoutItems = async (requestedItems = []) => {
     if (!Number.isInteger(quantity) || quantity < 1) throw Object.assign(new Error('Quantity must be a positive integer'), { statusCode: 400 });
     if (product.stock < quantity) throw Object.assign(new Error(`${product.name} does not have enough stock`), { statusCode: 409 });
 
-    const size = requestedItem.size || requestedItem.selectedSize;
-    const color = requestedItem.color;
+    const size = requestedItem.size || requestedItem.selectedSize || requestedItem.variant?.size;
+    const color = requestedItem.color || requestedItem.variant?.color || '';
     if (size && product.sizes?.length && !product.sizes.includes(size)) {
       throw Object.assign(new Error(`Size ${size} is unavailable for ${product.name}`), { statusCode: 400 });
     }
@@ -65,7 +65,7 @@ export const getCheckoutItems = async (requestedItems = []) => {
       quantity,
       size,
       color,
-      variant: requestedItem.variant,
+      variant: { size: size || '', color },
       price: Number(product.price),
       productName: product.name,
       productImage: product.image || product.images?.[0],

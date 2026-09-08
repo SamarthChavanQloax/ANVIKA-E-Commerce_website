@@ -3,11 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { FadeIn } from '../../components/animations/RevealOnScroll';
 import Button from '../../components/common/Button';
-<<<<<<< HEAD
 import api from '../../api';
-=======
-import axios from 'axios';
->>>>>>> origin/main
 
 const Register = () => {
   const [name, setName] = useState('');
@@ -25,31 +21,15 @@ const Register = () => {
     setError('');
     
     try {
-<<<<<<< HEAD
       const { data } = await api.post('/users', { name, email, password });
       login(data);
+      setIsLoading(false);
+      navigate('/profile');
     } catch (error) {
       setError(error.response?.data?.message || 'Registration failed.');
       setIsLoading(false);
       return;
     }
-    setIsLoading(false);
-=======
-      let res;
-      try {
-        res = await axios.post('/api/auth/register', { name, email, password }, { withCredentials: true });
-      } catch (authErr) {
-        // Fallback to legacy route if needed
-        res = await axios.post('/api/users', { name, email, password }, { withCredentials: true });
-      }
-      login(res.data);
-      setIsLoading(false);
-      navigate('/profile');
-    } catch (err) {
-      setError(err.response?.data?.message || err.message || 'Registration failed');
-      setIsLoading(false);
-    }
->>>>>>> origin/main
   };
 
   return (
@@ -72,11 +52,7 @@ const Register = () => {
             <p className="text-text-muted">Join us to experience modern Indian luxury.</p>
           </div>
 
-<<<<<<< HEAD
-          {error && <div className="bg-red-100 text-red-700 p-3 mb-6 rounded-sm text-sm">{error}</div>}
-=======
           {error && <div className="bg-red-100 dark:bg-red-950/50 text-red-700 dark:text-red-300 p-3 mb-6 rounded-sm text-sm border border-red-200 dark:border-red-900">{error}</div>}
->>>>>>> origin/main
 
           <form onSubmit={submitHandler} className="flex flex-col gap-6">
             <div>

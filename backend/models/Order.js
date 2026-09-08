@@ -1,5 +1,10 @@
 import mongoose from 'mongoose';
 
+const variantSchema = mongoose.Schema({
+  size: { type: String, default: '' },
+  color: { type: String, default: '' },
+}, { _id: false });
+
 const orderSchema = mongoose.Schema({
   user: {
     type: mongoose.Schema.Types.ObjectId,
@@ -15,7 +20,7 @@ const orderSchema = mongoose.Schema({
       },
       productName: { type: String, required: true },
       productImage: { type: String, required: true },
-      variant: { type: String },
+      variant: { type: variantSchema, default: () => ({}) },
       size: { type: String },
       color: { type: String },
       quantity: { type: Number, required: true, min: 1 },
@@ -29,7 +34,6 @@ const orderSchema = mongoose.Schema({
     postalCode: { type: String, required: true },
     country: { type: String, required: true },
   },
-<<<<<<< HEAD
   paymentMethod: { type: String, default: 'cod' },
   paymentStatus: {
     type: String,
@@ -40,20 +44,6 @@ const orderSchema = mongoose.Schema({
     type: String,
     enum: ['Pending', 'Confirmed', 'Processing', 'Shipped', 'Out for Delivery', 'Delivered', 'Cancelled', 'Returned', 'Refunded'],
     default: 'Pending'
-=======
-  paymentMethod: {
-    type: String,
-    required: true,
-  },
-  orderStatus: {
-    type: String,
-    enum: ['Placed', 'Confirmed', 'Packed', 'Shipped', 'Delivered', 'Cancelled'],
-    default: 'Placed',
-  },
-  paymentStatus: {
-    type: String,
-    enum: ['Pending', 'Completed', 'Failed'],
-    default: 'Pending',
   },
   paymentResult: {
     id: { type: String },
@@ -79,7 +69,6 @@ const orderSchema = mongoose.Schema({
   },
   cancelledAt: {
     type: Date,
->>>>>>> origin/main
   },
   subtotal: { type: Number, required: true, default: 0.0 },
   shippingFee: { type: Number, required: true, default: 0.0 },

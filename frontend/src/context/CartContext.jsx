@@ -1,13 +1,26 @@
-<<<<<<< HEAD
 import { createContext, useContext, useState, useEffect } from 'react';
 import api from '../api';
-=======
-import { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
+import { useCallback, useRef } from 'react';
 import { useAuth } from './AuthContext';
 import axios from 'axios';
->>>>>>> origin/main
 
 const CartContext = createContext();
+
+const isMongoProductId = (value) => /^[a-f\d]{24}$/i.test(String(value || ''));
+
+const resolveProduct = async (product) => {
+  if (isMongoProductId(product?._id)) return product;
+
+  const { data } = await api.get('/products', { params: { limit: 100 } });
+  const products = Array.isArray(data) ? data : data.products;
+  const match = products?.find((candidate) => (
+    (product.slug && candidate.slug === product.slug) ||
+    (product.name && candidate.name === product.name)
+  ));
+
+  if (!match?._id) throw new Error(`Product ${product?.name || 'item'} is no longer available`);
+  return match;
+};
 
 export const CartProvider = ({ children }) => {
   const { userInfo } = useAuth();
@@ -114,12 +127,47 @@ export const CartProvider = ({ children }) => {
     }
   }, [cartItems, userInfo]);
 
+  useEffect(() => {
+    if (userInfo || !cartItems.some((item) => !isMongoProductId(item._id))) return;
+
+    let cancelled = false;
+    const canonicalizeGuestCart = async () => {
+      try {
+        const { data } = await api.get('/products', { params: { limit: 100 } });
+        const products = Array.isArray(data) ? data : data.products;
+        const canonicalItems = cartItems.map((item) => {
+          if (isMongoProductId(item._id)) return item;
+          const match = products?.find((product) => (
+            (item.slug && product.slug === item.slug) ||
+            (item.name && product.name === item.name)
+          ));
+          return match ? { ...item, ...match, _id: match._id } : item;
+        });
+        if (!cancelled && canonicalItems.some((item, index) => item._id !== cartItems[index]._id)) {
+          setCartItems(canonicalItems);
+        }
+      } catch {
+        // Checkout will report the unavailable product if the catalog cannot be reached.
+      }
+    };
+
+    canonicalizeGuestCart();
+    return () => { cancelled = true; };
+  }, [cartItems, userInfo]);
+
   const openCart = () => setIsCartOpen(true);
   const closeCart = () => setIsCartOpen(false);
 
   const addToCart = async (product, qty = 1, selectedSize = null) => {
-    const sizeToUse = selectedSize || product.sizes?.[0] || 'Standard';
-    const itemKey = `${product._id}_${sizeToUse}`;
+    let canonicalProduct;
+    try {
+      canonicalProduct = await resolveProduct(product);
+    } catch {
+      return;
+    }
+
+    const sizeToUse = selectedSize || canonicalProduct.sizes?.[0] || 'Standard';
+    const itemKey = `${canonicalProduct._id}_${sizeToUse}`;
 
     // If authenticated, sync with MongoDB backend
     if (userInfo?.token) {
@@ -131,7 +179,7 @@ export const CartProvider = ({ children }) => {
         const { data } = await axios.post(
           '/api/cart',
           {
-            productId: product._id,
+            productId: canonicalProduct._id,
             quantity: qty,
             variant: { size: sizeToUse },
           },
@@ -157,7 +205,7 @@ export const CartProvider = ({ children }) => {
       return [
         ...prev,
         {
-          ...product,
+          ...canonicalProduct,
           cartKey: itemKey,
           selectedSize: sizeToUse,
           qty,

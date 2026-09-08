@@ -21,8 +21,14 @@ const Register = () => {
     setError('');
     
     try {
-      const { data } = await axios.post('/api/users', { name, email, password }, { withCredentials: true });
-      login(data);
+      let res;
+      try {
+        res = await axios.post('/api/auth/register', { name, email, password }, { withCredentials: true });
+      } catch (authErr) {
+        // Fallback to legacy route if needed
+        res = await axios.post('/api/users', { name, email, password }, { withCredentials: true });
+      }
+      login(res.data);
       setIsLoading(false);
       navigate('/profile');
     } catch (err) {

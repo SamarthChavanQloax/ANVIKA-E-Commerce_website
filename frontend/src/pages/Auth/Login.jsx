@@ -20,8 +20,14 @@ const Login = () => {
     setError('');
     
     try {
-      const { data } = await axios.post('/api/users/login', { email, password }, { withCredentials: true });
-      login(data);
+      let res;
+      try {
+        res = await axios.post('/api/auth/login', { email, password }, { withCredentials: true });
+      } catch (authErr) {
+        // Fallback to legacy route if needed
+        res = await axios.post('/api/users/login', { email, password }, { withCredentials: true });
+      }
+      login(res.data);
       setIsLoading(false);
       navigate('/profile');
     } catch (err) {

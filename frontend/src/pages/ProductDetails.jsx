@@ -68,7 +68,7 @@ const ProductDetails = () => {
   }
 
   const images = product.images?.length > 0 ? product.images : [product.image || '/demo-saree.jpg'];
-  const isFavorited = isInWishlist(product._id);
+  const isFavorited = isInWishlist(product);
   const isCompared = isInCompare(product._id);
 
   // Related products from same category or others

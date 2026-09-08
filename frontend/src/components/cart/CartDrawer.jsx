@@ -39,79 +39,19 @@ const CartDrawer = () => {
   const freeShippingProgress = Math.min(100, Math.round((subtotal / FREE_SHIPPING_THRESHOLD) * 100));
   const amountNeededForFreeShipping = Math.max(0, FREE_SHIPPING_THRESHOLD - subtotal);
 
-  const handleApplyCoupon = (e) => {
+  const handleApplyCoupon = async (e) => {
     e.preventDefault();
     if (!couponInput) return;
-    const result = applyCoupon(couponInput);
+    const result = await applyCoupon(couponInput);
     setCouponFeedback(result);
   };
 
-  const handleCheckout = async () => {
+  const handleCheckout = () => {
+    closeCart();
     if (!userInfo) {
-      closeCart();
-      navigate('/login');
-      return;
-    }
-
-    setIsCheckingOut(true);
-    setCheckoutError('');
-
-    try {
-      const config = {
-        headers: {
-          Authorization: `Bearer ${userInfo?.token}`,
-        },
-        withCredentials: true,
-      };
-
-      let shippingAddress = {
-        street: '101 Heritage Boulevard',
-        city: 'Mumbai',
-        state: 'Maharashtra',
-        postalCode: '400001',
-        country: 'India',
-      };
-
-      try {
-        const { data: userAddresses } = await axios.get('/api/users/addresses', config);
-        if (Array.isArray(userAddresses) && userAddresses.length > 0) {
-          const defaultAddr = userAddresses.find((a) => a.isDefault) || userAddresses[0];
-          shippingAddress = {
-            street: defaultAddr.addressLine,
-            city: defaultAddr.city,
-            state: defaultAddr.state,
-            postalCode: defaultAddr.postalCode,
-            country: defaultAddr.country || 'India',
-          };
-        }
-      } catch (e) {
-        // Fallback to default shipping address
-      }
-
-      const orderPayload = {
-        orderItems: cartItems.map((item) => ({
-          _id: item._id,
-          name: item.name,
-          image: item.image,
-          price: item.price,
-          quantity: item.qty,
-        })),
-        shippingAddress,
-        paymentMethod: 'UPI',
-        itemsPrice: subtotal,
-        shippingPrice: shippingFee,
-        discountPrice: discountAmount,
-        totalPrice: orderTotal,
-      };
-
-      const { data } = await axios.post('/api/orders', orderPayload, config);
-      setCreatedOrderData(data);
-      setCheckoutComplete(true);
-      clearCart();
-    } catch (err) {
-      setCheckoutError(err.response?.data?.message || err.message || 'Checkout failed. Please try again.');
-    } finally {
-      setIsCheckingOut(false);
+      navigate('/login?redirect=/checkout');
+    } else {
+      navigate('/checkout');
     }
   };
 

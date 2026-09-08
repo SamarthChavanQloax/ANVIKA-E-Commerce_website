@@ -19,6 +19,8 @@ const Navbar = () => {
   const location = useLocation();
 
   const isHome = location.pathname === '/';
+  const isAuthPage = location.pathname === '/login' || location.pathname === '/register' || location.pathname === '/forgot-password';
+  const hasDarkHero = isHome || isAuthPage;
 
   useEffect(() => {
     const handleScroll = () => {
@@ -63,11 +65,13 @@ const Navbar = () => {
   ];
 
   // Determine styling based on scroll state and route
-  const navClasses = isHome 
+  const navClasses = hasDarkHero 
     ? (isScrolled 
-        ? "bg-background/95 backdrop-blur-md border-b border-border text-text shadow-sm" 
-        : "bg-black/25 backdrop-blur-[2px] text-white border-b border-white/10")
-    : "bg-background/95 backdrop-blur-md border-b border-border text-text shadow-sm";
+        ? "bg-stone-950/80 backdrop-blur-md border-b border-white/10 text-white shadow-md" 
+        : "bg-black/20 backdrop-blur-[2px] text-white border-b border-white/10")
+    : (isScrolled
+        ? "bg-background/90 backdrop-blur-xl border-b border-border text-text shadow-sm"
+        : "bg-background/60 backdrop-blur-md border-b border-border/40 text-text");
 
   return (
     <header className="fixed top-0 left-0 w-full z-40">

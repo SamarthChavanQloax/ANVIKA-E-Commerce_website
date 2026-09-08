@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { SocialMediaBar, WhatsAppIcon } from '../common/SocialIcons';
 
@@ -10,6 +11,8 @@ const messages = [
 
 const AnnouncementBar = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const location = useLocation();
+  const isAuthPage = location.pathname === '/login' || location.pathname === '/register' || location.pathname === '/forgot-password';
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -19,7 +22,12 @@ const AnnouncementBar = () => {
   }, []);
 
   return (
-    <aside aria-label="Announcement" className="w-full bg-[#121212] text-white/90 h-[38px] relative overflow-hidden border-b border-white/10 select-none px-4 sm:px-8">
+    <aside
+      aria-label="Announcement"
+      className={`w-full ${
+        isAuthPage ? 'bg-black/35 backdrop-blur-md' : 'bg-[#121212]'
+      } text-white/90 h-[38px] relative overflow-hidden border-b border-white/10 select-none px-4 sm:px-8 transition-colors duration-300`}
+    >
       <div className="max-w-[90rem] mx-auto h-full flex items-center justify-between relative">
         
         {/* Left: Social Media Platforms with hover zoom */}

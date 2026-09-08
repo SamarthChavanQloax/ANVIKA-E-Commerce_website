@@ -50,9 +50,9 @@ const AdminLayout = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0d0d10] text-[#e8e6e3] flex flex-col lg:flex-row antialiased selection:bg-amber-600/30 selection:text-amber-200">
+    <div className="min-h-screen bg-[#0d0d10] text-[#e8e6e3] flex flex-col lg:flex-row antialiased selection:bg-amber-600/30 selection:text-amber-200 print:bg-white print:text-stone-900 print:block print:min-h-0 print:m-0 print:p-0">
       {/* Mobile Header */}
-      <header className="lg:hidden flex items-center justify-between px-5 py-4 bg-[#141418] border-b border-stone-800/80 sticky top-0 z-40">
+      <header className="lg:hidden flex items-center justify-between px-5 py-4 bg-[#141418] border-b border-stone-800/80 sticky top-0 z-40 print:hidden">
         <div className="flex items-center gap-3">
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -79,14 +79,14 @@ const AdminLayout = () => {
       {/* Sidebar Overlay for Mobile */}
       {mobileMenuOpen && (
         <div
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden"
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden print:hidden"
           onClick={() => setMobileMenuOpen(false)}
         />
       )}
 
       {/* Sidebar Navigation */}
       <aside
-        className={`fixed lg:sticky top-0 left-0 bottom-0 z-50 w-72 bg-[#121216] border-r border-stone-800/80 flex flex-col justify-between transition-transform duration-300 ease-in-out lg:translate-x-0 ${
+        className={`fixed lg:sticky top-0 left-0 bottom-0 z-50 w-72 bg-[#121216] border-r border-stone-800/80 flex flex-col justify-between transition-transform duration-300 ease-in-out lg:translate-x-0 print:hidden ${
           mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
@@ -186,9 +186,9 @@ const AdminLayout = () => {
       </aside>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 print:block print:w-full print:p-0 print:m-0">
         {/* Desktop Top Header Bar */}
-        <header className="hidden lg:flex items-center justify-between px-8 py-4 bg-[#121216]/90 backdrop-blur-md border-b border-stone-800/80 sticky top-0 z-30">
+        <header className="hidden lg:flex items-center justify-between px-8 py-4 bg-[#121216]/90 backdrop-blur-md border-b border-stone-800/80 sticky top-0 z-30 print:hidden">
           <div className="flex items-center gap-3">
             <span className="text-xs text-stone-400">Admin</span>
             <ChevronRight size={14} className="text-stone-400" />
@@ -212,7 +212,7 @@ const AdminLayout = () => {
         </header>
 
         {/* Page Content Viewport */}
-        <main className="flex-1 p-5 sm:p-8 max-w-7xl w-full mx-auto">
+        <main className="flex-1 p-5 sm:p-8 max-w-7xl w-full mx-auto print:p-0 print:m-0 print:max-w-none print:w-full print:block">
           <Outlet />
         </main>
       </div>

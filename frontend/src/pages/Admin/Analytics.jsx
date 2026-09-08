@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import axios from 'axios';
 import {
   BarChart3,
@@ -9,6 +9,10 @@ import {
   Calendar,
   Layers,
   Award,
+  PieChart as PieChartIcon,
+  Tag,
+  DollarSign,
+  Sparkles,
 } from 'lucide-react';
 
 const formatINR = (val) => {
@@ -26,11 +30,26 @@ const RANGES = [
   { id: 'year', label: 'This Year' },
 ];
 
+const PALETTE = [
+  { stroke: '#f59e0b', fill: '#f59e0b', bg: 'bg-amber-500', text: 'text-amber-400', border: 'border-amber-500/30' },
+  { stroke: '#f43f5e', fill: '#f43f5e', bg: 'bg-rose-500', text: 'text-rose-400', border: 'border-rose-500/30' },
+  { stroke: '#6366f1', fill: '#6366f1', bg: 'bg-indigo-500', text: 'text-indigo-400', border: 'border-indigo-500/30' },
+  { stroke: '#10b981', fill: '#10b981', bg: 'bg-emerald-500', text: 'text-emerald-400', border: 'border-emerald-500/30' },
+  { stroke: '#a855f7', fill: '#a855f7', bg: 'bg-purple-500', text: 'text-purple-400', border: 'border-purple-500/30' },
+  { stroke: '#06b6d4', fill: '#06b6d4', bg: 'bg-cyan-500', text: 'text-cyan-400', border: 'border-cyan-500/30' },
+  { stroke: '#ea580c', fill: '#ea580c', bg: 'bg-orange-500', text: 'text-orange-400', border: 'border-orange-500/30' },
+  { stroke: '#38bdf8', fill: '#38bdf8', bg: 'bg-sky-500', text: 'text-sky-400', border: 'border-sky-500/30' },
+];
+
 const Analytics = () => {
   const [range, setRange] = useState('month');
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+
+  // Chart interactivity & view toggles
+  const [chartView, setChartView] = useState('pie'); // 'pie' | 'bars'
+  const [hoveredProductIndex, setHoveredProductIndex] = useState(null);
 
   const fetchAnalytics = useCallback(async () => {
     try {
@@ -49,8 +68,94 @@ const Analytics = () => {
     fetchAnalytics();
   }, [fetchAnalytics]);
 
-  // Max revenue for bar normalization
+  // Max revenue for time-trend bar normalization
   const maxRevenue = data?.ordersTrend?.reduce((max, item) => Math.max(max, item.revenue), 0) || 1;
+
+  // Resolved list of products for revenue charts
+  const revenueItems = useMemo(() => {
+    const raw = data?.productRevenue || data?.topOrderedItems || [];
+    return raw.filter((item) => item.totalRevenue > 0);
+  }, [data?.productRevenue, data?.topOrderedItems]);
+
+  // Total product revenue for percentages
+  const totalProductsRevenue = useMemo(() => {
+    return revenueItems.reduce((sum, item) => sum + (item.totalRevenue || 0), 0);
+  }, [revenueItems]);
+
+  // Max product revenue for horizontal bar charts
+  const maxProductRevenue = useMemo(() => {
+    return revenueItems.reduce((max, item) => Math.max(max, item.totalRevenue || 0), 1);
+  }, [revenueItems]);
+
+  // Generate SVG Pie / Donut Arc Slices
+  const pieSlices = useMemo(() => {
+    if (!revenueItems.length || totalProductsRevenue === 0) return [];
+
+    let currentAngle = 0;
+    const cx = 110;
+    const cy = 110;
+    const R = 92; // Outer radius
+    const r = 58; // Inner cutout radius
+
+    return revenueItems.map((item, idx) => {
+      const val = item.totalRevenue || 0;
+      const fraction = val / totalProductsRevenue;
+      const startAngle = currentAngle;
+      const endAngle = currentAngle + fraction * 2 * Math.PI;
+      currentAngle = endAngle;
+
+      const palette = PALETTE[idx % PALETTE.length];
+      const percentage = (fraction * 100).toFixed(1);
+
+      // Edge case: single item 100% of pie
+      if (fraction >= 0.999) {
+        return {
+          ...item,
+          idx,
+          fraction,
+          percentage: '100.0',
+          palette,
+          isFull: true,
+          cx, cy, R, r,
+        };
+      }
+
+      // Compute outer arc points (rotated by -90deg so 0 is at top)
+      const x1 = cx + R * Math.cos(startAngle - Math.PI / 2);
+      const y1 = cy + R * Math.sin(startAngle - Math.PI / 2);
+      const x2 = cx + R * Math.cos(endAngle - Math.PI / 2);
+      const y2 = cy + R * Math.sin(endAngle - Math.PI / 2);
+
+      // Compute inner arc points in reverse direction
+      const ix1 = cx + r * Math.cos(endAngle - Math.PI / 2);
+      const iy1 = cy + r * Math.sin(endAngle - Math.PI / 2);
+      const ix2 = cx + r * Math.cos(startAngle - Math.PI / 2);
+      const iy2 = cy + r * Math.sin(startAngle - Math.PI / 2);
+
+      const largeArc = fraction > 0.5 ? 1 : 0;
+
+      const pathData = [
+        `M ${x1.toFixed(2)} ${y1.toFixed(2)}`,
+        `A ${R} ${R} 0 ${largeArc} 1 ${x2.toFixed(2)} ${y2.toFixed(2)}`,
+        `L ${ix1.toFixed(2)} ${iy1.toFixed(2)}`,
+        `A ${r} ${r} 0 ${largeArc} 0 ${ix2.toFixed(2)} ${iy2.toFixed(2)}`,
+        'Z',
+      ].join(' ');
+
+      return {
+        ...item,
+        idx,
+        fraction,
+        percentage,
+        palette,
+        pathData,
+        isFull: false,
+      };
+    });
+  }, [revenueItems, totalProductsRevenue]);
+
+  // Selected or hovered slice data for dynamic center display
+  const activeHoveredSlice = hoveredProductIndex !== null ? pieSlices[hoveredProductIndex] : null;
 
   return (
     <div className="space-y-8">
@@ -72,9 +177,9 @@ const Analytics = () => {
               key={r.id}
               type="button"
               onClick={() => setRange(r.id)}
-              className={`px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all ${
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
                 range === r.id
-                  ? 'bg-amber-600 text-white shadow-sm'
+                  ? 'bg-amber-600 text-white shadow-sm font-semibold'
                   : 'text-stone-400 hover:text-stone-200'
               }`}
             >
@@ -144,7 +249,7 @@ const Analytics = () => {
             </div>
           </div>
 
-          {/* Revenue Velocity Chart */}
+          {/* Sales & Revenue Trend Chart */}
           <div className="p-6 rounded-2xl bg-[#141419] border border-stone-800/80 shadow-xl space-y-5">
             <div className="flex items-center justify-between">
               <div>
@@ -181,6 +286,255 @@ const Analytics = () => {
                     </div>
                   );
                 })}
+              </div>
+            )}
+          </div>
+
+          {/* =========================================================================
+              PRODUCT REVENUE SHARE (PIE / DONUT CHART & RANKED BREAKDOWN)
+              ========================================================================= */}
+          <div className="p-6 rounded-2xl bg-[#141419] border border-stone-800/80 shadow-xl space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-stone-800/80 pb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
+                  <PieChartIcon size={18} />
+                </div>
+                <div>
+                  <h3 className="font-serif font-bold text-lg text-white">Product Revenue Distribution</h3>
+                  <p className="text-xs text-stone-400">
+                    Contribution share and sales volume by individual couture piece
+                  </p>
+                </div>
+              </div>
+
+              {/* View Switcher & Total Badge */}
+              <div className="flex items-center gap-3">
+                <div className="flex items-center p-1 bg-stone-900 border border-stone-800 rounded-xl text-xs">
+                  <button
+                    onClick={() => setChartView('pie')}
+                    className={`px-3 py-1.5 rounded-lg font-medium transition-all flex items-center gap-1.5 cursor-pointer ${
+                      chartView === 'pie'
+                        ? 'bg-amber-500 text-stone-950 font-semibold shadow-sm'
+                        : 'text-stone-400 hover:text-white'
+                    }`}
+                  >
+                    <PieChartIcon size={13} />
+                    <span>Donut Pie</span>
+                  </button>
+                  <button
+                    onClick={() => setChartView('bars')}
+                    className={`px-3 py-1.5 rounded-lg font-medium transition-all flex items-center gap-1.5 cursor-pointer ${
+                      chartView === 'bars'
+                        ? 'bg-amber-500 text-stone-950 font-semibold shadow-sm'
+                        : 'text-stone-400 hover:text-white'
+                    }`}
+                  >
+                    <BarChart3 size={13} />
+                    <span>Ranked Bars</span>
+                  </button>
+                </div>
+
+                <span className="hidden sm:inline-block text-xs font-mono text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full">
+                  Gross: {formatINR(totalProductsRevenue)}
+                </span>
+              </div>
+            </div>
+
+            {pieSlices.length === 0 ? (
+              <div className="py-16 text-center text-stone-500 text-xs">
+                No product revenue records found for this timeframe.
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                {/* Visual Chart Column */}
+                <div className="lg:col-span-5 flex flex-col items-center justify-center">
+                  {chartView === 'pie' ? (
+                    <div className="relative w-[240px] h-[240px] flex items-center justify-center">
+                      <svg
+                        viewBox="0 0 220 220"
+                        className="w-full h-full transform transition-all duration-300 drop-shadow-lg"
+                      >
+                        {pieSlices.map((slice) => {
+                          const isHovered = hoveredProductIndex === slice.idx;
+                          const isAnyHovered = hoveredProductIndex !== null;
+                          const opacityClass = isAnyHovered && !isHovered ? 'opacity-35' : 'opacity-100';
+
+                          if (slice.isFull) {
+                            return (
+                              <circle
+                                key={slice.idx}
+                                cx={slice.cx}
+                                cy={slice.cy}
+                                r={(slice.R + slice.r) / 2}
+                                fill="none"
+                                stroke={slice.palette.fill}
+                                strokeWidth={slice.R - slice.r}
+                                className={`transition-all duration-300 cursor-pointer ${opacityClass}`}
+                                onMouseEnter={() => setHoveredProductIndex(slice.idx)}
+                                onMouseLeave={() => setHoveredProductIndex(null)}
+                              />
+                            );
+                          }
+
+                          return (
+                            <path
+                              key={slice.idx}
+                              d={slice.pathData}
+                              fill={slice.palette.fill}
+                              stroke="#141419"
+                              strokeWidth="2.5"
+                              className={`transition-all duration-200 cursor-pointer ${opacityClass} hover:filter hover:brightness-110`}
+                              onMouseEnter={() => setHoveredProductIndex(slice.idx)}
+                              onMouseLeave={() => setHoveredProductIndex(null)}
+                            />
+                          );
+                        })}
+                      </svg>
+
+                      {/* Donut Center Cutout Display */}
+                      <div className="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none p-4">
+                        {activeHoveredSlice ? (
+                          <div className="animate-fadeIn space-y-0.5">
+                            <span className="text-[10px] uppercase font-bold tracking-wider text-amber-400">
+                              {activeHoveredSlice.percentage}% Share
+                            </span>
+                            <p className="font-serif font-bold text-sm sm:text-base text-white line-clamp-1 max-w-[120px]">
+                              {activeHoveredSlice._id}
+                            </p>
+                            <p className="font-mono text-xs text-stone-300 font-semibold">
+                              {formatINR(activeHoveredSlice.totalRevenue)}
+                            </p>
+                          </div>
+                        ) : (
+                          <div className="space-y-0.5">
+                            <span className="text-[9px] uppercase tracking-widest text-stone-400 font-semibold">
+                              Atelier Share
+                            </span>
+                            <p className="font-serif font-bold text-base sm:text-lg text-white">
+                              {formatINR(totalProductsRevenue)}
+                            </p>
+                            <span className="text-[9px] text-stone-500 font-medium">
+                              {revenueItems.length} Key Pieces
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ) : (
+                    /* Mini summary metric in bar view */
+                    <div className="w-full bg-stone-900/60 border border-stone-800 rounded-2xl p-6 text-center space-y-2">
+                      <Sparkles size={24} className="text-amber-400 mx-auto mb-1" />
+                      <h4 className="font-serif font-bold text-white text-base">Top Bestsellers</h4>
+                      <p className="text-xs text-stone-400 max-w-xs mx-auto">
+                        Ranked volume velocities and monetary yields for authentic handloom pieces.
+                      </p>
+                      <div className="pt-3 border-t border-stone-800 flex justify-around text-xs">
+                        <div>
+                          <div className="text-[10px] uppercase text-stone-500 font-semibold">Top Yield</div>
+                          <div className="text-sm font-mono font-bold text-amber-400">
+                            {formatINR(revenueItems[0]?.totalRevenue || 0)}
+                          </div>
+                        </div>
+                        <div className="w-[1px] bg-stone-800" />
+                        <div>
+                          <div className="text-[10px] uppercase text-stone-500 font-semibold">Catalog Units</div>
+                          <div className="text-sm font-mono font-bold text-white">
+                            {revenueItems.reduce((s, i) => s + (i.totalQuantity || 0), 0)} pcs
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Right Column: Interactive Product Legend & Ranked Breakdown */}
+                <div className="lg:col-span-7 space-y-2.5">
+                  {chartView === 'pie' ? (
+                    <div className="space-y-2">
+                      {pieSlices.map((slice) => {
+                        const isHovered = hoveredProductIndex === slice.idx;
+                        return (
+                          <div
+                            key={slice.idx}
+                            onMouseEnter={() => setHoveredProductIndex(slice.idx)}
+                            onMouseLeave={() => setHoveredProductIndex(null)}
+                            className={`p-3 rounded-xl border transition-all cursor-pointer flex items-center justify-between gap-3 ${
+                              isHovered
+                                ? 'bg-stone-800/90 border-amber-500/60 shadow-md scale-[1.01]'
+                                : 'bg-stone-900/50 hover:bg-stone-900/80 border-stone-800/80'
+                            }`}
+                          >
+                            <div className="flex items-center gap-3 min-w-0">
+                              <span
+                                className="w-3.5 h-3.5 rounded-full shrink-0 shadow-sm"
+                                style={{ backgroundColor: slice.palette.fill }}
+                              />
+                              <div className="min-w-0">
+                                <h4 className="text-xs font-semibold text-stone-200 truncate">
+                                  {slice._id}
+                                </h4>
+                                <p className="text-[11px] text-stone-400 flex items-center gap-2">
+                                  <span>{slice.totalQuantity || 1} units sold</span>
+                                  <span>•</span>
+                                  <span className="font-mono text-stone-300 font-medium">
+                                    {formatINR(slice.totalRevenue)}
+                                  </span>
+                                </p>
+                              </div>
+                            </div>
+
+                            {/* Percentage Share Pill */}
+                            <div className="shrink-0 flex items-center gap-2">
+                              <span
+                                className={`text-xs font-mono font-bold px-2.5 py-0.5 rounded-full border ${slice.palette.border} ${slice.palette.text} bg-stone-950`}
+                              >
+                                {slice.percentage}%
+                              </span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    /* Ranked Horizontal Bars View */
+                    <div className="space-y-3">
+                      {pieSlices.map((slice) => {
+                        const barWidth = Math.max(8, Math.round((slice.totalRevenue / maxProductRevenue) * 100));
+                        return (
+                          <div key={slice.idx} className="space-y-1.5 p-2 rounded-xl hover:bg-stone-900/40 transition-colors">
+                            <div className="flex justify-between items-center text-xs">
+                              <span className="font-medium text-stone-200 truncate max-w-sm">
+                                {slice._id}
+                              </span>
+                              <div className="flex items-center gap-2 shrink-0">
+                                <span className="text-stone-400 text-[11px]">
+                                  {slice.totalQuantity} units
+                                </span>
+                                <span className="font-mono font-bold text-white">
+                                  {formatINR(slice.totalRevenue)}
+                                </span>
+                                <span className="text-[10px] font-mono text-amber-400">
+                                  ({slice.percentage}%)
+                                </span>
+                              </div>
+                            </div>
+
+                            {/* Bar Track */}
+                            <div className="h-3 bg-stone-900 rounded-full overflow-hidden border border-stone-800">
+                              <div
+                                className="h-full rounded-full transition-all duration-700"
+                                style={{
+                                  width: `${barWidth}%`,
+                                  backgroundColor: slice.palette.fill,
+                                }}
+                              />
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
               </div>
             )}
           </div>

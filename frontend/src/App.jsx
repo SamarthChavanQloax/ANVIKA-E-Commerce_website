@@ -1,6 +1,7 @@
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider } from './context/AuthContext';
+import { ProductProvider } from './context/ProductContext';
 import { CartProvider } from './context/CartContext';
 import { WishlistProvider } from './context/WishlistContext';
 import { QuickViewProvider } from './context/QuickViewContext';
@@ -20,6 +21,7 @@ import ProductDetails from './pages/ProductDetails';
 import Compare from './pages/Compare';
 import Login from './pages/Auth/Login';
 import Register from './pages/Auth/Register';
+import ForgotPassword from './pages/Auth/ForgotPassword';
 import Profile from './pages/Auth/Profile';
 
 import Contact from './pages/Info/Contact';
@@ -31,9 +33,48 @@ import Sustainability from './pages/Info/Sustainability';
 import Terms from './pages/Info/Terms';
 import Privacy from './pages/Info/Privacy';
 
+// Admin Components & Pages
+import AdminRoute from './components/admin/AdminRoute';
+import AdminLayout from './components/admin/AdminLayout';
+import AdminLogin from './pages/Admin/AdminLogin';
+import Dashboard from './pages/Admin/Dashboard';
+import ProductList from './pages/Admin/ProductList';
+import ProductForm from './pages/Admin/ProductForm';
+import CategoryList from './pages/Admin/CategoryList';
+import Inventory from './pages/Admin/Inventory';
+import OrderList from './pages/Admin/OrderList';
+import CustomerList from './pages/Admin/CustomerList';
+import Analytics from './pages/Admin/Analytics';
+import Reports from './pages/Admin/Reports';
+
 function AppLayout() {
   const location = useLocation();
+  const isAdmin = location.pathname.startsWith('/admin');
   const isHome = location.pathname === '/';
+  const isAuthPage = location.pathname === '/login' || location.pathname === '/register' || location.pathname === '/forgot-password';
+
+  if (isAdmin) {
+    return (
+      <Routes>
+        <Route path="/admin/login" element={<AdminLogin />} />
+        <Route path="/admin" element={<AdminRoute />}>
+          <Route element={<AdminLayout />}>
+            <Route index element={<Navigate to="/admin/dashboard" replace />} />
+            <Route path="dashboard" element={<Dashboard />} />
+            <Route path="products" element={<ProductList />} />
+            <Route path="products/new" element={<ProductForm />} />
+            <Route path="products/:id/edit" element={<ProductForm />} />
+            <Route path="categories" element={<CategoryList />} />
+            <Route path="inventory" element={<Inventory />} />
+            <Route path="orders" element={<OrderList />} />
+            <Route path="customers" element={<CustomerList />} />
+            <Route path="reports" element={<Reports />} />
+            <Route path="analytics" element={<Analytics />} />
+          </Route>
+        </Route>
+      </Routes>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col font-sans text-text bg-background selection:bg-accent selection:text-background transition-colors duration-300">
@@ -43,8 +84,8 @@ function AppLayout() {
       {/* Unified Navbar which includes AnnouncementBar on top */}
       <Navbar />
 
-      {/* Main page content: Home starts at 0 for cinematic scrollytelling; other pages offset by header height */}
-      <main className={`flex-grow ${isHome ? 'pt-0' : 'pt-[115px]'}`}>
+      {/* Main page content: Home and Auth pages start at 0 for full-bleed cinematic video; other pages offset by header height */}
+      <main className={`flex-grow ${isHome || isAuthPage ? 'pt-0' : 'pt-[115px]'}`}>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/shop" element={<Shop />} />
@@ -55,6 +96,7 @@ function AppLayout() {
           <Route path="/compare" element={<Compare />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/profile" element={<Profile />} />
 
           {/* Help Pages */}
@@ -87,17 +129,19 @@ function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <CartProvider>
-          <WishlistProvider>
-            <QuickViewProvider>
-              <CompareProvider>
-                <Router>
-                  <AppLayout />
-                </Router>
-              </CompareProvider>
-            </QuickViewProvider>
-          </WishlistProvider>
-        </CartProvider>
+        <ProductProvider>
+          <CartProvider>
+            <WishlistProvider>
+              <QuickViewProvider>
+                <CompareProvider>
+                  <Router>
+                    <AppLayout />
+                  </Router>
+                </CompareProvider>
+              </QuickViewProvider>
+            </WishlistProvider>
+          </CartProvider>
+        </ProductProvider>
       </AuthProvider>
     </ThemeProvider>
   );

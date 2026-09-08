@@ -24,12 +24,16 @@ const ProductCarouselSection = ({
   const productsToDisplay = products && products.length > 0 ? products : mockProducts;
 
   return (
+<<<<<<< HEAD
     <section className="py-16 md:py-20 px-4 sm:px-6 lg:px-12 max-w-[90rem] mx-auto">
+=======
+    <section className="py-12 sm:py-16 md:py-20 px-4 sm:px-6 lg:px-12 max-w-[90rem] mx-auto">
+>>>>>>> c3c17e69fb1402587f193eab2889966d8c4c4a85
       <RevealOnScroll>
-        <div className="flex flex-col md:flex-row justify-between items-end mb-12">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 md:mb-12">
           <div>
-            <h2 className="text-3xl md:text-4xl font-serif text-text font-light mb-3 tracking-wide">{title}</h2>
-            <p className="text-text-muted text-sm tracking-wide">{subtitle}</p>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-serif text-text font-light mb-2 sm:mb-3 tracking-wide">{title}</h2>
+            <p className="text-text-muted text-xs sm:text-sm tracking-wide">{subtitle}</p>
           </div>
           <Link to={viewAllLink} className="hidden md:inline-flex mt-4 group text-xs font-medium tracking-[0.15em] uppercase text-text hover:text-accent transition-colors items-center gap-2">
             VIEW ALL <ArrowRight size={14} className="transform transition-transform group-hover:translate-x-1" />

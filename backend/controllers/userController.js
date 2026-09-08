@@ -75,6 +75,8 @@ const logoutUser = (req, res) => {
   res.cookie('jwt', '', {
     httpOnly: true,
     expires: new Date(0),
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
   });
   res.status(200).json({ message: 'Logged out successfully' });
 };
@@ -92,9 +94,14 @@ const getUserProfile = async (req, res, next) => {
         name: user.name,
         email: user.email,
         role: user.role,
-        addresses: user.addresses,
-        wishlist: user.wishlist,
-        phone: user.phone,
+        phone: user.phone || '',
+        avatar: user.avatar || '',
+        gender: user.gender || '',
+        dateOfBirth: user.dateOfBirth || null,
+        addresses: user.addresses || [],
+        wishlist: user.wishlist || [],
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
       });
     } else {
       res.status(404);
@@ -113,13 +120,22 @@ const updateUserProfile = async (req, res, next) => {
     const user = await User.findById(req.user._id);
 
     if (user) {
-      user.name = req.body.name || user.name;
-      user.email = req.body.email || user.email;
-      user.phone = req.body.phone || user.phone;
-      if (req.body.addresses) {
+      if (req.body.name) user.name = req.body.name.trim();
+      if (req.body.email) user.email = req.body.email.toLowerCase().trim();
+      if (req.body.phone !== undefined) user.phone = req.body.phone;
+      if (req.body.avatar !== undefined) user.avatar = req.body.avatar;
+      if (req.body.gender !== undefined) user.gender = req.body.gender;
+      if (req.body.dateOfBirth !== undefined) user.dateOfBirth = req.body.dateOfBirth;
+
+      if (req.body.addresses && Array.isArray(req.body.addresses)) {
         user.addresses = req.body.addresses;
       }
+
       if (req.body.password) {
+        if (req.body.password.length < 6) {
+          res.status(400);
+          throw new Error('Password must be at least 6 characters');
+        }
         user.password = req.body.password;
       }
 
@@ -131,12 +147,156 @@ const updateUserProfile = async (req, res, next) => {
         email: updatedUser.email,
         role: updatedUser.role,
         phone: updatedUser.phone,
+        avatar: updatedUser.avatar,
+        gender: updatedUser.gender,
+        dateOfBirth: updatedUser.dateOfBirth,
         addresses: updatedUser.addresses,
+        createdAt: updatedUser.createdAt,
+        updatedAt: updatedUser.updatedAt,
       });
     } else {
       res.status(404);
       throw new Error('User not found');
     }
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Get user addresses
+// @route   GET /api/users/addresses
+// @access  Private
+const getUserAddresses = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      res.status(404);
+      throw new Error('User not found');
+    }
+    res.json(user.addresses || []);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Add new address
+// @route   POST /api/users/addresses
+// @access  Private
+const addAddress = async (req, res, next) => {
+  try {
+    const { fullName, phone, addressLine, city, state, postalCode, country, isDefault } = req.body;
+
+    if (!fullName || !phone || !addressLine || !city || !state || !postalCode) {
+      res.status(400);
+      throw new Error('Please provide fullName, phone, addressLine, city, state, and postalCode');
+    }
+
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      res.status(404);
+      throw new Error('User not found');
+    }
+
+    const shouldBeDefault = Boolean(isDefault) || user.addresses.length === 0;
+
+    if (shouldBeDefault) {
+      user.addresses.forEach((addr) => {
+        addr.isDefault = false;
+      });
+    }
+
+    const newAddress = {
+      fullName,
+      phone,
+      addressLine,
+      city,
+      state,
+      postalCode,
+      country: country || 'India',
+      isDefault: shouldBeDefault,
+    };
+
+    user.addresses.push(newAddress);
+    await user.save();
+
+    const createdAddress = user.addresses[user.addresses.length - 1];
+    res.status(201).json(createdAddress);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Update user address
+// @route   PUT /api/users/addresses/:id
+// @access  Private
+const updateAddress = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      res.status(404);
+      throw new Error('User not found');
+    }
+
+    const address = user.addresses.id(id);
+    if (!address) {
+      res.status(404);
+      throw new Error('Address not found');
+    }
+
+    const { fullName, phone, addressLine, city, state, postalCode, country, isDefault } = req.body;
+
+    if (isDefault === true) {
+      user.addresses.forEach((addr) => {
+        addr.isDefault = false;
+      });
+      address.isDefault = true;
+    } else if (isDefault === false) {
+      address.isDefault = false;
+    }
+
+    if (fullName !== undefined) address.fullName = fullName;
+    if (phone !== undefined) address.phone = phone;
+    if (addressLine !== undefined) address.addressLine = addressLine;
+    if (city !== undefined) address.city = city;
+    if (state !== undefined) address.state = state;
+    if (postalCode !== undefined) address.postalCode = postalCode;
+    if (country !== undefined) address.country = country;
+
+    await user.save();
+    res.json(address);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Delete user address
+// @route   DELETE /api/users/addresses/:id
+// @access  Private
+const deleteAddress = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      res.status(404);
+      throw new Error('User not found');
+    }
+
+    const address = user.addresses.id(id);
+    if (!address) {
+      res.status(404);
+      throw new Error('Address not found');
+    }
+
+    const wasDefault = address.isDefault;
+    user.addresses.pull(id);
+
+    if (wasDefault && user.addresses.length > 0) {
+      user.addresses[0].isDefault = true;
+    }
+
+    await user.save();
+    res.json({ message: 'Address removed successfully' });
   } catch (error) {
     next(error);
   }
@@ -302,6 +462,10 @@ export {
   logoutUser,
   getUserProfile,
   updateUserProfile,
+  getUserAddresses,
+  addAddress,
+  updateAddress,
+  deleteAddress,
   getWishlist,
   addToWishlist,
   removeFromWishlist,

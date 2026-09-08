@@ -184,7 +184,16 @@ const updateOrderStatus = async (req, res, next) => {
 // @access  Private
 const cancelOrder = async (req, res, next) => {
   try {
-    const order = await Order.findById(req.params.id);
+    const { id } = req.params;
+
+    let order = null;
+    if (mongoose.Types.ObjectId.isValid(id)) {
+      order = await Order.findById(id);
+    }
+    if (!order) {
+      // Fallback search by orderNumber
+      order = await Order.findOne({ orderNumber: id });
+    }
 
     if (!order) {
       res.status(404);
@@ -192,30 +201,46 @@ const cancelOrder = async (req, res, next) => {
     }
 
     // Check authorization: admin or order owner
-    if (req.user.role !== 'admin' && order.user.toString() !== req.user._id.toString()) {
+    const orderUserId = order.user ? (order.user._id || order.user).toString() : null;
+    const reqUserId = req.user?._id ? req.user._id.toString() : null;
+
+    if (req.user.role !== 'admin' && (!orderUserId || orderUserId !== reqUserId)) {
       res.status(403);
       throw new Error('Not authorized to cancel this order');
     }
 
-    if (order.orderStatus === 'Cancelled') {
+    const currentStatus = (order.orderStatus || '').toLowerCase();
+
+    if (currentStatus === 'cancelled') {
       res.status(400);
       throw new Error('Order is already cancelled');
     }
 
-    if (order.orderStatus === 'Shipped' || order.orderStatus === 'Delivered') {
+    if (currentStatus === 'shipped' || currentStatus === 'out for delivery' || currentStatus === 'delivered') {
       res.status(400);
-      throw new Error(`Cannot cancel order once it is ${order.orderStatus.toLowerCase()}`);
+      throw new Error(`Cannot cancel order once it has been ${order.orderStatus.toLowerCase()}`);
     }
 
-    // Restore stock for all items
-    for (const item of order.items) {
-      await Product.findByIdAndUpdate(item.product, {
-        $inc: { stock: item.qty },
-      });
+    // Restore stock safely for all valid product items
+    for (const item of order.items || []) {
+      const prodId = item.product || item.matchedProductId;
+      const qty = Number(item.qty || 1);
+      if (prodId && mongoose.Types.ObjectId.isValid(prodId)) {
+        try {
+          await Product.findByIdAndUpdate(prodId, {
+            $inc: { stock: qty },
+          });
+        } catch (stockErr) {
+          console.warn(`Could not restore stock for product ${prodId}:`, stockErr.message);
+        }
+      }
     }
 
     order.orderStatus = 'Cancelled';
-    order.cancelledAt = Date.now();
+    order.cancelledAt = new Date();
+    if (order.isPaid || order.paymentStatus === 'Completed') {
+      order.paymentStatus = 'Refunded';
+    }
     const updatedOrder = await order.save();
 
     res.json({ message: 'Order cancelled successfully and inventory restored', order: updatedOrder });

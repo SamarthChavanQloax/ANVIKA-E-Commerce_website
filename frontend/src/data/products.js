@@ -1,4 +1,29 @@
 export const products = [
+  // ==================== TEST PRODUCT FOR VARIANTS ====================
+  {
+    _id: 'test_mehfil',
+    slug: 'mehfil-embroidered-anarkali',
+    name: 'Mehfil Embroidered Anarkali',
+    brand: 'Royal Elegance',
+    price: 15000,
+    originalPrice: 18000,
+    category: "Women's Wear",
+    image: '/products/saree-rosewood-silk.jpg', // Using existing image for test
+    images: ['/products/saree-rosewood-silk.jpg'],
+    description: 'A regal floor-length Anarkali suit featuring resham embroidery and a matching organza dupatta. (Test Product)',
+    fabric: 'Georgette',
+    stock: 15,
+    variants: [
+      { size: 'S', color: 'Emerald Green', price: 15000, stock: 5 },
+      { size: 'M', color: 'Emerald Green', price: 15000, stock: 7 },
+      { size: 'L', color: 'Emerald Green', price: 15500, stock: 3 },
+      { size: 'L', color: 'Ruby Red', price: 15500, stock: 0 } // out of stock variant
+    ],
+    rating: 5.0,
+    reviewsCount: 12,
+    isNew: true,
+    isFeatured: true
+  },
   // ==================== SAREES SECTION ====================
   {
     _id: 'prod_1',

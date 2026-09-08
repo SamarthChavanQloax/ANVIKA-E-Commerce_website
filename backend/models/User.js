@@ -1,25 +1,42 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcrypt';
 
-const userSchema = mongoose.Schema({
-  name: { type: String, required: true },
-  email: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
-  phone: { type: String },
-  role: { type: String, required: true, default: 'customer' }, // 'customer' or 'admin'
-  addresses: [{
-    street: String,
-    city: String,
-    state: String,
-    postalCode: String,
-    country: String,
-  }],
-  wishlist: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Product'
-  }],
+const addressSchema = mongoose.Schema({
+  fullName: { type: String, required: true },
+  phone: { type: String, required: true },
+  addressLine: { type: String, required: true },
+  city: { type: String, required: true },
+  state: { type: String, required: true },
+  postalCode: { type: String, required: true },
+  country: { type: String, required: true, default: 'India' },
+  isDefault: { type: Boolean, default: false },
 }, {
   timestamps: true,
+});
+
+const userSchema = mongoose.Schema({
+  name: { type: String, required: true },
+  email: { type: String, required: true, unique: true, lowercase: true, trim: true },
+  password: { type: String, required: true },
+  phone: { type: String },
+  role: { type: String, required: true, enum: ['customer', 'admin'], default: 'customer' },
+  avatar: { type: String, default: '' },
+  gender: { type: String, enum: ['male', 'female', 'other', 'prefer-not-to-say', ''], default: '' },
+  dateOfBirth: { type: Date },
+  addresses: [addressSchema],
+  wishlist: [{
+    type: mongoose.Schema.Types.Mixed,
+  }],
+  resetPasswordCode: { type: String },
+  resetPasswordExpires: { type: Date },
+}, {
+  timestamps: true,
+  toJSON: {
+    transform: function (doc, ret) {
+      delete ret.password;
+      return ret;
+    },
+  },
 });
 
 // Method to compare entered password with hashed password

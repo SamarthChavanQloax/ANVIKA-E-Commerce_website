@@ -159,17 +159,17 @@ const HeroVideo = () => {
 
             {/* Main Headline */}
             {currentSlide.isBrandLogo ? (
-              <h1 className="text-6xl sm:text-7xl md:text-9xl font-serif font-light tracking-[0.16em] text-white drop-shadow-[0_10px_35px_rgba(0,0,0,0.9)] my-2">
+              <h1 className="text-4xl sm:text-7xl md:text-9xl font-serif font-light tracking-[0.14em] sm:tracking-[0.16em] text-white drop-shadow-[0_10px_35px_rgba(0,0,0,0.9)] my-2">
                 {currentSlide.heading}
               </h1>
             ) : (
-              <h2 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-serif font-light leading-[1.1] text-white drop-shadow-[0_8px_30px_rgba(0,0,0,0.9)] max-w-4xl my-2">
+              <h2 className="text-2xl sm:text-5xl md:text-7xl lg:text-8xl font-serif font-light leading-[1.15] sm:leading-[1.1] text-white drop-shadow-[0_8px_30px_rgba(0,0,0,0.9)] max-w-4xl my-2">
                 {currentSlide.heading}
               </h2>
             )}
 
             {/* Subheading */}
-            <p className="mt-4 text-base sm:text-lg md:text-xl text-white/90 max-w-2xl font-light tracking-wide leading-relaxed drop-shadow-[0_4px_12px_rgba(0,0,0,0.8)]">
+            <p className="mt-3 sm:mt-4 text-xs sm:text-base md:text-xl text-white/90 max-w-2xl font-light tracking-wide leading-relaxed drop-shadow-[0_4px_12px_rgba(0,0,0,0.8)] px-2">
               {currentSlide.subheading}
             </p>
 
@@ -179,18 +179,18 @@ const HeroVideo = () => {
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.35, duration: 0.6 }}
-                className="mt-8 flex flex-wrap items-center justify-center gap-4"
+                className="mt-6 sm:mt-8 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 w-full sm:w-auto px-4 sm:px-0"
               >
                 <Link
                   to="/shop"
-                  className="px-8 py-3.5 rounded-full bg-white text-black hover:bg-gold-300 transition-all duration-300 text-xs font-semibold tracking-[0.2em] uppercase flex items-center gap-2 shadow-2xl hover:scale-105 active:scale-95"
+                  className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-3.5 rounded-full bg-white text-black hover:bg-gold-300 transition-all duration-300 text-xs font-semibold tracking-[0.18em] uppercase flex items-center justify-center gap-2 shadow-2xl hover:scale-105 active:scale-95"
                 >
                   <span>Explore Collection</span>
                   <ArrowRight size={15} />
                 </Link>
                 <Link
                   to="/category/sarees"
-                  className="px-8 py-3.5 rounded-full bg-white/10 hover:bg-white/20 border border-white/30 backdrop-blur-md transition-all duration-300 text-xs font-semibold tracking-[0.2em] uppercase text-white hover:scale-105 active:scale-95"
+                  className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-3.5 rounded-full bg-white/10 hover:bg-white/20 border border-white/30 backdrop-blur-md transition-all duration-300 text-xs font-semibold tracking-[0.18em] uppercase text-white hover:scale-105 active:scale-95 flex items-center justify-center"
                 >
                   Bridal & Sarees
                 </Link>
@@ -201,7 +201,7 @@ const HeroVideo = () => {
       </div>
 
       {/* Bottom Interface - Story Progress Bar & Scroll Indicator Only */}
-      <div className="absolute bottom-8 left-0 w-full z-30 px-6 sm:px-12 flex items-center justify-between pointer-events-none">
+      <div className="absolute bottom-5 sm:bottom-8 left-0 w-full z-30 px-4 sm:px-12 flex items-center justify-between pointer-events-none">
         
         {/* Story Slide Indicators */}
         <div className="flex items-center gap-2 sm:gap-3 pointer-events-auto">

@@ -1,5 +1,4 @@
 import { RevealOnScroll } from '../animations/RevealOnScroll';
-import { Heart } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { InstagramIcon } from '../common/SocialIcons';
 
@@ -36,14 +35,19 @@ const SocialGallery = () => {
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 w-full">
         {images.map((src, idx) => (
           <RevealOnScroll key={idx} delay={idx * 0.1} className="relative aspect-square group overflow-hidden cursor-pointer bg-background">
-            <motion.img 
-              src={src} 
-              alt="Social Post"
-              className="w-full h-full object-cover transition-transform duration-700 ease-[0.25,0.1,0.25,1] group-hover:scale-110"
-            />
-            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors duration-500 flex items-center justify-center">
-              <Heart size={24} className="text-white opacity-0 group-hover:opacity-100 transition-opacity duration-500 transform scale-50 group-hover:scale-100" />
-            </div>
+            <motion.a
+              href="https://instagram.com/anvikaboutique"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block w-full h-full relative"
+            >
+              <motion.img 
+                src={src} 
+                alt="Social Post"
+                className="w-full h-full object-cover transition-transform duration-700 ease-[0.25,0.1,0.25,1] group-hover:scale-110"
+              />
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-500 pointer-events-none" />
+            </motion.a>
           </RevealOnScroll>
         ))}
       </div>

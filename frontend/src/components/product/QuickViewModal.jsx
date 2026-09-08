@@ -33,7 +33,7 @@ const QuickViewModal = () => {
     ? selectedProduct.images 
     : [selectedProduct.image || '/demo-saree.jpg'];
 
-  const isFavorited = isInWishlist(selectedProduct._id);
+  const isFavorited = isInWishlist(selectedProduct);
   const isCompared = isInCompare(selectedProduct._id);
 
   const handleAddToCart = () => {
@@ -64,20 +64,20 @@ const QuickViewModal = () => {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             transition={{ type: 'spring', damping: 26, stiffness: 300 }}
-            className="relative w-full max-w-4xl bg-background rounded-3xl overflow-hidden shadow-2xl z-10 border border-border flex flex-col md:flex-row max-h-[90vh]"
+            className="relative w-full max-w-4xl bg-background rounded-2xl sm:rounded-3xl overflow-y-auto md:overflow-hidden shadow-2xl z-10 border border-border flex flex-col md:flex-row max-h-[92vh]"
           >
             {/* Close Button */}
             <button
               onClick={closeQuickView}
-              className="absolute top-4 right-4 z-20 p-2 rounded-full bg-background/80 backdrop-blur-md text-text-muted hover:text-text hover:bg-surface transition-colors shadow-sm"
+              className="absolute top-3 right-3 sm:top-4 sm:right-4 z-20 p-2 rounded-full bg-background/80 backdrop-blur-md text-text-muted hover:text-text hover:bg-surface transition-colors shadow-sm"
               aria-label="Close modal"
             >
-              <X size={20} />
+              <X size={18} className="sm:w-5 sm:h-5" />
             </button>
 
             {/* Left: Product Images */}
-            <div className="w-full md:w-1/2 p-6 md:p-8 flex flex-col justify-between bg-surface/30 border-b md:border-b-0 md:border-r border-border">
-              <div className="relative aspect-[3/4] w-full rounded-2xl overflow-hidden bg-surface shadow-inner group">
+            <div className="w-full md:w-1/2 p-4 sm:p-6 md:p-8 flex flex-col justify-between bg-surface/30 border-b md:border-b-0 md:border-r border-border flex-shrink-0">
+              <div className="relative aspect-[4/3] sm:aspect-[3/4] max-h-[260px] sm:max-h-none w-full rounded-xl sm:rounded-2xl overflow-hidden bg-surface shadow-inner group">
                 <img
                   src={images[activeImageIdx] || '/demo-saree.jpg'}
                   alt={selectedProduct.name}
@@ -89,14 +89,14 @@ const QuickViewModal = () => {
                   <>
                     <button
                       onClick={() => setActiveImageIdx(prev => (prev === 0 ? images.length - 1 : prev - 1))}
-                      className="absolute left-2.5 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-background/80 hover:bg-background text-text border border-border shadow backdrop-blur-md opacity-0 group-hover:opacity-100 transition-opacity"
+                      className="absolute left-2.5 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-background/80 hover:bg-background text-text border border-border shadow backdrop-blur-md opacity-90 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
                       aria-label="Previous view"
                     >
                       <ChevronLeft size={16} />
                     </button>
                     <button
                       onClick={() => setActiveImageIdx(prev => (prev === images.length - 1 ? 0 : prev + 1))}
-                      className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-background/80 hover:bg-background text-text border border-border shadow backdrop-blur-md opacity-0 group-hover:opacity-100 transition-opacity"
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-background/80 hover:bg-background text-text border border-border shadow backdrop-blur-md opacity-90 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
                       aria-label="Next view"
                     >
                       <ChevronRight size={16} />

@@ -21,6 +21,7 @@ import ProductDetails from './pages/ProductDetails';
 import Compare from './pages/Compare';
 import Login from './pages/Auth/Login';
 import Register from './pages/Auth/Register';
+import ForgotPassword from './pages/Auth/ForgotPassword';
 import Profile from './pages/Auth/Profile';
 
 import Contact from './pages/Info/Contact';
@@ -50,6 +51,7 @@ function AppLayout() {
   const location = useLocation();
   const isAdmin = location.pathname.startsWith('/admin');
   const isHome = location.pathname === '/';
+  const isAuthPage = location.pathname === '/login' || location.pathname === '/register' || location.pathname === '/forgot-password';
 
   if (isAdmin) {
     return (
@@ -82,8 +84,8 @@ function AppLayout() {
       {/* Unified Navbar which includes AnnouncementBar on top */}
       <Navbar />
 
-      {/* Main page content: Home starts at 0 for cinematic scrollytelling; other pages offset by header height */}
-      <main className={`flex-grow ${isHome ? 'pt-0' : 'pt-[115px]'}`}>
+      {/* Main page content: Home and Auth pages start at 0 for full-bleed cinematic video; other pages offset by header height */}
+      <main className={`flex-grow ${isHome || isAuthPage ? 'pt-0' : 'pt-[115px]'}`}>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/shop" element={<Shop />} />
@@ -94,6 +96,7 @@ function AppLayout() {
           <Route path="/compare" element={<Compare />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/profile" element={<Profile />} />
 
           {/* Help Pages */}

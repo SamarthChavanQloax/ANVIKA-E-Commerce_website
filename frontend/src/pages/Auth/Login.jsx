@@ -37,7 +37,7 @@ const Login = () => {
   };
 
   return (
-    <div className="relative min-h-[calc(100vh-115px)] flex items-center justify-center overflow-y-auto py-8 sm:py-12 px-4 sm:px-6 lg:px-12 bg-stone-950">
+    <div className="relative min-h-screen flex items-center justify-center overflow-y-auto pt-[125px] pb-12 px-4 sm:px-6 lg:px-12 bg-stone-950">
       {/* Background Video Looping Continuously */}
       <video
         autoPlay
@@ -126,7 +126,7 @@ const Login = () => {
                     <label className="block text-xs uppercase tracking-wider text-stone-200 font-medium">
                       Password
                     </label>
-                    <Link to="/contact" className="text-xs text-amber-300 hover:text-amber-200 transition-colors">
+                    <Link to="/forgot-password" className="text-xs text-amber-300 hover:text-amber-200 transition-colors">
                       Forgot Password?
                     </Link>
                   </div>

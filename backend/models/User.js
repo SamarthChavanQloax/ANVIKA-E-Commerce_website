@@ -27,6 +27,8 @@ const userSchema = mongoose.Schema({
   wishlist: [{
     type: mongoose.Schema.Types.Mixed,
   }],
+  resetPasswordCode: { type: String },
+  resetPasswordExpires: { type: Date },
 }, {
   timestamps: true,
   toJSON: {

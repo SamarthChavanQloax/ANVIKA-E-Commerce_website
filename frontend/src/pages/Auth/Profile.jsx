@@ -37,6 +37,8 @@ const Profile = () => {
   const [loadingOrders, setLoadingOrders] = useState(true);
   const [ordersError, setOrdersError] = useState('');
   const [cancellingId, setCancellingId] = useState(null);
+  const [confirmCancelId, setConfirmCancelId] = useState(null);
+  const [cancelErrorMsg, setCancelErrorMsg] = useState({});
 
   // Profile Details State
   const [profileData, setProfileData] = useState({
@@ -283,24 +285,47 @@ const Profile = () => {
     setAddressErrorMsg('');
   };
 
+  // Determine if customer can cancel order
+  const isCancellableStatus = (status) => {
+    const s = (status || '').toLowerCase();
+    return ['placed', 'pending', 'confirmed', 'processing', 'packed'].includes(s);
+  };
+
   // Cancel Order
   const handleCancelOrder = async (orderId) => {
-    if (!window.confirm('Are you sure you want to cancel this order? Inventory stock will be restored.')) {
-      return;
-    }
-
     try {
       setCancellingId(orderId);
+      setCancelErrorMsg((prev) => ({ ...prev, [orderId]: '' }));
       setActionMessage('');
+
+      const headers = {};
+      if (userInfo?.token) {
+        headers.Authorization = `Bearer ${userInfo.token}`;
+      }
+
       const config = {
-        headers: { Authorization: `Bearer ${userInfo?.token}` },
+        headers,
         withCredentials: true,
       };
-      await axios.put(`/api/orders/${orderId}/cancel`, {}, config);
-      setActionMessage('Order cancelled successfully.');
+
+      const { data } = await axios.put(`/api/orders/${orderId}/cancel`, {}, config);
+
+      // Instantly update local order state to show Cancelled
+      setOrders((prev) =>
+        prev.map((o) =>
+          o._id === orderId
+            ? { ...o, orderStatus: 'Cancelled', cancelledAt: new Date() }
+            : o
+        )
+      );
+
+      setActionMessage(data?.message || 'Order cancelled successfully. Reserved inventory has been restored.');
+      setConfirmCancelId(null);
       await fetchMyOrders();
     } catch (err) {
-      alert(err.response?.data?.message || err.message || 'Failed to cancel order');
+      console.error('Cancel order error:', err);
+      const msg = err.response?.data?.message || err.message || 'Failed to cancel order';
+      setCancelErrorMsg((prev) => ({ ...prev, [orderId]: msg }));
     } finally {
       setCancellingId(null);
     }
@@ -531,18 +556,54 @@ const Profile = () => {
                             </span>
                           </div>
 
-                          {(order.orderStatus === 'Placed' || order.orderStatus === 'Confirmed') && (
-                            <Button
-                              variant="outline"
-                              onClick={() => handleCancelOrder(order._id)}
-                              disabled={cancellingId === order._id}
-                              className="text-xs py-1.5 px-3 border-red-200 text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
-                            >
-                              {cancellingId === order._id ? 'Cancelling...' : 'Cancel Order'}
-                            </Button>
+                          {isCancellableStatus(order.orderStatus) && (
+                            <div className="flex items-center gap-2">
+                              {confirmCancelId === order._id ? (
+                                <div className="flex items-center gap-2 animate-fadeIn bg-red-500/10 border border-red-500/30 px-3 py-1.5 rounded-xl">
+                                  <span className="text-[11px] text-red-600 dark:text-red-400 font-medium">
+                                    Cancel this order?
+                                  </span>
+                                  <Button
+                                    variant="outline"
+                                    onClick={() => handleCancelOrder(order._id)}
+                                    disabled={cancellingId === order._id}
+                                    className="text-xs py-1 px-2.5 bg-red-600 hover:bg-red-700 text-white border-red-600 transition-colors shadow-sm"
+                                  >
+                                    {cancellingId === order._id ? 'Cancelling...' : 'Confirm'}
+                                  </Button>
+                                  <Button
+                                    variant="outline"
+                                    onClick={() => {
+                                      setConfirmCancelId(null);
+                                      setCancelErrorMsg((prev) => ({ ...prev, [order._id]: '' }));
+                                    }}
+                                    disabled={cancellingId === order._id}
+                                    className="text-xs py-1 px-2 text-text-muted hover:text-text border-border transition-colors"
+                                  >
+                                    Keep
+                                  </Button>
+                                </div>
+                              ) : (
+                                <Button
+                                  variant="outline"
+                                  onClick={() => setConfirmCancelId(order._id)}
+                                  className="text-xs py-1.5 px-3 border-red-200 text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
+                                >
+                                  Cancel Order
+                                </Button>
+                              )}
+                            </div>
                           )}
                         </div>
                       </div>
+
+                      {/* Cancellation Error Banner if any */}
+                      {cancelErrorMsg[order._id] && (
+                        <div className="mt-3 p-3 rounded-xl bg-red-500/10 border border-red-500/25 text-red-600 dark:text-red-400 text-xs flex items-center gap-2 animate-fadeIn">
+                          <AlertCircle size={14} className="shrink-0" />
+                          <span>{cancelErrorMsg[order._id]}</span>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>

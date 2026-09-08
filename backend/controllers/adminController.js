@@ -181,8 +181,46 @@ export const getAdminAnalytics = async (req, res, next) => {
       },
     ]);
 
+    // Product revenue breakdown (excluding cancelled orders)
+    let productRevenue = await Order.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: startDate },
+          orderStatus: { $ne: 'Cancelled' },
+        },
+      },
+      { $unwind: '$items' },
+      {
+        $group: {
+          _id: '$items.name',
+          totalQuantity: { $sum: '$items.qty' },
+          totalRevenue: { $sum: { $multiply: ['$items.qty', '$items.price'] } },
+        },
+      },
+      { $sort: { totalRevenue: -1 } },
+      { $limit: 7 },
+    ]);
+
+    // Fallback to all non-cancelled orders if range has 0 revenue orders so chart is never empty
+    if (!productRevenue || productRevenue.length === 0) {
+      productRevenue = await Order.aggregate([
+        { $match: { orderStatus: { $ne: 'Cancelled' } } },
+        { $unwind: '$items' },
+        {
+          $group: {
+            _id: '$items.name',
+            totalQuantity: { $sum: '$items.qty' },
+            totalRevenue: { $sum: { $multiply: ['$items.qty', '$items.price'] } },
+          },
+        },
+        { $sort: { totalRevenue: -1 } },
+        { $limit: 7 },
+      ]);
+    }
+
     // Top selling products by order frequency
     const topOrderedItems = await Order.aggregate([
+      { $match: { orderStatus: { $ne: 'Cancelled' } } },
       { $unwind: '$items' },
       {
         $group: {
@@ -204,6 +242,7 @@ export const getAdminAnalytics = async (req, res, next) => {
       ordersTrend,
       categoryStats,
       orderStatusDistribution,
+      productRevenue,
       topOrderedItems,
     });
   } catch (error) {

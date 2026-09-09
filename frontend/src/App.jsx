@@ -49,6 +49,7 @@ import CustomerList from './pages/Admin/CustomerList';
 import CouponManagement from './pages/Admin/CouponManagement';
 import Analytics from './pages/Admin/Analytics';
 import Reports from './pages/Admin/Reports';
+import AbandonedCarts from './pages/Admin/AbandonedCarts';
 
 function AppLayout() {
   const location = useLocation();
@@ -70,6 +71,7 @@ function AppLayout() {
             <Route path="categories" element={<CategoryList />} />
             <Route path="inventory" element={<Inventory />} />
             <Route path="orders" element={<OrderList />} />
+            <Route path="abandoned-carts" element={<AbandonedCarts />} />
             <Route path="customers" element={<CustomerList />} />
             <Route path="coupons" element={<CouponManagement />} />
             <Route path="reports" element={<Reports />} />

@@ -97,8 +97,17 @@ export const addToCart = async (req, res, next) => {
         image: product.image,
       });
     }
-
+ 
     cart.calculateSubtotal();
+    cart.lastActivityAt = new Date();
+    if (!cart.recoveryToken) {
+      cart.recoveryToken = `rec_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+    }
+    // If cart was marked abandoned or in_progress, adding more items reactivates it
+    if (cart.recoveryStatus === 'in_progress' || cart.recoveryStatus === 'cancelled') {
+      cart.recoveryStatus = 'none';
+      cart.recoveryStep = 0;
+    }
     await cart.save();
 
     const populatedCart = await Cart.findById(cart._id).populate('items.product', 'name price image stock sizes colors');
@@ -150,6 +159,7 @@ export const updateCartItem = async (req, res, next) => {
     item.price = product.price; // Update snapshot to latest price
 
     cart.calculateSubtotal();
+    cart.lastActivityAt = new Date();
     await cart.save();
 
     const populatedCart = await Cart.findById(cart._id).populate('items.product', 'name price image stock sizes colors');
@@ -180,6 +190,7 @@ export const removeCartItem = async (req, res, next) => {
 
     cart.items.pull(itemId);
     cart.calculateSubtotal();
+    cart.lastActivityAt = new Date();
     await cart.save();
 
     const populatedCart = await Cart.findById(cart._id).populate('items.product', 'name price image stock sizes colors');
@@ -199,6 +210,8 @@ export const clearCart = async (req, res, next) => {
     if (cart) {
       cart.items = [];
       cart.subtotal = 0;
+      cart.lastActivityAt = new Date();
+      cart.recoveryStatus = 'cancelled';
       await cart.save();
     }
 

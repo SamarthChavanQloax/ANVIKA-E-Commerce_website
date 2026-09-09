@@ -3,6 +3,7 @@ import Order from '../models/Order.js';
 import Product from '../models/Product.js';
 import Coupon from '../models/Coupon.js';
 import Cart from '../models/Cart.js';
+import WhatsAppMessage from '../models/WhatsAppMessage.js';
 import { reduceOrderStock, restoreOrderStock } from './paymentController.js';
 
 // Helper: Calculate shipping fee based on subtotal
@@ -176,7 +177,20 @@ export const addOrderItems = async (req, res, next) => {
     if (!isRazorpay) {
       await reduceOrderStock(savedOrder);
       try {
-        await Cart.findOneAndUpdate({ user: req.user._id }, { items: [], subtotal: 0 });
+        await Cart.findOneAndUpdate(
+          { user: req.user._id },
+          {
+            items: [],
+            subtotal: 0,
+            recoveryStatus: 'completed',
+            recoveredAt: new Date(),
+            recoveryOrder: savedOrder._id,
+          }
+        );
+        await WhatsAppMessage.updateMany(
+          { userId: req.user._id, status: 'pending' },
+          { $set: { status: 'cancelled' } }
+        );
       } catch (e) {
         console.warn('Cart clear error on direct checkout:', e.message);
       }

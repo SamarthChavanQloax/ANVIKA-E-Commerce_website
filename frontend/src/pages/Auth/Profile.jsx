@@ -47,6 +47,12 @@ const Profile = () => {
     phone: '',
     gender: '',
     dateOfBirth: '',
+    whatsappOptIn: false,
+    notificationPreferences: {
+      abandonedCart: true,
+      orderUpdates: true,
+      promotions: false,
+    },
   });
   const [loadingProfile, setLoadingProfile] = useState(false);
   const [savingProfile, setSavingProfile] = useState(false);
@@ -119,6 +125,12 @@ const Profile = () => {
           phone: data.phone || '',
           gender: data.gender || '',
           dateOfBirth: data.dateOfBirth ? data.dateOfBirth.split('T')[0] : '',
+          whatsappOptIn: Boolean(data.whatsappOptIn),
+          notificationPreferences: data.notificationPreferences || {
+            abandonedCart: true,
+            orderUpdates: true,
+            promotions: false,
+          },
         });
         if (Array.isArray(data.addresses)) {
           setAddresses(data.addresses);
@@ -165,6 +177,8 @@ const Profile = () => {
         phone: profileData.phone,
         gender: profileData.gender,
         dateOfBirth: profileData.dateOfBirth || null,
+        whatsappOptIn: profileData.whatsappOptIn,
+        notificationPreferences: profileData.notificationPreferences,
       };
       const { data } = await axios.put('/api/users/profile', payload, config);
 
@@ -721,6 +735,62 @@ const Profile = () => {
                       <Calendar size={16} className="absolute left-3.5 top-3.5 text-text-muted" />
                     </div>
                   </div>
+                </div>
+
+                {/* WhatsApp Communication Preferences */}
+                <div className="mt-6 p-5 rounded-2xl bg-surface border border-border">
+                  <div className="flex items-center justify-between mb-3">
+                    <div>
+                      <h4 className="text-sm font-serif font-bold text-text">WhatsApp Notifications & Cart Reminders</h4>
+                      <p className="text-xs text-text-muted mt-0.5">
+                        Manage automated WhatsApp updates, order tracking, and shopping bag reminders.
+                      </p>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={profileData.whatsappOptIn}
+                        onChange={(e) => setProfileData({ ...profileData, whatsappOptIn: e.target.checked })}
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-stone-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-stone-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
+                    </label>
+                  </div>
+
+                  {profileData.whatsappOptIn && (
+                    <div className="mt-4 pt-4 border-t border-border/70 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-text font-medium">Abandoned Cart Reminders</span>
+                        <input
+                          type="checkbox"
+                          checked={profileData.notificationPreferences?.abandonedCart !== false}
+                          onChange={(e) => setProfileData({
+                            ...profileData,
+                            notificationPreferences: {
+                              ...profileData.notificationPreferences,
+                              abandonedCart: e.target.checked,
+                            },
+                          })}
+                          className="w-4 h-4 rounded text-accent focus:ring-accent accent-accent cursor-pointer"
+                        />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-text font-medium">Order Status & Courier Tracking</span>
+                        <input
+                          type="checkbox"
+                          checked={profileData.notificationPreferences?.orderUpdates !== false}
+                          onChange={(e) => setProfileData({
+                            ...profileData,
+                            notificationPreferences: {
+                              ...profileData.notificationPreferences,
+                              orderUpdates: e.target.checked,
+                            },
+                          })}
+                          className="w-4 h-4 rounded text-accent focus:ring-accent accent-accent cursor-pointer"
+                        />
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <div className="pt-4 border-t border-border flex justify-end">

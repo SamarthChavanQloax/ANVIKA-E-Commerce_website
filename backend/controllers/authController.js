@@ -6,7 +6,7 @@ import generateToken from '../utils/generateToken.js';
 // @access  Public
 export const register = async (req, res, next) => {
   try {
-    const { name, email, password, phone } = req.body;
+    const { name, email, password, phone, whatsappOptIn, notificationPreferences } = req.body;
 
     if (!name || !email || !password) {
       res.status(400);
@@ -26,11 +26,20 @@ export const register = async (req, res, next) => {
       throw new Error('An account with this email already exists');
     }
 
+    const isOptedIn = Boolean(whatsappOptIn);
+
     const user = await User.create({
       name: name.trim(),
       email: normalizedEmail,
       password,
       phone: phone || '',
+      whatsappOptIn: isOptedIn,
+      whatsappOptInAt: isOptedIn ? new Date() : null,
+      notificationPreferences: notificationPreferences || {
+        abandonedCart: true,
+        orderUpdates: true,
+        promotions: false,
+      },
       role: 'customer',
     });
 
@@ -42,6 +51,8 @@ export const register = async (req, res, next) => {
         name: user.name,
         email: user.email,
         phone: user.phone,
+        whatsappOptIn: user.whatsappOptIn,
+        notificationPreferences: user.notificationPreferences,
         role: user.role,
         token,
       });
@@ -77,6 +88,8 @@ export const login = async (req, res, next) => {
         name: user.name,
         email: user.email,
         phone: user.phone,
+        whatsappOptIn: user.whatsappOptIn,
+        notificationPreferences: user.notificationPreferences,
         role: user.role,
         token,
       });

@@ -3,12 +3,14 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { FadeIn } from '../../components/animations/RevealOnScroll';
 import axios from 'axios';
-import { Sparkles, Lock, Mail, User, ArrowRight, ShieldCheck, Crown } from 'lucide-react';
+import { Sparkles, Lock, Mail, User, ArrowRight, ShieldCheck, Crown, Phone, MessageSquare } from 'lucide-react';
 
 const Register = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [phone, setPhone] = useState('');
+  const [whatsappOptIn, setWhatsappOptIn] = useState(true); // Default opt-in checked for convenience, customer can uncheck
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   
@@ -23,10 +25,22 @@ const Register = () => {
     try {
       let res;
       try {
-        res = await axios.post('/api/auth/register', { name, email, password }, { withCredentials: true });
+        res = await axios.post('/api/auth/register', { 
+          name, 
+          email, 
+          password, 
+          phone, 
+          whatsappOptIn 
+        }, { withCredentials: true });
       } catch (authErr) {
         // Fallback to legacy route if needed
-        res = await axios.post('/api/users', { name, email, password }, { withCredentials: true });
+        res = await axios.post('/api/users', { 
+          name, 
+          email, 
+          password, 
+          phone, 
+          whatsappOptIn 
+        }, { withCredentials: true });
       }
       login(res.data);
       setIsLoading(false);
@@ -157,6 +171,38 @@ const Register = () => {
                       placeholder="••••••••"
                     />
                   </div>
+                </div>
+
+                {/* WhatsApp Phone Number */}
+                <div>
+                  <label className="block text-xs uppercase tracking-wider text-stone-200 font-medium mb-1.5">
+                    WhatsApp Phone Number
+                  </label>
+                  <div className="relative">
+                    <Phone size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-300" />
+                    <input 
+                      type="tel" 
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      className="w-full pl-10 pr-4 py-3 bg-white/10 hover:bg-white/[0.15] focus:bg-white/[0.18] border border-white/20 focus:border-amber-300/80 rounded-xl text-white placeholder-stone-300/60 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-amber-300/30 backdrop-blur-xl transition-all"
+                      placeholder="+91 98765 43210"
+                    />
+                  </div>
+                </div>
+
+                {/* WhatsApp Marketing & Abandoned Cart Opt-In Checkbox */}
+                <div className="flex items-start gap-3 p-3 rounded-xl bg-white/[0.06] border border-white/15 backdrop-blur-md">
+                  <input
+                    type="checkbox"
+                    id="whatsappOptIn"
+                    checked={whatsappOptIn}
+                    onChange={(e) => setWhatsappOptIn(e.target.checked)}
+                    className="mt-1 w-4 h-4 rounded border-stone-400 text-amber-500 focus:ring-amber-400/30 bg-stone-900/60 cursor-pointer accent-amber-400"
+                  />
+                  <label htmlFor="whatsappOptIn" className="text-xs text-stone-200 leading-relaxed cursor-pointer select-none">
+                    <span className="font-medium text-amber-300">WhatsApp Updates & Cart Reminders:</span>{' '}
+                    Send me order receipts, dispatch tracking, and reminders for items left in my shopping bag.
+                  </label>
                 </div>
 
                 <button

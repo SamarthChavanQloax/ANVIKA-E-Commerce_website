@@ -43,6 +43,11 @@ const Checkout = () => {
     country: 'India',
   });
 
+  // WhatsApp Notification Opt-In state
+  const [whatsappOptIn, setWhatsappOptIn] = useState(() => {
+    return userInfo?.whatsappOptIn !== undefined ? userInfo.whatsappOptIn : true;
+  });
+
   // Payment method state
   const [paymentMethod, setPaymentMethod] = useState('Razorpay'); // 'Razorpay' or 'COD'
 
@@ -169,6 +174,14 @@ const Checkout = () => {
 
       // 2. Create authoritative order on backend
       const { data: createdOrder } = await axios.post('/api/orders', orderPayload, config);
+
+      // 2b. Sync customer's confirmed phone and WhatsApp opt-in preferences in profile
+      try {
+        axios.put('/api/users/profile', {
+          phone: shippingAddress.phone,
+          whatsappOptIn,
+        }, config).catch(() => {});
+      } catch (_) {}
 
       if (paymentMethod === 'COD') {
         // COD complete immediately
@@ -426,6 +439,22 @@ const Checkout = () => {
                 </div>
               </div>
             )}
+
+            {/* WhatsApp Notification & Order Tracking Opt-In */}
+            <div className="mt-5 p-3.5 rounded-xl bg-background border border-border flex items-start gap-3">
+              <input
+                type="checkbox"
+                id="checkoutWhatsappOptIn"
+                checked={whatsappOptIn}
+                onChange={(e) => setWhatsappOptIn(e.target.checked)}
+                className="mt-1 w-4 h-4 rounded text-accent focus:ring-accent accent-accent cursor-pointer"
+              />
+              <label htmlFor="checkoutWhatsappOptIn" className="text-xs text-textSecondary leading-relaxed cursor-pointer select-none">
+                <span className="font-semibold text-text">WhatsApp Order Updates & Assistance:</span>{' '}
+                Send order receipt, live courier dispatch tracking, and concierge styling reminders to{' '}
+                <span className="font-medium text-accent">{shippingAddress?.phone || 'my phone number'}</span>.
+              </label>
+            </div>
           </div>
 
           {/* 2. Payment Method Section */}

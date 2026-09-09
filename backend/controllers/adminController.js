@@ -2,6 +2,9 @@ import Product from '../models/Product.js';
 import Order from '../models/Order.js';
 import User from '../models/User.js';
 import Category from '../models/Category.js';
+import Cart from '../models/Cart.js';
+import WhatsAppMessage from '../models/WhatsAppMessage.js';
+import { processSingleCartRecovery } from '../services/cartRecoveryWorker.js';
 
 // @desc    Get real Admin Dashboard statistics from MongoDB
 // @route   GET /api/admin/dashboard
@@ -817,5 +820,184 @@ export const getAdminAnalyticsCustomers = async (req, res, next) => {
     next(error);
   }
 };
+
+// @desc    Get Abandoned Cart Recovery statistics for Admin Dashboard
+// @route   GET /api/admin/abandoned-carts/stats
+// @access  Private/Admin
+export const getAbandonedCartStats = async (req, res, next) => {
+  try {
+    const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000);
+
+    const [
+      totalAbandonedCarts,
+      messagesSent,
+      messagesDelivered,
+      messagesRead,
+      messagesFailed,
+      recoveredCartsCount,
+      recoveredCartsDocs,
+    ] = await Promise.all([
+      // Any cart with items that is marked abandoned OR inactive > 30m
+      Cart.countDocuments({
+        'items.0': { $exists: true },
+        subtotal: { $gt: 0 },
+        $or: [
+          { isAbandoned: true },
+          { recoveryStatus: { $in: ['in_progress', 'scheduled'] } },
+          { lastActivityAt: { $lte: thirtyMinutesAgo } },
+        ],
+      }),
+      WhatsAppMessage.countDocuments({ status: { $in: ['sent', 'delivered', 'read'] } }),
+      WhatsAppMessage.countDocuments({ status: { $in: ['delivered', 'read'] } }),
+      WhatsAppMessage.countDocuments({ status: 'read' }),
+      WhatsAppMessage.countDocuments({ status: 'failed' }),
+      Cart.countDocuments({ recoveryStatus: 'completed' }),
+      Cart.find({ recoveryStatus: 'completed', recoveryOrder: { $exists: true } })
+        .populate('recoveryOrder', 'total totalAmount')
+        .select('recoveryOrder'),
+    ]);
+
+    // Calculate recovered revenue from orders linked to recovered carts
+    const revenueRecovered = recoveredCartsDocs.reduce((sum, c) => {
+      const orderTotal = c.recoveryOrder?.total || c.recoveryOrder?.totalAmount || 0;
+      return sum + orderTotal;
+    }, 0);
+
+    // Conversion rate: recovered carts / total abandoned carts
+    const baseCarts = totalAbandonedCarts + recoveredCartsCount;
+    const recoveryConversionRate = baseCarts > 0 
+      ? Number(((recoveredCartsCount / baseCarts) * 100).toFixed(1)) 
+      : 0;
+
+    res.status(200).json({
+      totalAbandonedCarts,
+      messagesSent,
+      messagesDelivered,
+      messagesRead,
+      messagesFailed,
+      recoveredCarts: recoveredCartsCount,
+      recoveryConversionRate,
+      revenueRecovered,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Get List of Abandoned Carts with Customer & Item details
+// @route   GET /api/admin/abandoned-carts
+// @access  Private/Admin
+export const getAbandonedCartsList = async (req, res, next) => {
+  try {
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 20;
+    const skip = (page - 1) * limit;
+    const statusFilter = req.query.status;
+
+    const query = {
+      'items.0': { $exists: true },
+      subtotal: { $gt: 0 },
+    };
+
+    if (statusFilter && statusFilter !== 'all') {
+      query.recoveryStatus = statusFilter;
+    } else {
+      // Default: show abandoned or in-progress carts
+      const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000);
+      query.$or = [
+        { isAbandoned: true },
+        { recoveryStatus: { $in: ['in_progress', 'scheduled', 'completed'] } },
+        { lastActivityAt: { $lte: thirtyMinutesAgo } },
+      ];
+    }
+
+    const [total, carts] = await Promise.all([
+      Cart.countDocuments(query),
+      Cart.find(query)
+        .populate('user', 'name email phone whatsappOptIn whatsappOptInAt')
+        .populate('recoveryOrder', 'orderNumber total createdAt')
+        .sort({ lastActivityAt: -1, updatedAt: -1 })
+        .skip(skip)
+        .limit(limit),
+    ]);
+
+    res.status(200).json({
+      carts,
+      page,
+      pages: Math.ceil(total / limit) || 1,
+      total,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Manually trigger WhatsApp recovery reminder for an abandoned cart
+// @route   POST /api/admin/abandoned-carts/:cartId/send-reminder
+// @access  Private/Admin
+export const triggerCartReminder = async (req, res, next) => {
+  try {
+    const { cartId } = req.params;
+
+    const cart = await Cart.findById(cartId).populate('items.product', 'name price image');
+    if (!cart) {
+      res.status(404);
+      throw new Error('Cart not found');
+    }
+
+    const result = await processSingleCartRecovery(cart, true);
+
+    if (result.status === 'failed') {
+      res.status(400);
+      throw new Error(result.error || 'Failed to dispatch WhatsApp reminder');
+    }
+
+    if (result.status === 'skipped' || result.status === 'cancelled') {
+      return res.status(200).json({
+        success: false,
+        message: `Skipped: ${result.reason}`,
+        result,
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: `WhatsApp reminder dispatched successfully (Step ${result.step})`,
+      result,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Get WhatsApp message history audit log
+// @route   GET /api/admin/abandoned-carts/messages
+// @access  Private/Admin
+export const getWhatsAppMessagesList = async (req, res, next) => {
+  try {
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 25;
+    const skip = (page - 1) * limit;
+
+    const [total, messages] = await Promise.all([
+      WhatsAppMessage.countDocuments(),
+      WhatsAppMessage.find({})
+        .populate('userId', 'name email phone')
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit),
+    ]);
+
+    res.status(200).json({
+      messages,
+      page,
+      pages: Math.ceil(total / limit) || 1,
+      total,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 
 

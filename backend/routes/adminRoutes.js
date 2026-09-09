@@ -7,6 +7,10 @@ import {
   getAdminAnalyticsCustomers,
   getAdminCustomers,
   getAdminReportData,
+  getAbandonedCartStats,
+  getAbandonedCartsList,
+  triggerCartReminder,
+  getWhatsAppMessagesList,
 } from '../controllers/adminController.js';
 import couponRoutes from './couponRoutes.js';
 import {
@@ -28,6 +32,12 @@ router.get('/analytics', getAdminAnalytics);
 router.get('/analytics/revenue', getAdminAnalyticsRevenue);
 router.get('/analytics/products', getAdminAnalyticsProducts);
 router.get('/analytics/customers', getAdminAnalyticsCustomers);
+
+// Abandoned Carts Recovery
+router.get('/abandoned-carts/stats', getAbandonedCartStats);
+router.get('/abandoned-carts', getAbandonedCartsList);
+router.post('/abandoned-carts/:cartId/send-reminder', triggerCartReminder);
+router.get('/abandoned-carts/messages', getWhatsAppMessagesList);
 
 // Coupons management alias under /api/admin/coupons
 router.use('/coupons', couponRoutes);

@@ -95,6 +95,13 @@ const getUserProfile = async (req, res, next) => {
         email: user.email,
         role: user.role,
         phone: user.phone || '',
+        whatsappOptIn: user.whatsappOptIn || false,
+        whatsappOptInAt: user.whatsappOptInAt || null,
+        notificationPreferences: user.notificationPreferences || {
+          abandonedCart: true,
+          orderUpdates: true,
+          promotions: false,
+        },
         avatar: user.avatar || '',
         gender: user.gender || '',
         dateOfBirth: user.dateOfBirth || null,
@@ -123,6 +130,19 @@ const updateUserProfile = async (req, res, next) => {
       if (req.body.name) user.name = req.body.name.trim();
       if (req.body.email) user.email = req.body.email.toLowerCase().trim();
       if (req.body.phone !== undefined) user.phone = req.body.phone;
+      if (req.body.whatsappOptIn !== undefined) {
+        const isOptedIn = Boolean(req.body.whatsappOptIn);
+        if (isOptedIn && !user.whatsappOptIn) {
+          user.whatsappOptInAt = new Date();
+        }
+        user.whatsappOptIn = isOptedIn;
+      }
+      if (req.body.notificationPreferences && typeof req.body.notificationPreferences === 'object') {
+        user.notificationPreferences = {
+          ...user.notificationPreferences,
+          ...req.body.notificationPreferences,
+        };
+      }
       if (req.body.avatar !== undefined) user.avatar = req.body.avatar;
       if (req.body.gender !== undefined) user.gender = req.body.gender;
       if (req.body.dateOfBirth !== undefined) user.dateOfBirth = req.body.dateOfBirth;
@@ -147,6 +167,9 @@ const updateUserProfile = async (req, res, next) => {
         email: updatedUser.email,
         role: updatedUser.role,
         phone: updatedUser.phone,
+        whatsappOptIn: updatedUser.whatsappOptIn,
+        whatsappOptInAt: updatedUser.whatsappOptInAt,
+        notificationPreferences: updatedUser.notificationPreferences,
         avatar: updatedUser.avatar,
         gender: updatedUser.gender,
         dateOfBirth: updatedUser.dateOfBirth,

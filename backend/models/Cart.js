@@ -45,6 +45,43 @@ const cartSchema = mongoose.Schema({
     required: true,
     default: 0,
   },
+  lastActivityAt: {
+    type: Date,
+    default: Date.now,
+    index: true,
+  },
+  isAbandoned: {
+    type: Boolean,
+    default: false,
+    index: true,
+  },
+  abandonedAt: {
+    type: Date,
+  },
+  recoveryStatus: {
+    type: String,
+    enum: ['none', 'scheduled', 'in_progress', 'completed', 'cancelled'],
+    default: 'none',
+    index: true,
+  },
+  recoveryStep: {
+    type: Number,
+    default: 0, // 0 = no reminder sent, 1 = reminder 1, 2 = reminder 2, 3 = reminder 3
+  },
+  lastRecoveryMessageSentAt: {
+    type: Date,
+  },
+  recoveryToken: {
+    type: String,
+    index: true,
+  },
+  recoveredAt: {
+    type: Date,
+  },
+  recoveryOrder: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Order',
+  },
 }, {
   timestamps: true,
 });

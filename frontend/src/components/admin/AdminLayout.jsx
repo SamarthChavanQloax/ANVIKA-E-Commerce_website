@@ -19,6 +19,7 @@ import {
   ChevronRight,
   FileText,
   Tag,
+  MessageSquare,
 } from 'lucide-react';
 
 const NAV_ITEMS = [
@@ -27,6 +28,7 @@ const NAV_ITEMS = [
   { name: 'Categories', path: '/admin/categories', icon: Layers },
   { name: 'Inventory', path: '/admin/inventory', icon: Boxes },
   { name: 'Orders', path: '/admin/orders', icon: ShoppingBag },
+  { name: 'Abandoned Carts', path: '/admin/abandoned-carts', icon: MessageSquare },
   { name: 'Coupons', path: '/admin/coupons', icon: Tag },
   { name: 'Customers', path: '/admin/customers', icon: Users },
   { name: 'Reports', path: '/admin/reports', icon: FileText },

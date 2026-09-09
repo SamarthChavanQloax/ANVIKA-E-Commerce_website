@@ -3,6 +3,7 @@ import Razorpay from 'razorpay';
 import Order from '../models/Order.js';
 import Product from '../models/Product.js';
 import Cart from '../models/Cart.js';
+import WhatsAppMessage from '../models/WhatsAppMessage.js';
 
 // Initialize Razorpay client with environment variables
 const getRazorpayInstance = () => {
@@ -255,11 +256,21 @@ export const verifyRazorpayPayment = async (req, res, next) => {
     // Reduce inventory stock now that payment is confirmed
     await reduceOrderStock(order);
 
-    // Clear user cart upon successful payment
+    // Clear user cart upon successful payment and record recovery completion
     try {
       await Cart.findOneAndUpdate(
         { user: order.user },
-        { items: [], subtotal: 0 }
+        {
+          items: [],
+          subtotal: 0,
+          recoveryStatus: 'completed',
+          recoveredAt: new Date(),
+          recoveryOrder: savedOrder._id,
+        }
+      );
+      await WhatsAppMessage.updateMany(
+        { userId: order.user, status: 'pending' },
+        { $set: { status: 'cancelled' } }
       );
     } catch (cartErr) {
       console.warn('[Cart] Cart clear notice:', cartErr.message);

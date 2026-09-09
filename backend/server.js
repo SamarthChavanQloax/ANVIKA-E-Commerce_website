@@ -28,6 +28,8 @@ import wishlistRoutes from './routes/wishlistRoutes.js';
 import paymentRoutes from './routes/paymentRoutes.js';
 import couponRoutes from './routes/couponRoutes.js';
 import reviewRoutes from './routes/reviewRoutes.js';
+import whatsappRoutes from './routes/whatsappRoutes.js';
+import { startCartRecoveryWorker, stopCartRecoveryWorker } from './services/cartRecoveryWorker.js';
 
 const app = express();
 
@@ -158,6 +160,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/coupons', couponRoutes);
 app.use('/api/reviews', reviewRoutes);
+app.use('/api', whatsappRoutes);
 
 // Payment configuration
 app.get('/api/config/paypal', (req, res) => {
@@ -185,11 +188,14 @@ app.use((err, req, res, next) => {
 const PORT = process.env.PORT || 5001;
 const server = app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Anvika Backend listening on 0.0.0.0:${PORT} in ${process.env.NODE_ENV || 'development'} mode`);
+  // Initialize background WhatsApp abandoned cart recovery worker
+  startCartRecoveryWorker();
 });
 
 // Handle graceful shutdown for zero-downtime rolling deploys on Render
 const gracefulShutdown = (signal) => {
   console.log(`\n🛑 Received ${signal}. Gracefully closing HTTP server and database connections...`);
+  stopCartRecoveryWorker();
   server.close(async () => {
     console.log('✅ HTTP server closed.');
     try {

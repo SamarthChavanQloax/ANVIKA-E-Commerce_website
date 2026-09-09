@@ -183,16 +183,18 @@ const HeroVideo = () => {
               >
                 <Link
                   to="/shop"
-                  className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-3.5 rounded-full bg-white text-black hover:bg-gold-300 transition-all duration-300 text-xs font-semibold tracking-[0.18em] uppercase flex items-center justify-center gap-2 shadow-2xl hover:scale-105 active:scale-95"
+                  className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-3.5 rounded-full bg-white !text-stone-950 hover:bg-amber-400 hover:!text-stone-950 transition-all duration-300 text-xs font-semibold tracking-[0.18em] uppercase flex items-center justify-center gap-2 shadow-2xl hover:scale-105 active:scale-95"
+                  style={{ color: '#0c0a09' }}
                 >
-                  <span>Explore Collection</span>
-                  <ArrowRight size={15} />
+                  <span className="!text-stone-950 font-bold" style={{ color: '#0c0a09' }}>Explore Collection</span>
+                  <ArrowRight size={15} className="!text-stone-950" style={{ color: '#0c0a09' }} />
                 </Link>
                 <Link
                   to="/category/sarees"
-                  className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-3.5 rounded-full bg-white/10 hover:bg-white/20 border border-white/30 backdrop-blur-md transition-all duration-300 text-xs font-semibold tracking-[0.18em] uppercase text-white hover:scale-105 active:scale-95 flex items-center justify-center"
+                  className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-3.5 rounded-full bg-white/10 hover:bg-white/20 border border-white/30 backdrop-blur-md transition-all duration-300 text-xs font-semibold tracking-[0.18em] uppercase !text-white hover:scale-105 active:scale-95 flex items-center justify-center"
+                  style={{ color: '#ffffff' }}
                 >
-                  Bridal & Sarees
+                  <span className="!text-white" style={{ color: '#ffffff' }}>Bridal & Sarees</span>
                 </Link>
               </motion.div>
             )}

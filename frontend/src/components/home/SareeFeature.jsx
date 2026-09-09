@@ -4,11 +4,7 @@ import Button from '../common/Button';
 
 const SareeFeature = () => {
   return (
-<<<<<<< HEAD
-    <section className="py-16 md:py-20 w-full bg-surface">
-=======
     <section className="py-12 sm:py-16 md:py-24 w-full bg-surface">
->>>>>>> c3c17e69fb1402587f193eab2889966d8c4c4a85
       <div className="max-w-[100rem] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="relative w-full min-h-[340px] sm:min-h-[420px] aspect-auto md:aspect-[21/9] lg:aspect-[2.5/1] rounded-2xl sm:rounded-3xl overflow-hidden shadow-sm flex items-center justify-center">
           

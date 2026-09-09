@@ -48,14 +48,6 @@ const Login = () => {
         src="/videos/login_video.mp4"
       />
 
-<<<<<<< HEAD
-      {/* Right side - Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 sm:p-12 lg:p-16 bg-background">
-        <FadeIn className="w-full max-w-md">
-          <div className="text-center mb-10">
-            <h1 className="text-3xl font-serif text-text mb-2">Welcome Back</h1>
-            <p className="text-text-muted">Sign in to access your wishlist and orders.</p>
-=======
       {/* Subtle Ambient Video Tint (keeps video visible, avoids black wash) */}
       <div className="absolute inset-0 bg-gradient-to-r from-black/45 via-black/25 to-black/40 backdrop-blur-[1px]" />
 
@@ -67,7 +59,6 @@ const Login = () => {
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-xl border border-white/25 text-amber-300 text-xs font-medium tracking-widest uppercase w-fit shadow-sm">
             <Sparkles size={14} className="text-amber-300 animate-pulse" />
             <span>Anvika Heritage Couture</span>
->>>>>>> c3c17e69fb1402587f193eab2889966d8c4c4a85
           </div>
 
           <h1 className="text-4xl xl:text-5xl font-serif font-light leading-tight tracking-wide text-white drop-shadow-md">

@@ -1,8 +1,11 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { useWishlist } from '../../context/WishlistContext';
+import { useCart } from '../../context/CartContext';
 import { FadeIn } from '../../components/animations/RevealOnScroll';
 import Button from '../../components/common/Button';
+import OrderStatusTracker from '../../components/order/OrderStatusTracker';
 import {
   Package,
   User,
@@ -21,16 +24,29 @@ import {
   Mail,
   Calendar,
   Save,
-  X
+  X,
+  Heart,
+  CreditCard,
+  ChevronDown,
+  ChevronUp,
+  ExternalLink,
+  Eye,
+  Truck
 } from 'lucide-react';
 import axios from 'axios';
 
 const Profile = () => {
   const { userInfo, logout, updateUser } = useAuth();
+  const { wishlistItems, removeFromWishlist } = useWishlist();
+  const { addToCart } = useCart();
   const navigate = useNavigate();
+  const location = useLocation();
 
-  // Active Tab: 'orders' | 'profile' | 'addresses'
-  const [activeTab, setActiveTab] = useState('orders');
+  // Active Tab: 'orders' | 'saved' | 'profile' | 'addresses'
+  const [activeTab, setActiveTab] = useState(location.state?.tab || 'orders');
+
+  // Expanded Order for live status tracking
+  const [expandedOrderId, setExpandedOrderId] = useState(location.state?.orderId || null);
 
   // Orders State
   const [orders, setOrders] = useState([]);
@@ -331,6 +347,33 @@ const Profile = () => {
     }
   };
 
+  // Checkout single saved product from Profile
+  const handleCheckoutSavedProduct = (product) => {
+    addToCart(product, 1);
+    navigate('/checkout');
+  };
+
+  // Checkout all saved products from Profile
+  const handleCheckoutAllSaved = () => {
+    if (!wishlistItems || wishlistItems.length === 0) return;
+    wishlistItems.forEach((item) => {
+      addToCart(item, 1);
+    });
+    navigate('/checkout');
+  };
+
+  // Move saved item to bag
+  const handleMoveToBag = (product) => {
+    addToCart(product, 1);
+    setActionMessage(`"${product.name || 'Item'}" added to your royal shopping bag.`);
+    setTimeout(() => setActionMessage(''), 4000);
+  };
+
+  // Toggle Order Status Expansion
+  const toggleOrderExpand = (orderId) => {
+    setExpandedOrderId((prev) => (prev === orderId ? null : orderId));
+  };
+
   // Logout
   const handleLogout = async () => {
     await logout();
@@ -402,6 +445,21 @@ const Profile = () => {
             </button>
 
             <button
+              onClick={() => setActiveTab('saved')}
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                activeTab === 'saved'
+                  ? 'bg-accent text-background font-semibold shadow-sm'
+                  : 'text-text-muted hover:text-text hover:bg-surface'
+              }`}
+            >
+              <Heart size={16} />
+              <span>Saved Collection</span>
+              <span className={`text-xs px-2 py-0.5 rounded-full ${activeTab === 'saved' ? 'bg-background/20 text-background' : 'bg-surface text-text-muted border border-border'}`}>
+                {wishlistItems.length}
+              </span>
+            </button>
+
+            <button
               onClick={() => setActiveTab('profile')}
               className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium transition-all ${
                 activeTab === 'profile'
@@ -433,7 +491,12 @@ const Profile = () => {
           {activeTab === 'orders' && (
             <div className="space-y-6">
               <div className="flex items-center justify-between">
-                <h2 className="font-serif text-xl text-text font-medium">Your Royal Orders</h2>
+                <div>
+                  <h2 className="font-serif text-xl text-text font-medium">Your Royal Orders</h2>
+                  <p className="text-xs text-text-muted mt-0.5">
+                    Click any confirmed order below to view real-time status and consignment tracking.
+                  </p>
+                </div>
                 <Link to="/shop">
                   <Button variant="ghost" className="text-xs text-accent hover:underline flex items-center gap-1">
                     Continue Shopping <ArrowRight size={13} />
@@ -467,151 +530,326 @@ const Profile = () => {
                   </Link>
                 </div>
               ) : (
-                <div className="space-y-4">
-                  {orders.map((order) => (
-                    <div
-                      key={order._id}
-                      className="bg-surface border border-border rounded-2xl p-6 shadow-sm hover:border-accent/40 transition-colors"
-                    >
-                      {/* Order Metadata Row */}
-                      <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-border/60 text-xs">
-                        <div className="flex items-center gap-3 flex-wrap">
-                          <span className="font-mono font-semibold text-text">
-                            ORDER #{order._id.slice(-8).toUpperCase()}
-                          </span>
-                          <span className="text-text-muted flex items-center gap-1">
-                            <Clock size={13} />
-                            {new Date(order.createdAt).toLocaleDateString('en-IN', {
-                              day: 'numeric',
-                              month: 'short',
-                              year: 'numeric',
-                            })}
-                          </span>
-                        </div>
+                <div className="space-y-5">
+                  {orders.map((order) => {
+                    const isExpanded = expandedOrderId === order._id;
 
-                        {/* Status Badges */}
-                        <div className="flex items-center gap-2">
-                          <span
-                            className={`px-3 py-1 rounded-full text-[11px] font-medium uppercase tracking-wider ${
-                              order.orderStatus === 'Delivered'
-                                ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300'
-                                : order.orderStatus === 'Cancelled'
-                                ? 'bg-red-100 text-red-800 dark:bg-red-950/60 dark:text-red-300'
-                                : order.orderStatus === 'Shipped'
-                                ? 'bg-indigo-100 text-indigo-800 dark:bg-indigo-950/60 dark:text-indigo-300'
-                                : 'bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300'
-                            }`}
-                          >
-                            {order.orderStatus}
-                          </span>
-
-                          <span
-                            className={`px-2.5 py-1 rounded-full text-[10px] font-medium uppercase tracking-wider ${
-                              order.isPaid || order.paymentStatus === 'Completed'
-                                ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400 border border-emerald-200/50'
-                                : 'bg-yellow-50 text-yellow-700 dark:bg-yellow-950/30 dark:text-yellow-400 border border-yellow-200/50'
-                            }`}
-                          >
-                            {order.paymentMethod} • {order.isPaid || order.paymentStatus === 'Completed' ? 'Paid' : 'Pending Payment'}
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Order Items */}
-                      <div className="py-4 divide-y divide-border/40">
-                        {order.items?.map((item, idx) => (
-                          <div key={idx} className="py-3 flex items-center justify-between gap-4">
-                            <div className="flex items-center gap-4">
-                              <img
-                                src={item.image || '/demo-saree.jpg'}
-                                alt={item.name}
-                                className="w-14 h-16 object-cover rounded-lg bg-background border border-border flex-shrink-0"
-                              />
-                              <div>
-                                <h4 className="font-serif text-sm text-text font-medium">{item.name}</h4>
-                                <p className="text-xs text-text-muted mt-0.5">
-                                  Qty: <span className="text-text font-medium">{item.qty}</span> × ₹
-                                  {Number(item.price).toLocaleString('en-IN')}
-                                </p>
-                              </div>
-                            </div>
-                            <span className="font-semibold text-sm text-text">
-                              ₹{(Number(item.price) * Number(item.qty)).toLocaleString('en-IN')}
+                    return (
+                      <div
+                        key={order._id}
+                        onClick={() => toggleOrderExpand(order._id)}
+                        className={`bg-surface border rounded-2xl p-6 shadow-sm transition-all cursor-pointer ${
+                          isExpanded
+                            ? 'border-accent/80 ring-1 ring-accent/30 shadow-md'
+                            : 'border-border hover:border-accent/40'
+                        }`}
+                      >
+                        {/* Order Metadata Row */}
+                        <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-border/60 text-xs">
+                          <div className="flex items-center gap-3 flex-wrap">
+                            <span className="font-mono font-semibold text-text">
+                              ORDER #{order._id.slice(-8).toUpperCase()}
                             </span>
-                          </div>
-                        ))}
-                      </div>
-
-                      {/* Footer Row: Shipping & Total */}
-                      <div className="pt-4 border-t border-border/60 flex flex-wrap items-center justify-between gap-4">
-                        <div className="text-xs text-text-muted">
-                          Delivery to: <span className="text-text font-medium">{order.shippingAddress?.street}, {order.shippingAddress?.city}</span>
-                        </div>
-
-                        <div className="flex items-center gap-4">
-                          <div className="text-right">
-                            <span className="text-xs text-text-muted mr-2">Total Amount:</span>
-                            <span className="text-base font-semibold text-text font-serif">
-                              ₹{Number(order.total).toLocaleString('en-IN')}
+                            <span className="text-text-muted flex items-center gap-1">
+                              <Clock size={13} />
+                              {new Date(order.createdAt).toLocaleDateString('en-IN', {
+                                day: 'numeric',
+                                month: 'short',
+                                year: 'numeric',
+                              })}
                             </span>
                           </div>
 
-                          {isCancellableStatus(order.orderStatus) && (
-                            <div className="flex items-center gap-2">
-                              {confirmCancelId === order._id ? (
-                                <div className="flex items-center gap-2 animate-fadeIn bg-red-500/10 border border-red-500/30 px-3 py-1.5 rounded-xl">
-                                  <span className="text-[11px] text-red-600 dark:text-red-400 font-medium">
-                                    Cancel this order?
-                                  </span>
-                                  <Button
-                                    variant="outline"
-                                    onClick={() => handleCancelOrder(order._id)}
-                                    disabled={cancellingId === order._id}
-                                    className="text-xs py-1 px-2.5 bg-red-600 hover:bg-red-700 text-white border-red-600 transition-colors shadow-sm"
-                                  >
-                                    {cancellingId === order._id ? 'Cancelling...' : 'Confirm'}
-                                  </Button>
-                                  <Button
-                                    variant="outline"
-                                    onClick={() => {
-                                      setConfirmCancelId(null);
-                                      setCancelErrorMsg((prev) => ({ ...prev, [order._id]: '' }));
-                                    }}
-                                    disabled={cancellingId === order._id}
-                                    className="text-xs py-1 px-2 text-text-muted hover:text-text border-border transition-colors"
-                                  >
-                                    Keep
-                                  </Button>
+                          {/* Status Badges */}
+                          <div className="flex items-center gap-2">
+                            <span
+                              className={`px-3 py-1 rounded-full text-[11px] font-medium uppercase tracking-wider ${
+                                order.orderStatus === 'Delivered'
+                                  ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300'
+                                  : order.orderStatus === 'Out for Delivery'
+                                  ? 'bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 ring-1 ring-amber-400/50'
+                                  : order.orderStatus === 'Shipped'
+                                  ? 'bg-blue-100 text-blue-800 dark:bg-blue-950/60 dark:text-blue-300'
+                                  : order.orderStatus === 'Cancelled'
+                                  ? 'bg-red-100 text-red-800 dark:bg-red-950/60 dark:text-red-300'
+                                  : 'bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300'
+                              }`}
+                            >
+                              {order.orderStatus}
+                            </span>
+
+                            <span
+                              className={`px-2.5 py-1 rounded-full text-[10px] font-medium uppercase tracking-wider ${
+                                order.isPaid || order.paymentStatus === 'Completed'
+                                  ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400 border border-emerald-200/50'
+                                  : 'bg-yellow-50 text-yellow-700 dark:bg-yellow-950/30 dark:text-yellow-400 border border-yellow-200/50'
+                              }`}
+                            >
+                              {order.paymentMethod} • {order.isPaid || order.paymentStatus === 'Completed' ? 'Paid' : 'Pending Payment'}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Order Items */}
+                        <div className="py-4 divide-y divide-border/40">
+                          {order.items?.map((item, idx) => (
+                            <div key={idx} className="py-3 flex items-center justify-between gap-4">
+                              <div className="flex items-center gap-4">
+                                <img
+                                  src={item.image || '/demo-saree.jpg'}
+                                  alt={item.name}
+                                  className="w-14 h-16 object-cover rounded-lg bg-background border border-border flex-shrink-0"
+                                />
+                                <div>
+                                  <h4 className="font-serif text-sm text-text font-medium">{item.name}</h4>
+                                  <p className="text-xs text-text-muted mt-0.5">
+                                    Qty: <span className="text-text font-medium">{item.qty}</span> × ₹
+                                    {Number(item.price).toLocaleString('en-IN')}
+                                  </p>
                                 </div>
-                              ) : (
-                                <Button
-                                  variant="outline"
-                                  onClick={() => setConfirmCancelId(order._id)}
-                                  className="text-xs py-1.5 px-3 border-red-200 text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
-                                >
-                                  Cancel Order
-                                </Button>
-                              )}
+                              </div>
+                              <span className="font-semibold text-sm text-text">
+                                ₹{(Number(item.price) * Number(item.qty)).toLocaleString('en-IN')}
+                              </span>
                             </div>
-                          )}
+                          ))}
                         </div>
-                      </div>
 
-                      {/* Cancellation Error Banner if any */}
-                      {cancelErrorMsg[order._id] && (
-                        <div className="mt-3 p-3 rounded-xl bg-red-500/10 border border-red-500/25 text-red-600 dark:text-red-400 text-xs flex items-center gap-2 animate-fadeIn">
-                          <AlertCircle size={14} className="shrink-0" />
-                          <span>{cancelErrorMsg[order._id]}</span>
+                        {/* Footer Row: Shipping & Total */}
+                        <div className="pt-4 border-t border-border/60 flex flex-wrap items-center justify-between gap-4">
+                          <div className="text-xs text-text-muted">
+                            Delivery to: <span className="text-text font-medium">{order.shippingAddress?.street || order.shippingAddress?.addressLine}, {order.shippingAddress?.city}</span>
+                          </div>
+
+                          <div className="flex items-center gap-4">
+                            <div className="text-right">
+                              <span className="text-xs text-text-muted mr-2">Total Amount:</span>
+                              <span className="text-base font-semibold text-text font-serif">
+                                ₹{Number(order.total).toLocaleString('en-IN')}
+                              </span>
+                            </div>
+
+                            {isCancellableStatus(order.orderStatus) && (
+                              <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                                {confirmCancelId === order._id ? (
+                                  <div className="flex items-center gap-2 animate-fadeIn bg-red-500/10 border border-red-500/30 px-3 py-1.5 rounded-xl">
+                                    <span className="text-[11px] text-red-600 dark:text-red-400 font-medium">
+                                      Cancel this order?
+                                    </span>
+                                    <Button
+                                      variant="outline"
+                                      onClick={() => handleCancelOrder(order._id)}
+                                      disabled={cancellingId === order._id}
+                                      className="text-xs py-1 px-2.5 bg-red-600 hover:bg-red-700 text-white border-red-600 transition-colors shadow-sm"
+                                    >
+                                      {cancellingId === order._id ? 'Cancelling...' : 'Confirm'}
+                                    </Button>
+                                    <Button
+                                      variant="outline"
+                                      onClick={() => {
+                                        setConfirmCancelId(null);
+                                        setCancelErrorMsg((prev) => ({ ...prev, [order._id]: '' }));
+                                      }}
+                                      disabled={cancellingId === order._id}
+                                      className="text-xs py-1 px-2 text-text-muted hover:text-text border-border transition-colors"
+                                    >
+                                      Keep
+                                    </Button>
+                                  </div>
+                                ) : (
+                                  <Button
+                                    variant="outline"
+                                    onClick={() => setConfirmCancelId(order._id)}
+                                    className="text-xs py-1.5 px-3 border-red-200 text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
+                                  >
+                                    Cancel Order
+                                  </Button>
+                                )}
+                              </div>
+                            )}
+                          </div>
                         </div>
-                      )}
-                    </div>
-                  ))}
+
+                        {/* Interactive Tracking Bar (Action row to expand status) */}
+                        <div className="mt-4 pt-3 border-t border-border/50 flex flex-wrap items-center justify-between gap-3">
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleOrderExpand(order._id);
+                            }}
+                            className={`inline-flex items-center gap-2 text-xs font-semibold px-4 py-2 rounded-xl border transition-all ${
+                              isExpanded
+                                ? 'bg-accent text-background border-accent shadow-xs'
+                                : 'bg-background hover:bg-surface text-text border-border hover:border-accent/60'
+                            }`}
+                          >
+                            <Truck size={14} />
+                            <span>
+                              {isExpanded ? 'Hide Consignment Status' : `Click to View Status (${order.orderStatus})`}
+                            </span>
+                            {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                          </button>
+
+                          <Link
+                            to={`/order/${order._id}`}
+                            onClick={(e) => e.stopPropagation()}
+                            className="text-xs text-accent hover:underline inline-flex items-center gap-1 font-medium"
+                          >
+                            <span>Receipt & Details</span>
+                            <ExternalLink size={12} />
+                          </Link>
+                        </div>
+
+                        {/* Expandable Luxury Order Status Tracker */}
+                        {isExpanded && (
+                          <div
+                            className="mt-5 pt-3 animate-fadeIn"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <OrderStatusTracker
+                              order={order}
+                              userInfo={userInfo}
+                              allowSimulation={true}
+                              onStatusUpdate={(updated) => {
+                                setOrders((prev) =>
+                                  prev.map((o) => (o._id === updated._id ? updated : o))
+                                );
+                              }}
+                            />
+                          </div>
+                        )}
+
+                        {/* Cancellation Error Banner if any */}
+                        {cancelErrorMsg[order._id] && (
+                          <div className="mt-3 p-3 rounded-xl bg-red-500/10 border border-red-500/25 text-red-600 dark:text-red-400 text-xs flex items-center gap-2 animate-fadeIn">
+                            <AlertCircle size={14} className="shrink-0" />
+                            <span>{cancelErrorMsg[order._id]}</span>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               )}
             </div>
           )}
 
-          {/* TAB 2: PROFILE DETAILS */}
+          {/* TAB 2: SAVED ITEMS / WISHLIST WITH DIRECT CHECKOUT OPTION */}
+          {activeTab === 'saved' && (
+            <div className="space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2">
+                <div>
+                  <h2 className="font-serif text-xl text-text font-medium">Your Saved Collection</h2>
+                  <p className="text-xs text-text-muted mt-0.5">
+                    Luxury items saved to your profile. Select any product below for direct, one-click checkout.
+                  </p>
+                </div>
+
+                {wishlistItems.length > 0 && (
+                  <Button
+                    onClick={handleCheckoutAllSaved}
+                    className="bg-accent text-background text-xs uppercase tracking-widest px-5 py-2.5 rounded-xl flex items-center gap-2 self-start sm:self-auto shadow-md hover:bg-accent/90 transition-all font-semibold"
+                  >
+                    <CreditCard size={15} /> Checkout All Saved Items ({wishlistItems.length})
+                  </Button>
+                )}
+              </div>
+
+              {wishlistItems.length === 0 ? (
+                <div className="bg-surface border border-border rounded-2xl p-12 text-center">
+                  <div className="w-16 h-16 rounded-full bg-background flex items-center justify-center text-text-muted mx-auto mb-4 border border-border">
+                    <Heart size={28} strokeWidth={1.3} className="text-accent/60" />
+                  </div>
+                  <h3 className="font-serif text-xl text-text mb-2">No Items Saved to Your Profile</h3>
+                  <p className="text-sm text-text-muted max-w-md mx-auto mb-6">
+                    Browse our royal couture collections, tap the heart icon on any design to save it to your profile, and checkout anytime.
+                  </p>
+                  <Link to="/shop">
+                    <Button className="bg-primary text-background text-xs uppercase tracking-widest px-8">
+                      Explore Haute Couture Catalog
+                    </Button>
+                  </Link>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {wishlistItems.map((item, idx) => {
+                    const itemId = item._id || item.id || item.productId || `saved_${idx}`;
+                    return (
+                      <div
+                        key={itemId}
+                        className="bg-surface border border-border rounded-2xl p-5 shadow-sm hover:border-accent/40 hover:shadow-md transition-all flex flex-col justify-between group"
+                      >
+                        <div>
+                          <div className="relative aspect-[3/4] w-full rounded-xl overflow-hidden bg-background mb-4 border border-border">
+                            <img
+                              src={item.image || (item.images && item.images[0]) || '/demo-saree.jpg'}
+                              alt={item.name}
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                            />
+                            <button
+                              onClick={() => removeFromWishlist(itemId)}
+                              className="absolute top-3 right-3 p-2 rounded-full bg-background/80 backdrop-blur-xs text-text-muted hover:text-red-500 hover:bg-background transition-colors shadow-xs"
+                              title="Remove from Saved Items"
+                            >
+                              <Trash2 size={15} />
+                            </button>
+                            <span className="absolute bottom-3 left-3 text-[10px] uppercase tracking-wider font-semibold px-2.5 py-1 rounded-full bg-background/90 backdrop-blur-xs text-accent">
+                              {item.category || 'Luxury Ensemble'}
+                            </span>
+                          </div>
+
+                          <h4 className="font-serif text-base text-text font-medium line-clamp-1 mb-1">
+                            {item.name}
+                          </h4>
+
+                          <div className="flex items-center justify-between mb-4">
+                            <span className="text-lg font-serif font-bold text-accent">
+                              ₹{Number(item.price || 0).toLocaleString('en-IN')}
+                            </span>
+                            <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-0.5 rounded-full border border-emerald-200/50">
+                              In Stock
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Direct Checkout & Bag Actions */}
+                        <div className="space-y-2 pt-3 border-t border-border/60">
+                          <Button
+                            onClick={() => handleCheckoutSavedProduct(item)}
+                            className="w-full bg-accent text-background text-xs uppercase tracking-widest py-2.5 rounded-xl flex items-center justify-center gap-2 shadow-sm hover:bg-accent/90 transition-all font-semibold"
+                          >
+                            <CreditCard size={14} /> Checkout Option
+                          </Button>
+
+                          <div className="flex items-center gap-2">
+                            <Button
+                              variant="outline"
+                              onClick={() => handleMoveToBag(item)}
+                              className="flex-1 text-xs py-2 border-border text-text hover:bg-background transition-colors flex items-center justify-center gap-1.5"
+                            >
+                              <ShoppingBag size={13} /> Add to Bag
+                            </Button>
+
+                            <Link to={`/product/${item.slug || item._id || item.id}`} className="flex-1">
+                              <Button
+                                variant="ghost"
+                                className="w-full text-xs py-2 text-text-muted hover:text-text flex items-center justify-center gap-1"
+                              >
+                                <Eye size={13} /> Details
+                              </Button>
+                            </Link>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* TAB 3: PROFILE DETAILS */}
           {activeTab === 'profile' && (
             <div className="bg-surface border border-border rounded-2xl p-6 sm:p-10 shadow-sm max-w-3xl">
               <div className="mb-6">

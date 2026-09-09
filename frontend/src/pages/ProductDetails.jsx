@@ -386,10 +386,10 @@ const ProductDetails = () => {
                         ? 'border-red-500 bg-red-50 text-red-500 dark:bg-red-950/50 shadow-sm'
                         : 'border-border bg-surface hover:bg-surface/80 text-text'
                     }`}
-                    aria-label="Add to wishlist"
+                    aria-label="Save to Profile"
                   >
                     <Heart size={16} className={isFavorited ? 'fill-red-500 stroke-red-500' : ''} />
-                    <span className="truncate">{isFavorited ? 'Wishlisted' : 'Add to Wishlist'}</span>
+                    <span className="truncate">{isFavorited ? 'Saved in Profile' : 'Save to Profile'}</span>
                   </button>
                 </div>
               </div>

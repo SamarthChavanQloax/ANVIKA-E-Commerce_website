@@ -228,6 +228,23 @@ export const verifyRazorpayPayment = async (req, res, next) => {
     order.paidAt = new Date();
     order.paymentStatus = 'Completed';
     order.orderStatus = 'Confirmed';
+    if (!order.trackingNumber) {
+      order.trackingNumber = `ANV-EXP-${order._id.toString().slice(-6).toUpperCase()}`;
+    }
+    if (!order.courierPartner) {
+      order.courierPartner = 'BlueDart Luxury Express';
+    }
+    if (!order.estimatedDelivery) {
+      order.estimatedDelivery = new Date(Date.now() + 4 * 24 * 60 * 60 * 1000);
+    }
+    if (!Array.isArray(order.statusHistory)) {
+      order.statusHistory = [];
+    }
+    order.statusHistory.push({
+      status: 'Confirmed',
+      timestamp: new Date(),
+      note: 'Payment verified and order confirmed by boutique',
+    });
     order.paymentResult = {
       id: rzpPaymentId,
       status: 'Captured',

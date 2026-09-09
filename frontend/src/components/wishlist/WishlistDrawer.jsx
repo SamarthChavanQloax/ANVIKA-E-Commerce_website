@@ -1,19 +1,32 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Heart, ShoppingBag, Trash2, ArrowRight } from 'lucide-react';
+import { X, Heart, ShoppingBag, Trash2, ArrowRight, CreditCard, User } from 'lucide-react';
 import { useWishlist } from '../../context/WishlistContext';
 import { useCart } from '../../context/CartContext';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Button from '../common/Button';
 
 const WishlistDrawer = () => {
   const { wishlistItems, isWishlistOpen, closeWishlist, removeFromWishlist } = useWishlist();
   const { addToCart, openCart } = useCart();
+  const navigate = useNavigate();
 
   const handleMoveToCart = (product) => {
     addToCart(product, 1);
     removeFromWishlist(product._id || product.id || product.productId);
     closeWishlist();
     openCart();
+  };
+
+  const handleDirectCheckout = (product) => {
+    addToCart(product, 1);
+    closeWishlist();
+    navigate('/checkout');
+  };
+
+  const handleCheckoutAllWishlist = () => {
+    wishlistItems.forEach((item) => addToCart(item, 1));
+    closeWishlist();
+    navigate('/checkout');
   };
 
   return (
@@ -35,13 +48,13 @@ const WishlistDrawer = () => {
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 28, stiffness: 260 }}
-            className="fixed top-0 right-0 h-full w-full sm:w-[440px] bg-background z-50 shadow-2xl flex flex-col border-l border-border"
+            className="fixed top-0 right-0 h-full w-full sm:w-[460px] bg-background z-50 shadow-2xl flex flex-col border-l border-border"
           >
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-5 border-b border-border bg-surface/50">
               <div className="flex items-center gap-3">
                 <Heart size={20} className="text-red-500 fill-red-500" />
-                <h3 className="font-serif text-xl tracking-wide text-text font-medium">Your Wishlist</h3>
+                <h3 className="font-serif text-xl tracking-wide text-text font-medium">Saved to Profile</h3>
                 <span className="text-xs bg-red-100 text-red-600 dark:bg-red-950 dark:text-red-400 font-semibold px-2 py-0.5 rounded-full">
                   {wishlistItems.length}
                 </span>
@@ -63,7 +76,7 @@ const WishlistDrawer = () => {
                 </div>
                 <h4 className="font-serif text-2xl text-text font-light mb-2">No Saved Items</h4>
                 <p className="text-text-muted text-sm max-w-xs mb-6">
-                  Save your favorite sarees, dresses, and bridal lehengas to view them later.
+                  Save your favorite sarees, dresses, and bridal lehengas to your profile for direct checkout.
                 </p>
                 <Link to="/shop" onClick={closeWishlist}>
                   <Button variant="outline" className="text-xs uppercase tracking-widest px-8">
@@ -83,7 +96,7 @@ const WishlistDrawer = () => {
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, x: 20 }}
-                        className="py-4 flex gap-4 items-center"
+                        className="py-4 flex gap-4 items-start"
                       >
                         <img
                           src={item.image || '/demo-saree.jpg'}
@@ -109,17 +122,29 @@ const WishlistDrawer = () => {
                             </button>
                           </div>
 
-                          <div className="flex items-center justify-between mt-3">
-                            <span className="text-sm font-semibold text-text">
+                          <div className="mt-1">
+                            <span className="text-sm font-semibold text-text font-serif">
                               ₹{Number(item.price || 0).toLocaleString('en-IN')}
                             </span>
+                          </div>
+
+                          {/* Item Action Buttons */}
+                          <div className="flex items-center gap-2 mt-3">
+                            <button
+                              onClick={() => handleDirectCheckout(item)}
+                              className="flex-1 flex items-center justify-center gap-1.5 text-xs bg-accent text-background font-semibold px-3 py-2 rounded-lg hover:bg-accent/90 transition-all shadow-xs"
+                            >
+                              <CreditCard size={13} />
+                              <span>Checkout</span>
+                            </button>
 
                             <button
                               onClick={() => handleMoveToCart(item)}
-                              className="flex items-center gap-1.5 text-xs bg-primary text-background font-medium px-3 py-1.5 rounded-lg hover:opacity-90 transition-opacity"
+                              className="flex items-center justify-center gap-1 text-xs border border-border text-text hover:bg-surface px-3 py-2 rounded-lg transition-colors"
+                              title="Move to bag"
                             >
                               <ShoppingBag size={13} />
-                              <span>Move to Bag</span>
+                              <span className="hidden sm:inline">Bag</span>
                             </button>
                           </div>
                         </div>
@@ -128,13 +153,40 @@ const WishlistDrawer = () => {
                   })}
                 </div>
 
-                <div className="p-6 border-t border-border bg-surface/30">
-                  <Link to="/shop" onClick={closeWishlist} className="block">
-                    <Button variant="outline" className="w-full text-xs uppercase tracking-widest flex items-center justify-center gap-2">
-                      Continue Shopping
-                      <ArrowRight size={14} />
-                    </Button>
-                  </Link>
+                {/* Footer with Checkout Options */}
+                <div className="p-6 border-t border-border bg-surface/30 space-y-2.5">
+                  <Button
+                    onClick={handleCheckoutAllWishlist}
+                    className="w-full bg-accent text-background text-xs uppercase tracking-widest py-3 flex items-center justify-center gap-2 shadow-md hover:bg-accent/90 transition-all font-semibold"
+                  >
+                    <CreditCard size={15} />
+                    Checkout All Items ({wishlistItems.length})
+                  </Button>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <Link
+                      to="/profile"
+                      state={{ tab: 'saved' }}
+                      onClick={closeWishlist}
+                      className="block"
+                    >
+                      <Button
+                        variant="outline"
+                        className="w-full text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 py-2.5"
+                      >
+                        <User size={13} /> My Profile
+                      </Button>
+                    </Link>
+
+                    <Link to="/shop" onClick={closeWishlist} className="block">
+                      <Button
+                        variant="ghost"
+                        className="w-full text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 py-2.5"
+                      >
+                        Explore <ArrowRight size={13} />
+                      </Button>
+                    </Link>
+                  </div>
                 </div>
               </>
             )}

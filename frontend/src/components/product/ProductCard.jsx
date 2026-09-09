@@ -65,19 +65,20 @@ const ProductCard = ({ product }) => {
           )}
         </div>
 
-        {/* Wishlist Button */}
+        {/* Wishlist / Save to Profile Button */}
         <button
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
             toggleWishlist(product);
           }}
+          title={isFavorited ? "Saved to your profile" : "Save to your profile"}
           className={`absolute top-4 right-4 p-2.5 rounded-full transition-all z-10 shadow-sm ${
             isFavorited
               ? 'bg-red-50 text-red-500 dark:bg-red-950/80 shadow-md'
               : 'bg-background/80 backdrop-blur-md text-text hover:text-red-500'
           }`}
-          aria-label="Toggle Wishlist"
+          aria-label={isFavorited ? "Remove from Profile" : "Save to Profile"}
         >
           <motion.div whileTap={{ scale: 0.8 }}>
             <Heart size={16} className={isFavorited ? "fill-red-500 stroke-red-500" : ""} />

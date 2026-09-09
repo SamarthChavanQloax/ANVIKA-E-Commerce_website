@@ -167,6 +167,16 @@ export const addOrderItems = async (req, res, next) => {
       shippingFee,
       total: finalTotal,
       totalAmount: finalTotal,
+      trackingNumber: `ANV-EXP-${Date.now().toString().slice(-6).toUpperCase()}`,
+      courierPartner: 'BlueDart Luxury Express',
+      estimatedDelivery: new Date(Date.now() + 4 * 24 * 60 * 60 * 1000),
+      statusHistory: [
+        {
+          status: initialOrderStatus,
+          timestamp: new Date(),
+          note: isRazorpay ? 'Order initialized, awaiting payment' : 'Order placed successfully with Cash on Delivery',
+        },
+      ],
       coupon: appliedCouponCode ? { code: appliedCouponCode, discount: discountAmount } : undefined,
     });
 
@@ -394,6 +404,30 @@ export const updateOrderStatus = async (req, res, next) => {
     }
 
     order.orderStatus = newStatus;
+
+    if (!order.trackingNumber) {
+      order.trackingNumber = `ANV-EXP-${order._id.toString().slice(-6).toUpperCase()}`;
+    }
+    if (!order.courierPartner) {
+      order.courierPartner = 'BlueDart Luxury Express';
+    }
+    if (!order.estimatedDelivery) {
+      order.estimatedDelivery = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);
+    }
+    if (req.body.trackingNumber) order.trackingNumber = req.body.trackingNumber;
+    if (req.body.courierPartner) order.courierPartner = req.body.courierPartner;
+    if (req.body.estimatedDelivery) order.estimatedDelivery = req.body.estimatedDelivery;
+
+    if (!Array.isArray(order.statusHistory)) {
+      order.statusHistory = [];
+    }
+    if (newStatus !== previousStatus) {
+      order.statusHistory.push({
+        status: newStatus,
+        timestamp: new Date(),
+        note: req.body.note || `Order status updated to ${newStatus}`,
+      });
+    }
 
     if (paymentStatus) {
       order.paymentStatus = paymentStatus;

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useLocation, Link } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
+import OrderStatusTracker from '../components/order/OrderStatusTracker';
 import {
   CheckCircle2,
   Package,
@@ -78,6 +79,16 @@ const OrderConfirmation = () => {
         <p className="text-textSecondary mt-2">
           Your order <span className="font-mono font-semibold text-text">#{order._id}</span> has been received and is being prepared with artisanal care.
         </p>
+      </div>
+
+      {/* Live Order Status & Consignment Tracking */}
+      <div className="mb-8">
+        <OrderStatusTracker
+          order={order}
+          userInfo={userInfo}
+          allowSimulation={true}
+          onStatusUpdate={(updated) => setOrder(updated)}
+        />
       </div>
 
       <div className="bg-surface border border-border rounded-2xl shadow-sm overflow-hidden mb-8">
@@ -211,9 +222,10 @@ const OrderConfirmation = () => {
         </Link>
         <Link
           to="/profile"
+          state={{ tab: 'orders', orderId: order._id }}
           className="inline-flex items-center gap-2 px-6 py-3 rounded-full border border-border text-text font-medium hover:bg-surface transition-all"
         >
-          <span>View All My Orders</span>
+          <span>View In Profile & Track Live Status</span>
         </Link>
       </div>
     </div>

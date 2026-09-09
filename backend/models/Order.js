@@ -120,6 +120,23 @@ const orderSchema = mongoose.Schema({
   returnedAt: {
     type: Date,
   },
+  trackingNumber: {
+    type: String,
+  },
+  courierPartner: {
+    type: String,
+    default: 'BlueDart Luxury Express',
+  },
+  estimatedDelivery: {
+    type: Date,
+  },
+  statusHistory: [
+    {
+      status: { type: String },
+      timestamp: { type: Date, default: Date.now },
+      note: { type: String },
+    }
+  ],
   subtotal: { type: Number, required: true, default: 0.0 },
   shipping: { type: Number, required: true, default: 0.0 },
   shippingFee: { type: Number, default: 0.0 },

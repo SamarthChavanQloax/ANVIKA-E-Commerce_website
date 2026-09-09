@@ -24,6 +24,7 @@ const formatINR = (val) => {
 };
 
 const ORDER_STATUS_OPTIONS = [
+  'Pending',
   'Placed',
   'Confirmed',
   'Processing',
@@ -50,7 +51,8 @@ const OrderList = () => {
       setLoading(true);
       setError('');
       const { data } = await axios.get('/api/admin/orders', { withCredentials: true });
-      setOrders(data || []);
+      const ordersList = Array.isArray(data) ? data : (data?.orders || []);
+      setOrders(ordersList);
     } catch (err) {
       setError(err.response?.data?.message || err.message || 'Failed to fetch orders');
     } finally {

@@ -36,7 +36,13 @@ router.route('/:id')
 router.route('/:id/related')
   .get(getRelatedProducts);
 
+import {
+  getProductReviews,
+  createProductReview as handleProductReview,
+} from '../controllers/reviewController.js';
+
 router.route('/:id/reviews')
-  .post(protect, createProductReview);
+  .get(getProductReviews)
+  .post(protect, handleProductReview);
 
 export default router;

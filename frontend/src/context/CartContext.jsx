@@ -236,17 +236,34 @@ export const CartProvider = ({ children }) => {
     localStorage.removeItem('anvika_cart');
   };
 
-  const applyCoupon = (code) => {
+  const applyCoupon = async (code) => {
+    if (!code || !code.trim()) {
+      return { success: false, message: 'Please enter a coupon code' };
+    }
     const upper = code.trim().toUpperCase();
-    if (upper === 'ANVIKA10' || upper === 'FESTIVE10') {
-      setAppliedCoupon({ code: upper, discountPercent: 10 });
-      return { success: true, message: '10% discount applied successfully!' };
+    try {
+      const { data } = await axios.post('/api/coupons/validate', {
+        code: upper,
+        subtotal,
+      });
+      setAppliedCoupon({
+        code: data.code,
+        discountType: data.discountType,
+        discountValue: data.discountValue,
+        discount: data.discount,
+      });
+      return { success: true, message: data.message || `Coupon ${data.code} applied successfully!` };
+    } catch (err) {
+      if (upper === 'ANVIKA10' || upper === 'FESTIVE10') {
+        const disc = Math.round((subtotal * 10) / 100);
+        setAppliedCoupon({ code: upper, discount: disc, discountPercent: 10 });
+        return { success: true, message: '10% discount applied successfully!' };
+      }
+      return {
+        success: false,
+        message: err.response?.data?.message || 'Invalid or expired coupon code',
+      };
     }
-    if (upper === 'ROYAL15') {
-      setAppliedCoupon({ code: upper, discountPercent: 15 });
-      return { success: true, message: '15% Royal discount applied!' };
-    }
-    return { success: false, message: 'Invalid coupon code. Try ANVIKA10' };
   };
 
   const removeCoupon = () => {
@@ -255,8 +272,12 @@ export const CartProvider = ({ children }) => {
 
   const subtotal = cartItems.reduce((acc, item) => acc + item.price * item.qty, 0);
   const totalItems = cartItems.reduce((acc, item) => acc + item.qty, 0);
-  const discountAmount = appliedCoupon ? Math.round((subtotal * appliedCoupon.discountPercent) / 100) : 0;
-  const shippingFee = subtotal >= 10000 || subtotal === 0 ? 0 : 450;
+  const discountAmount = appliedCoupon
+    ? (appliedCoupon.discount !== undefined
+        ? appliedCoupon.discount
+        : Math.round((subtotal * (appliedCoupon.discountPercent || 0)) / 100))
+    : 0;
+  const shippingFee = subtotal >= 1500 || subtotal === 0 ? 0 : 99;
   const orderTotal = Math.max(0, subtotal - discountAmount + shippingFee);
 
   return (

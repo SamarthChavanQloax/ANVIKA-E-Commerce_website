@@ -25,6 +25,9 @@ import adminRoutes from './routes/adminRoutes.js';
 import authRoutes from './routes/authRoutes.js';
 import cartRoutes from './routes/cartRoutes.js';
 import wishlistRoutes from './routes/wishlistRoutes.js';
+import paymentRoutes from './routes/paymentRoutes.js';
+import couponRoutes from './routes/couponRoutes.js';
+import reviewRoutes from './routes/reviewRoutes.js';
 
 const app = express();
 
@@ -152,6 +155,9 @@ app.use('/api/wishlist', wishlistRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/payments', paymentRoutes);
+app.use('/api/coupons', couponRoutes);
+app.use('/api/reviews', reviewRoutes);
 
 // Payment configuration
 app.get('/api/config/paypal', (req, res) => {

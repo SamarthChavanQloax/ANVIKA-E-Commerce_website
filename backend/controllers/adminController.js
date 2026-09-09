@@ -550,3 +550,272 @@ export const getAdminReportData = async (req, res, next) => {
   }
 };
 
+// @desc    Get dedicated revenue analytics with aggregation
+// @route   GET /api/admin/analytics/revenue
+// @access  Private/Admin
+export const getAdminAnalyticsRevenue = async (req, res, next) => {
+  try {
+    const { period = 'month' } = req.query;
+    const now = new Date();
+    let startDate = new Date();
+    let format = '%Y-%m-%d';
+
+    if (period === 'week') {
+      startDate.setDate(now.getDate() - 7);
+    } else if (period === 'year') {
+      startDate.setFullYear(now.getFullYear() - 1);
+      format = '%Y-%m';
+    } else {
+      // 30 days default
+      startDate.setDate(now.getDate() - 30);
+    }
+
+    // Revenue aggregation grouped by time interval
+    const revenueTimeline = await Order.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: startDate },
+          orderStatus: { $nin: ['Cancelled', 'Returned', 'Refunded'] },
+        },
+      },
+      {
+        $group: {
+          _id: { $dateToString: { format, date: '$createdAt' } },
+          totalRevenue: { $sum: '$total' },
+          subtotal: { $sum: '$subtotal' },
+          discounts: { $sum: '$discount' },
+          shipping: { $sum: '$shipping' },
+          orderCount: { $sum: 1 },
+        },
+      },
+      { $sort: { _id: 1 } },
+    ]);
+
+    // Aggregate totals across all non-cancelled orders
+    const allTimeStats = await Order.aggregate([
+      {
+        $match: {
+          orderStatus: { $nin: ['Cancelled', 'Returned', 'Refunded'] },
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          totalSales: { $sum: '$total' },
+          totalDiscounts: { $sum: '$discount' },
+          totalShipping: { $sum: '$shipping' },
+          totalOrders: { $sum: 1 },
+          avgOrderValue: { $avg: '$total' },
+        },
+      },
+    ]);
+
+    // Payment methods revenue distribution
+    const paymentMethods = await Order.aggregate([
+      {
+        $match: {
+          orderStatus: { $nin: ['Cancelled', 'Returned', 'Refunded'] },
+        },
+      },
+      {
+        $group: {
+          _id: '$paymentMethod',
+          revenue: { $sum: '$total' },
+          count: { $sum: 1 },
+        },
+      },
+      { $sort: { revenue: -1 } },
+    ]);
+
+    res.status(200).json({
+      period,
+      summary: allTimeStats[0] || {
+        totalSales: 0,
+        totalDiscounts: 0,
+        totalShipping: 0,
+        totalOrders: 0,
+        avgOrderValue: 0,
+      },
+      timeline: revenueTimeline,
+      paymentMethods,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Get dedicated product analytics with top selling & low stock
+// @route   GET /api/admin/analytics/products
+// @access  Private/Admin
+export const getAdminAnalyticsProducts = async (req, res, next) => {
+  try {
+    const threshold = Number(req.query.lowStockThreshold) || 5;
+
+    // Top selling products by revenue and quantity sold
+    const topProducts = await Order.aggregate([
+      {
+        $match: {
+          orderStatus: { $nin: ['Cancelled', 'Returned', 'Refunded'] },
+        },
+      },
+      { $unwind: '$items' },
+      {
+        $group: {
+          _id: '$items.product',
+          productName: { $first: '$items.name' },
+          image: { $first: '$items.image' },
+          totalUnitsSold: { $sum: '$items.qty' },
+          totalRevenue: { $sum: { $multiply: ['$items.qty', '$items.price'] } },
+        },
+      },
+      { $sort: { totalRevenue: -1 } },
+      { $limit: 10 },
+    ]);
+
+    // Low stock products alert
+    const lowStockAlerts = await Product.find({
+      stock: { $gt: 0, $lte: threshold },
+    })
+      .select('name image price stock category variants')
+      .sort({ stock: 1 })
+      .limit(20);
+
+    // Out of stock products
+    const outOfStock = await Product.find({
+      stock: { $lte: 0 },
+    })
+      .select('name image price stock category')
+      .limit(20);
+
+    // Category distribution
+    const categoryDistribution = await Product.aggregate([
+      {
+        $group: {
+          _id: '$category',
+          count: { $sum: 1 },
+          totalInventory: { $sum: '$stock' },
+        },
+      },
+      { $sort: { count: -1 } },
+    ]);
+
+    res.status(200).json({
+      topSelling: topProducts,
+      lowStockAlerts,
+      outOfStock,
+      categoryDistribution,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Get dedicated customer analytics with lifetime spend & retention
+// @route   GET /api/admin/analytics/customers
+// @access  Private/Admin
+export const getAdminAnalyticsCustomers = async (req, res, next) => {
+  try {
+    // Total customers (non-admin)
+    const totalCustomers = await User.countDocuments({ role: { $ne: 'admin' } });
+
+    // Customer spend & order frequency ranking
+    const topCustomers = await Order.aggregate([
+      {
+        $match: {
+          orderStatus: { $nin: ['Cancelled', 'Returned', 'Refunded'] },
+        },
+      },
+      {
+        $group: {
+          _id: '$user',
+          ordersCount: { $sum: 1 },
+          totalSpend: { $sum: '$total' },
+          lastOrderDate: { $max: '$createdAt' },
+        },
+      },
+      { $sort: { totalSpend: -1 } },
+      { $limit: 10 },
+      {
+        $lookup: {
+          from: 'users',
+          localField: '_id',
+          foreignField: '_id',
+          as: 'userDetails',
+        },
+      },
+      { $unwind: { path: '$userDetails', preserveNullAndEmptyArrays: true } },
+      {
+        $project: {
+          _id: 1,
+          name: '$userDetails.name',
+          email: '$userDetails.email',
+          ordersCount: 1,
+          totalSpend: 1,
+          lastOrderDate: 1,
+        },
+      },
+    ]);
+
+    // Repeat customers (ordered > 1 time)
+    const repeatCustomerAgg = await Order.aggregate([
+      {
+        $match: {
+          orderStatus: { $nin: ['Cancelled', 'Returned', 'Refunded'] },
+        },
+      },
+      {
+        $group: {
+          _id: '$user',
+          count: { $sum: 1 },
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          totalUniqueBuyers: { $sum: 1 },
+          repeatBuyers: {
+            $sum: { $cond: [{ $gt: ['$count', 1] }, 1, 0] },
+          },
+        },
+      },
+    ]);
+
+    const repeatData = repeatCustomerAgg[0] || { totalUniqueBuyers: 0, repeatBuyers: 0 };
+    const repeatRate = repeatData.totalUniqueBuyers > 0
+      ? Math.round((repeatData.repeatBuyers / repeatData.totalUniqueBuyers) * 100)
+      : 0;
+
+    // Geographic customer distribution by shipping city
+    const geographicSpread = await Order.aggregate([
+      {
+        $match: {
+          'shippingAddress.city': { $exists: true, $ne: '' },
+        },
+      },
+      {
+        $group: {
+          _id: '$shippingAddress.city',
+          ordersCount: { $sum: 1 },
+          revenue: { $sum: '$total' },
+        },
+      },
+      { $sort: { ordersCount: -1 } },
+      { $limit: 10 },
+    ]);
+
+    res.status(200).json({
+      totalCustomers,
+      topCustomers,
+      retention: {
+        totalUniqueBuyers: repeatData.totalUniqueBuyers,
+        repeatBuyers: repeatData.repeatBuyers,
+        repeatRate: `${repeatRate}%`,
+      },
+      geographicSpread,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+

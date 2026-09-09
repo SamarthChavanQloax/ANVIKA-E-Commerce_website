@@ -23,6 +23,8 @@ import Login from './pages/Auth/Login';
 import Register from './pages/Auth/Register';
 import ForgotPassword from './pages/Auth/ForgotPassword';
 import Profile from './pages/Auth/Profile';
+import Checkout from './pages/Checkout';
+import OrderConfirmation from './pages/OrderConfirmation';
 
 import Contact from './pages/Info/Contact';
 import Shipping from './pages/Info/Shipping';
@@ -44,6 +46,7 @@ import CategoryList from './pages/Admin/CategoryList';
 import Inventory from './pages/Admin/Inventory';
 import OrderList from './pages/Admin/OrderList';
 import CustomerList from './pages/Admin/CustomerList';
+import CouponManagement from './pages/Admin/CouponManagement';
 import Analytics from './pages/Admin/Analytics';
 import Reports from './pages/Admin/Reports';
 
@@ -68,6 +71,7 @@ function AppLayout() {
             <Route path="inventory" element={<Inventory />} />
             <Route path="orders" element={<OrderList />} />
             <Route path="customers" element={<CustomerList />} />
+            <Route path="coupons" element={<CouponManagement />} />
             <Route path="reports" element={<Reports />} />
             <Route path="analytics" element={<Analytics />} />
           </Route>
@@ -94,6 +98,9 @@ function AppLayout() {
           <Route path="/new-arrivals" element={<Shop />} />
           <Route path="/product/:id" element={<ProductDetails />} />
           <Route path="/compare" element={<Compare />} />
+          <Route path="/checkout" element={<Checkout />} />
+          <Route path="/order-confirmation/:id" element={<OrderConfirmation />} />
+          <Route path="/order/:id" element={<OrderConfirmation />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />

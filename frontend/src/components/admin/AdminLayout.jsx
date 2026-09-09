@@ -18,6 +18,7 @@ import {
   ShieldCheck,
   ChevronRight,
   FileText,
+  Tag,
 } from 'lucide-react';
 
 const NAV_ITEMS = [
@@ -26,6 +27,7 @@ const NAV_ITEMS = [
   { name: 'Categories', path: '/admin/categories', icon: Layers },
   { name: 'Inventory', path: '/admin/inventory', icon: Boxes },
   { name: 'Orders', path: '/admin/orders', icon: ShoppingBag },
+  { name: 'Coupons', path: '/admin/coupons', icon: Tag },
   { name: 'Customers', path: '/admin/customers', icon: Users },
   { name: 'Reports', path: '/admin/reports', icon: FileText },
   { name: 'Analytics', path: '/admin/analytics', icon: BarChart3 },

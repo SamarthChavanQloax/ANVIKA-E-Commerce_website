@@ -10,6 +10,7 @@ import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
 import { useCompare } from '../context/CompareContext';
 import ProductCard from '../components/product/ProductCard';
+import ProductReviews from '../components/product/ProductReviews';
 
 const ProductDetails = () => {
   const { id } = useParams();
@@ -502,6 +503,9 @@ const ProductDetails = () => {
             </FadeIn>
           </div>
         </div>
+
+        {/* Client Ratings & Verified Reviews */}
+        {product?._id && <ProductReviews productId={product._id} />}
 
         {/* You May Also Like Section */}
         <div className="mt-28 border-t border-border pt-16">

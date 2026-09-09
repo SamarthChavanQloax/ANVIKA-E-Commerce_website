@@ -2,9 +2,13 @@ import express from 'express';
 import {
   getAdminDashboard,
   getAdminAnalytics,
+  getAdminAnalyticsRevenue,
+  getAdminAnalyticsProducts,
+  getAdminAnalyticsCustomers,
   getAdminCustomers,
   getAdminReportData,
 } from '../controllers/adminController.js';
+import couponRoutes from './couponRoutes.js';
 import {
   getOrders,
   updateOrderStatus,
@@ -21,6 +25,12 @@ router.get('/dashboard', getAdminDashboard);
 
 // Analytics
 router.get('/analytics', getAdminAnalytics);
+router.get('/analytics/revenue', getAdminAnalyticsRevenue);
+router.get('/analytics/products', getAdminAnalyticsProducts);
+router.get('/analytics/customers', getAdminAnalyticsCustomers);
+
+// Coupons management alias under /api/admin/coupons
+router.use('/coupons', couponRoutes);
 
 // Customers list
 router.get('/customers', getAdminCustomers);

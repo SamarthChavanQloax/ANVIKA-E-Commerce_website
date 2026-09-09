@@ -44,11 +44,7 @@ const FeaturedCategories = () => {
   ];
 
   return (
-<<<<<<< HEAD
-    <section className="py-16 md:py-20 px-4 sm:px-6 lg:px-12 max-w-[90rem] mx-auto bg-background">
-=======
     <section className="py-12 sm:py-16 md:py-24 px-4 sm:px-6 lg:px-12 max-w-[90rem] mx-auto bg-background">
->>>>>>> c3c17e69fb1402587f193eab2889966d8c4c4a85
       <RevealOnScroll>
         <div className="text-center mb-10 sm:mb-16 flex flex-col items-center">
           <span className="text-text-muted text-[10px] sm:text-xs tracking-[0.2em] uppercase mb-3 sm:mb-4 block font-medium">From everyday elegance to unforgettable occasions</span>
